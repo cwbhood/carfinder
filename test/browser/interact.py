@@ -1,6 +1,7 @@
 """Interaction checks on a phone viewport: filters, sort, search, state change, detail sheet and trim slider, compare
-flow, show-more and auto-load, wizard, World-tab currency and units, persistence across reload, and the data pass
-(every card, efficiency string and detail sheet for all 2,729 cars renders without NaN/undefined/null).
+flow, show-more and auto-load, wizard, World-tab currency and units, the cars / motorcycles / boats switch, persistence
+across reload, and the data pass (every card, efficiency string, breakdown and detail sheet for every vehicle in every
+vertical renders without NaN/undefined/null).
 
     python3 test/browser/interact.py        (needs: pip install playwright && playwright install chromium)
 
@@ -26,22 +27,51 @@ async def main():
         await page.route('**/*', lambda r: r.continue_() if '127.0.0.1' in r.request.url else r.abort())
         await page.goto(url); await page.wait_for_selector('.card'); await page.evaluate('document.fonts.ready')
 
-        # ---- data pass: every card, every tab renders without NaN/undefined/null and effShort is sane
+        # ---- data pass: every card, every tab of every vertical renders without NaN/undefined/null and effShort is sane
         bad = await page.evaluate("""() => {
-          const out = []; const re = /\\b(NaN|undefined|null)\\b/;
-          for (const cc of Object.keys(DATA)) {
-            switchCountry(cc);
+          const out = []; const re = /\\b(NaN|undefined|null)\\b/; let n = 0;
+          for (const vt of VERTS) for (const cc of Object.keys(DATA[vt])) {
+            if (!DATA[vt][cc].length) { out.push(vt+'/'+cc+' has no rows'); continue; }
+            setLive(cc, vt); buildChrome(); syncChips(); render();
             for (const c of CARS) {
-              const h = cardHTML(c); if (re.test(h)) out.push(cc+' card '+c.make+' '+c.model+': '+h.match(re)[0]);
-              const e = effShort(c, CC); if (!e || re.test(e)) out.push(cc+' eff '+c.make+' '+c.model+': '+e);
-              detailCar = c; detailT = 0.5; const p = effPanel(c); if (re.test(p)) out.push(cc+' effPanel '+c.make+' '+c.model);
-              const d = detailDynamic(); if (re.test(d.sticker+d.pay+d.trimVal+d.world)) out.push(cc+' detail '+c.make+' '+c.model);
-              if (!(c.hp>0) || !(c.seats>0) || !(c.price>0) || !(c.top>=c.price)) out.push(cc+' fields '+c.make+' '+c.model+' hp='+c.hp+' seats='+c.seats+' price='+c.price+' top='+c.top);
+              n++;
+              const h = cardHTML(c); if (re.test(h)) out.push(vt+'/'+cc+' card '+c.make+' '+c.model+': '+h.match(re)[0]);
+              const e = effShort(c, CC); if (!e || re.test(e)) out.push(vt+'/'+cc+' eff '+c.make+' '+c.model+': '+e);
+              detailCar = c; detailT = 0.5; const p = effPanel(c); if (re.test(p)) out.push(vt+'/'+cc+' effPanel '+c.make+' '+c.model);
+              const d = detailDynamic(); if (re.test(d.sticker+d.pay+d.trimVal+d.world)) out.push(vt+'/'+cc+' detail '+c.make+' '+c.model);
+              if (!(c.hp>=0) || !(c.seats>0) || !(c.price>0) || !(c.top>=c.price) || (vt!=='boat' && !(c.hp>0))) out.push(vt+'/'+cc+' fields '+c.make+' '+c.model+' hp='+c.hp+' seats='+c.seats+' price='+c.price+' top='+c.top);
+              const o = bd(c, c.price); if (!(o.lo>0 && o.hi>=o.lo && isFinite(o.hi))) out.push(vt+'/'+cc+' breakdown '+c.make+' '+c.model);
             }
+            compare = [0, 1]; openCompare(); if (re.test(document.getElementById('cBody').innerHTML)) out.push(vt+'/'+cc+' compare'); document.getElementById('dlgCompare').close(); compare = [];
           }
-          switchCountry('US'); return out.slice(0,20);
+          setLive('US', 'car'); document.getElementById('countryTabs').innerHTML = countryTabsHTML(); buildChrome(); syncChips(); render(); return out.slice(0,20).concat(['rows:'+n]);
         }""")
-        check('no NaN/undefined/null in any card, efficiency string or detail sheet across 2,729 cars', not bad, bad)
+        rows = bad.pop()
+        check(f'no NaN/undefined/null in any card, efficiency string, breakdown, compare table or detail sheet ({rows[5:]} vehicles, 3 verticals x 12 tabs)', not bad, bad)
+
+        # ---- vertical switch: bikes and boats get their own filters, chips, wizard and glossary
+        await page.click('.vtab[data-vt="moto"]'); await page.wait_for_timeout(200)
+        check('bikes: tab counts and title switch', await page.evaluate("() => VT==='moto' && CARS.length > 200 && /Motorcycles/.test(document.title) && document.querySelector('.ctab[data-country=\"US\"] small').textContent.replace(',','') == String(DATA.moto.US.length)"))
+        check('bikes: engine-size filter, transmission select, no seats group', await page.evaluate("() => document.getElementById('sizeLbl').textContent==='Engine size' && document.getElementById('driveLbl').textContent==='Transmission' && getComputedStyle(document.getElementById('seatsGroup')).display==='none' && [...document.querySelectorAll('#sizeOpts .opt')].some(b=>b.dataset.v==='Under 125cc')"))
+        check('bikes: body chips are bike types', await page.evaluate("() => [...document.querySelectorAll('#bodyChips .chip')].map(b=>b.dataset.body).includes('Scooter') && ![...document.querySelectorAll('#bodyChips .chip')].map(b=>b.dataset.body).includes('SUV')"))
+        check('bikes: wizard asks about learner licences', 'learner' in (await page.evaluate("() => document.getElementById('wBody').textContent")))
+        check('bikes: glossary has bike terms', 'Twist-and-go' in (await page.evaluate("() => document.getElementById('gBody').textContent")))
+        await page.click('#bodyChips .chip[data-body="Scooter"]'); await page.wait_for_timeout(50)
+        check('bikes: scooter chip filters', await page.evaluate("() => lastList.length > 5 && lastList.every(c => c.body==='Scooter')"))
+        await page.click('#bodyChips .chip[data-body=""]'); await page.wait_for_timeout(50)
+        await page.click('.vtab[data-vt="boat"]'); await page.wait_for_timeout(200)
+        check('boats: length filter, propulsion select, capacity label, boat sort options', await page.evaluate("() => VT==='boat' && document.getElementById('sizeLbl').textContent==='Length' && document.getElementById('driveLbl').textContent==='Propulsion' && document.getElementById('seatsLbl').textContent==='Capacity' && document.getElementById('optRng').textContent==='Longest boat' && document.getElementById('rngLbl').textContent==='Minimum length'"))
+        check('boats: fuel chips say Gas/Sail and cards show length', await page.evaluate("() => [...document.querySelectorAll('#fuelChips .chip')].map(b=>b.textContent).includes('Sail') && /ft \\//.test(document.querySelector('.card .specs').textContent)"))
+        await page.evaluate("() => { const r = document.getElementById('rng'); r.value = 26; r.dispatchEvent(new Event('input', {bubbles:true})); }"); await page.wait_for_timeout(80)
+        check('boats: minimum-length slider filters and reads in ft/m', await page.evaluate("() => lastList.length > 0 && lastList.every(c => c.len >= 26)") and 'ft /' in (await page.text_content('#rngOut')))
+        await page.evaluate("() => document.getElementById('resetAll').click()"); await page.wait_for_timeout(50)
+        await page.click('.card [data-detail]'); await page.wait_for_timeout(150)
+        check('boats: detail shows on-the-water breakdown with engine hours', await page.evaluate("() => document.getElementById('dlgDetail').open && /on-the-water/i.test(document.getElementById('dBody').textContent) && /hours/i.test(document.getElementById('dBody').textContent)"))
+        await page.keyboard.press('Escape'); await page.wait_for_timeout(100)
+        await page.reload(); await page.wait_for_selector('.card'); await page.wait_for_timeout(100)
+        check('reload restores the vertical', await page.evaluate("() => VT==='boat'"))
+        await page.click('.vtab[data-vt="car"]'); await page.wait_for_timeout(200)
+        check('back to cars restores car filters', await page.evaluate("() => VT==='car' && document.getElementById('sizeLbl').textContent==='Size' && document.getElementById('driveLbl').textContent==='Drivetrain'"))
 
         # ---- compare bar hidden with nothing selected
         check('compare bar hidden at start', await page.evaluate("() => getComputedStyle(document.getElementById('cmpbar')).display === 'none'"))

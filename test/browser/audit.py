@@ -1,4 +1,5 @@
-"""Layout audit: every country tab at phone, tablet and desktop widths, light and dark.
+"""Layout audit: every country tab (cars) plus four tabs of the motorcycle and boat verticals, at phone, tablet and
+desktop widths, light and dark.
 
     python3 test/browser/audit.py [360 390 430 768 1280]     (default: all five)
 
@@ -55,29 +56,35 @@ async def audit(pw, url, width, height, mobile, scheme):
     await page.route('**/*', lambda route: route.continue_() if '127.0.0.1' in route.request.url else route.abort())
     await page.goto(url); await page.wait_for_selector('.card'); await page.evaluate('document.fonts.ready')
     problems = []
-    for cc in TABS:
+    # the car tabs at every width; the motorcycle and boat verticals on four tabs (each tab name prefixed with the vertical)
+    plan = [('car', cc) for cc in TABS] + [(vt, cc) for vt in ('moto', 'boat') for cc in ('ALL', 'US', 'IN', 'UK')]
+    for vt, cc in plan:
+        if (await page.evaluate('VT')) != vt: await page.click(f'.vtab[data-vt="{vt}"]'); await page.wait_for_timeout(150)
+        cc_label = cc if vt == 'car' else f'{vt}/{cc}'
         await page.click(f'.ctab[data-country="{cc}"]'); await page.wait_for_timeout(120)
+        cc = cc_label
         ov = await page.evaluate(JS_OVERFLOW)
         if ov['page'][0] > ov['page'][1]: problems.append(f'{cc}: page scrollWidth {ov["page"]}')
         if ov['els']: problems.append(f'{cc}: overflow ' + json.dumps(ov['els'][:3]))
         bad = await page.evaluate(JS_TEXT_CHECK)
         if bad: problems.append(f'{cc}: bad text ' + json.dumps(bad))
         taps = await page.evaluate(JS_TAP, 44)
-        if cc in ('ALL', 'US', 'IN'): await page.screenshot(path=OUT / f'{cc}-{width}-{scheme}-list.png')
+        shot = cc.replace('/', '-')
+        if cc in ('ALL', 'US', 'IN', 'moto/US', 'boat/US'): await page.screenshot(path=OUT / f'{shot}-{width}-{scheme}-list.png')
         # detail sheet
         await page.click('.card [data-detail]'); await page.wait_for_timeout(350)
         ov = await page.evaluate(JS_OVERFLOW)
         if ov['els']: problems.append(f'{cc} detail: overflow ' + json.dumps(ov['els'][:3]))
         bad = await page.evaluate(JS_TEXT_CHECK)
         if bad: problems.append(f'{cc} detail: bad text ' + json.dumps(bad))
-        if cc in ('ALL', 'US', 'IN'): await page.screenshot(path=OUT / f'{cc}-{width}-{scheme}-detail.png')
+        if cc in ('ALL', 'US', 'IN', 'moto/US', 'boat/US'): await page.screenshot(path=OUT / f'{shot}-{width}-{scheme}-detail.png')
         await page.keyboard.press('Escape'); await page.wait_for_timeout(60)
         # filter sheet on narrow screens
         if width < 960:
             await page.click('#btnFilters'); await page.wait_for_timeout(350)
             ov = await page.evaluate(JS_OVERFLOW)
             if ov['els']: problems.append(f'{cc} filters: overflow ' + json.dumps(ov['els'][:3]))
-            if cc == 'US': await page.screenshot(path=OUT / f'{cc}-{width}-{scheme}-filters.png')
+            if cc in ('US', 'moto/US', 'boat/US'): await page.screenshot(path=OUT / f'{shot}-{width}-{scheme}-filters.png')
             await page.click('#closeFilters'); await page.wait_for_timeout(350)
         # compare two
         cards = await page.query_selector_all('.card [data-cmp]')

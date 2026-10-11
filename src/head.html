@@ -76,6 +76,14 @@ input[type=range]{margin:0}
 body.has-cmp .wrap{padding-bottom:calc(96px + var(--sab))}
 body.no-scroll,body:has(dialog[open]){overflow:hidden}
 
+/* ---------- vertical switch: cars · motorcycles · boats ---------- */
+.verts{display:flex;gap:6px;padding-top:10px;margin-inline:calc(-1 * var(--gutter));padding-inline:var(--gutter);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.verts::-webkit-scrollbar{display:none}
+.vtab{flex:1 1 0;min-width:max-content;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;min-height:var(--tap);border:1px solid var(--line);border-radius:999px;background:var(--surface);font-weight:700;font-size:14px;color:var(--muted);letter-spacing:.01em}
+.vtab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.vtab[aria-selected="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.masthead h1 em{font-style:normal;color:var(--muted);font-weight:600;font-size:.62em;letter-spacing:.04em;white-space:nowrap}
+
 /* ---------- country tabs ---------- */
 .country{display:flex;gap:0;padding-top:10px;padding-bottom:2px;margin-inline:calc(-1 * var(--gutter));padding-inline:var(--gutter);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scroll-padding-inline:var(--gutter)}
 .country::-webkit-scrollbar{display:none}
@@ -130,7 +138,7 @@ body.no-scroll,body:has(dialog[open]){overflow:hidden}
 .empty{padding:32px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--radius)}
 
 /* ---------- card ---------- */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;box-shadow:var(--shadow);cursor:pointer}
+.card{--pad:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--pad);display:flex;flex-direction:column;gap:10px;min-width:0;box-shadow:var(--shadow);cursor:pointer}
 .card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .card-top > div:first-child{min-width:0}
 .card .mk{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
@@ -163,6 +171,15 @@ body.no-scroll,body:has(dialog[open]){overflow:hidden}
 .mkt.m-deals{background:var(--deal-soft);color:var(--deal)}
 .card .note{font-size:14px;color:var(--muted)}
 .card .more{margin-top:auto;width:100%}
+/* photo: a Wikimedia Commons image when one is known, a body-type silhouette otherwise */
+.photo{position:relative;aspect-ratio:16/9;margin:calc(-1 * var(--pad, 14px)) calc(-1 * var(--pad, 14px)) 0;border-radius:var(--radius) var(--radius) 0 0;background:var(--surface-2);overflow:hidden;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line)}
+.photo img{width:100%;height:100%;object-fit:cover;display:block;background:#fff}
+.photo .sil{width:46%;max-width:180px;height:auto;fill:none;stroke:var(--muted);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:.55;display:none}
+.photo.ph-none .sil{display:block}
+.photo .credit{position:absolute;right:6px;bottom:6px;font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:5px;background:rgba(15,19,23,.6);color:#fff;pointer-events:none}
+.photo.big{aspect-ratio:16/9;margin:0;border-radius:var(--radius);border:1px solid var(--line)}
+.credit-line{font-size:12px;color:var(--muted)}
+.credit-line a{color:inherit}
 
 /* ---------- filters panel ---------- */
 .filters{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:14px;min-width:0}
@@ -230,7 +247,7 @@ details.assume summary{cursor:pointer;font-weight:700;font-size:14px;min-height:
   .toolbar .sort select{position:absolute;inset:0;opacity:0;width:100%;height:100%;padding:0;background-image:none}
   .toolbar .sort::before{content:"";position:absolute;inset:0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
   .results-head .sorted{display:block}
-  .card{padding:12px;gap:9px}
+  .card{--pad:12px;gap:9px}
   .card h3{font-size:24px}
   .card .note{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .card .more{font-size:14px;background:var(--surface-2)}
@@ -330,7 +347,34 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
 .site-links a{color:var(--fg);font-weight:600}
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="ico-car" viewBox="0 0 24 24"><path d="M3 14l2-5c.4-1 1-1.5 2-1.5h10c1 0 1.6.5 2 1.5l2 5v4H3z"/><circle cx="7" cy="17" r="1.6"/><circle cx="17" cy="17" r="1.6"/><path d="M3 14h18"/></symbol>
+  <symbol id="ico-moto" viewBox="0 0 24 24"><circle cx="5.5" cy="16" r="3"/><circle cx="18.5" cy="16" r="3"/><path d="M5.5 16l4-6h5l2 3 2 3M9.5 10L8 7h3M14.5 10l3-2 1.5 2"/></symbol>
+  <symbol id="ico-boat" viewBox="0 0 24 24"><path d="M3 13h17l-3 5H6z"/><path d="M8 13V9h6l3 4M10 9V6h3M3 20h18"/></symbol>
+  <symbol id="sil-sedan" viewBox="0 0 160 90"><path d="M10 60c0-6 4-10 10-12l26-6 16-16h46l16 16 22 6c6 2 8 6 8 12v6H10z"/><path d="M62 42l12-12h36l12 12"/><circle cx="42" cy="66" r="10"/><circle cx="118" cy="66" r="10"/><path d="M52 66h56"/></symbol>
+  <symbol id="sil-suv" viewBox="0 0 160 90"><path d="M10 64V48c0-4 3-8 8-9l20-3 14-18h56l14 18 22 4c4 1 6 4 6 8v16z"/><path d="M52 36l10-14h44l10 14"/><circle cx="40" cy="66" r="10"/><circle cx="120" cy="66" r="10"/><path d="M50 66h60M10 52h18"/></symbol>
+  <symbol id="sil-truck" viewBox="0 0 160 90"><path d="M8 64V40h58l12-20h40v20h34v24z"/><path d="M78 40l8-14h26v14"/><circle cx="36" cy="66" r="10"/><circle cx="124" cy="66" r="10"/><path d="M46 66h68"/></symbol>
+  <symbol id="sil-van" viewBox="0 0 160 90"><path d="M10 64V34c0-4 3-7 7-7h78l24 16 24 6c4 1 7 4 7 8v7z"/><path d="M95 27l20 14H14M60 27v14M118 41v10"/><circle cx="40" cy="66" r="10"/><circle cx="122" cy="66" r="10"/><path d="M50 66h62"/></symbol>
+  <symbol id="sil-hatch" viewBox="0 0 160 90"><path d="M14 62v-14c0-4 3-8 7-9l24-5 16-14h40c10 0 20 6 28 14l18 12c3 2 5 6 5 10v6z"/><path d="M58 34l12-10h32c8 0 14 5 20 10"/><circle cx="44" cy="66" r="10"/><circle cx="118" cy="66" r="10"/><path d="M54 66h54"/></symbol>
+  <symbol id="sil-wagon" viewBox="0 0 160 90"><path d="M10 62V48c0-4 3-8 8-9l20-3 14-14h80l10 14 8 4c3 1 4 4 4 8v14z"/><path d="M52 36l10-10h66l8 10"/><circle cx="40" cy="66" r="10"/><circle cx="122" cy="66" r="10"/><path d="M50 66h62"/></symbol>
+  <symbol id="sil-coupe" viewBox="0 0 160 90"><path d="M8 62c0-6 4-10 10-12l30-6c10-12 24-20 46-20 16 0 30 8 40 20l12 4c4 2 6 6 6 10v4z"/><path d="M56 42c8-10 22-16 38-16 14 0 24 6 32 16"/><circle cx="42" cy="66" r="10"/><circle cx="118" cy="66" r="10"/><path d="M52 66h56"/></symbol>
+  <symbol id="sil-conv" viewBox="0 0 160 90"><path d="M8 62c0-6 4-10 10-12l32-6 10-8h40l12 8 32 6c4 2 6 6 6 10v2z"/><path d="M60 44l8-8h36"/><circle cx="42" cy="66" r="10"/><circle cx="118" cy="66" r="10"/><path d="M52 66h56"/></symbol>
+  <symbol id="sil-moto" viewBox="0 0 160 90"><circle cx="34" cy="62" r="16"/><circle cx="126" cy="62" r="16"/><path d="M34 62l24-24h28l10 10 30 14M58 38l-6-14h12M86 38l20-10 10 6M58 38c-8 6-12 14-12 24M110 48l-10 14H60"/></symbol>
+  <symbol id="sil-scooter" viewBox="0 0 160 90"><circle cx="36" cy="66" r="12"/><circle cx="126" cy="66" r="12"/><path d="M48 66h40l12-20h18M100 46l-6-26h-14M94 20l10-4M48 66c0-14 12-30 32-30h8M60 36l4-14"/></symbol>
+  <symbol id="sil-sport" viewBox="0 0 160 90"><circle cx="32" cy="64" r="15"/><circle cx="128" cy="64" r="15"/><path d="M32 64l20-26 36-4 20-10 26 14-8 14-26 6-14 14H56M52 38l-8-14M88 34l-6 10"/></symbol>
+  <symbol id="sil-cruiser" viewBox="0 0 160 90"><circle cx="30" cy="64" r="16"/><circle cx="130" cy="64" r="16"/><path d="M30 64l20-22h40l16 14 24 8M50 42l-10-16h14M90 42l20-8 8 6M50 42c-6 8-8 14-6 22h64"/></symbol>
+  <symbol id="sil-adv" viewBox="0 0 160 90"><circle cx="32" cy="62" r="17"/><circle cx="128" cy="62" r="17"/><path d="M32 62l22-28 30-2 16-16h18l12 18 14 8M54 34l-8-14h14M98 32l-8 30H58M98 32l16 4"/></symbol>
+  <symbol id="sil-trike" viewBox="0 0 160 90"><circle cx="30" cy="64" r="14"/><circle cx="118" cy="64" r="16"/><path d="M30 64l24-26h30l14-16h16l10 18 14 8M54 38l-10-16h14M84 38l-6 26H44M98 38l10 2M134 50v14h8"/></symbol>
+  <symbol id="sil-boat" viewBox="0 0 160 90"><path d="M10 50h120l20-12-16 28H26z"/><path d="M60 50V34h34l10 16M72 34l6-10h12M10 74h140"/></symbol>
+  <symbol id="sil-pwc" viewBox="0 0 160 90"><path d="M12 56h110l24-10-12 22H28z"/><path d="M70 56l6-18h22l8 18M76 38l10-12 20 4M12 76h136"/></symbol>
+  <symbol id="sil-pontoon" viewBox="0 0 160 90"><path d="M14 50h132M22 50v-18h110v18M40 32v-8h60v8M30 58h100c6 0 10 2 10 6s-4 6-10 6H30c-6 0-10-2-10-6s4-6 10-6zM14 80h132"/></symbol>
+  <symbol id="sil-sail" viewBox="0 0 160 90"><path d="M18 62h124l-14 16H34z"/><path d="M84 62V8M84 12l46 50H84M80 20L40 60h40M12 84h136"/></symbol>
+  <symbol id="sil-dinghy" viewBox="0 0 160 90"><path d="M20 44h120l-18 24H42z"/><path d="M60 44V22M60 24l28 20M50 44v-8M110 44v-8M12 76h136"/></symbol>
+  <symbol id="sil-rib" viewBox="0 0 160 90"><path d="M14 50c0-6 4-10 10-10h106l20-10-12 26H30c-8 0-16-2-16-6z"/><path d="M24 40c0-4 4-6 8-6h98M70 40V28h20l8 12M14 74h136"/></symbol>
+  <symbol id="sil-cabin" viewBox="0 0 160 90"><path d="M8 52h128l18-10-16 28H26z"/><path d="M40 52V34h56l16 18M48 34v-12h40v12M56 22v-6h12M8 78h144"/></symbol>
+</defs></svg>
 <div class="wrap">
+  <div class="verts" role="tablist" aria-label="Vehicle type" id="vertTabs"></div>
   <div class="country" role="tablist" aria-label="Country" id="countryTabs"></div>
   <header class="masthead">
     <div>
@@ -355,10 +399,10 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
         <option value="price-desc">Price: high to low</option>
         <option value="fuel">Lowest yearly fuel cost</option>
         <option value="mpg" id="optMpg">Best MPG</option>
-        <option value="range">Longest electric range</option>
+        <option value="range" id="optRng">Longest electric range</option>
         <option value="hp">Most horsepower</option>
         <option value="perhp">Cheapest per horsepower</option>
-        <option value="seats">Most seats</option>
+        <option value="seats" id="optSeats">Most seats</option>
         <option value="name">A to Z</option>
       </select>
     </div>
@@ -385,7 +429,7 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
       </div>
 
       <div class="fgroup">
-        <div class="flbl"><span>Size</span></div>
+        <div class="flbl"><span id="sizeLbl">Size</span></div>
         <div class="opts" id="sizeOpts"></div>
       </div>
 
@@ -398,25 +442,17 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
         </div>
       </div>
 
-      <div class="fgroup">
-        <div class="flbl"><span>Seats</span></div>
+      <div class="fgroup" id="seatsGroup">
+        <div class="flbl"><span id="seatsLbl">Seats</span></div>
         <select id="seats" aria-label="Minimum seats">
           <option value="0">Any</option>
-          <option value="4">4 or more</option>
-          <option value="5">5 or more</option>
-          <option value="6">6 or more</option>
-          <option value="7">7 or more (third row)</option>
-          <option value="8">8 or more</option>
         </select>
       </div>
 
       <div class="fgroup">
-        <div class="flbl"><span>Drivetrain</span></div>
+        <div class="flbl"><span id="driveLbl">Drivetrain</span></div>
         <select id="drive" aria-label="Drivetrain">
           <option value="any">Any</option>
-          <option value="awd">AWD or 4WD available</option>
-          <option value="fwd">Front-wheel drive available</option>
-          <option value="rwd">Rear-wheel drive available</option>
         </select>
       </div>
 
@@ -426,7 +462,7 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
       </div>
 
       <div class="fgroup">
-        <div class="flbl"><span>Minimum electric range</span><span class="muted hint">EVs &amp; plug-ins only</span></div>
+        <div class="flbl"><span id="rngLbl">Minimum electric range</span><span class="muted hint" id="rngHint">EVs &amp; plug-ins only</span></div>
         <div class="slider"><input type="range" id="rng" min="0" max="450" step="10" value="0" aria-label="Minimum electric range"><output id="rngOut" for="rng">Any</output></div>
       </div>
 
@@ -468,7 +504,7 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
 
       <div class="filter-actions">
         <button class="btn" id="resetAll" type="button">Reset all</button>
-        <button class="btn primary" id="applyFilters" type="button">Show <span id="applyCount">0</span> cars</button>
+        <button class="btn primary" id="applyFilters" type="button">Show <span id="applyCount">0</span> <span id="applyNoun">vehicles</span></button>
       </div>
     </aside>
 
