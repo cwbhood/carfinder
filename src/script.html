@@ -8,7 +8,7 @@ const RAW = {
 const STATES_US = /*__STATES_US__*/{};
 const STATES_IN = /*__STATES_IN__*/{};
 const VFEES = /*__VFEES__*/{};          // motorcycle and boat fee rules per country (data/vfees.json)
-const IMAGES = /*__IMAGES__*/{};        // Wikimedia Commons photo per vehicle, keyed 'vt/cc' then 'make|model' (data/images.json)
+const IMAGES = /*__IMAGES__*/{};        // Wikipedia lead photos: {files:[[name, host, md5 prefix, author, licence]], map:{'vt/cc':{'make|model':[fileIndex, approx]}}} (data/images.json)
 //<<core
 /* ---------- normalisation into one schema ---------- */
 const US_FIELDS = ['make','model','year','body','size','cls','fuel','price','top','dest','city','hwy','mpg','rngMi','mpge','hp','seats','drive','mkt','note','est'];
@@ -903,20 +903,27 @@ function specsHTML(c){
   return `<span class="eff">${effShort(c, CC)}</span>${hp}<span><b>${c.seats}</b> seats</span><span>${esc(c.drive)}</span>`;
 }
 /* photos: a Wikimedia Commons image per vehicle when one is known (data/images.json), otherwise a body-type silhouette */
-function imgRec(c){ const h = c.home || c; return (IMAGES[h.vt+'/'+h.cc] || {})[h.make+'|'+h.model] || null; }
+/* Wikimedia only serves thumbnail widths it has already rendered; the 960 px rendition exists for every file here
+   because the index was built through the API, and files smaller than that are served as the original */
+function thumbUrl(f){ const enc = s => encodeURIComponent(s).replace(/[!'()*]/g, ch => '%'+ch.charCodeAt(0).toString(16).toUpperCase()); const base = 'https://upload.wikimedia.org/wikipedia/'+(f[1]==='e' ? 'en' : 'commons'); if (f[5]==='o') return base+'/'+f[2][0]+'/'+f[2]+'/'+enc(f[0]); const ext = f[0].toLowerCase().split('.').pop(); const tail = '960px-'+f[0]+(ext==='svg' ? '.png' : (ext==='tif'||ext==='tiff') ? '.jpg' : ''); return base+'/thumb/'+f[2][0]+'/'+f[2]+'/'+enc(f[0])+'/'+enc(tail); }
+function imgRec(c){
+  const h = c.home || c; const m = (IMAGES.map || {})[h.vt+'/'+h.cc]; const r = m && m[h.make+'|'+h.model]; if (!r) return null;
+  const f = IMAGES.files[r[0]]; if (!f) return null;
+  return {file:f[0], url:thumbUrl(f), artist:f[3], license:f[4], approx:r[1]};
+}
 function photoHTML(c, where){
   const r = imgRec(c); const big = where==='detail';
   const sil = `<svg class="sil" viewBox="0 0 160 90" aria-hidden="true"><use href="#sil-${silKey(c)}"></use></svg>`;
   if (!r) return `<div class="photo ph-none ${big?'big':''}">${sil}</div>`;
-  const src = r[1];
-  return `<div class="photo ${big?'big':''}"><img src="${esc(src)}" alt="${esc(c.make+' '+c.model)}" loading="lazy" decoding="async" onerror="this.closest('.photo').classList.add('ph-none');this.remove()">${sil}${big ? '' : `<span class="credit" title="${esc('Photo: '+(r[2]||'Wikimedia Commons')+(r[3]?' · '+r[3]:''))}">${esc(r[3]||'CC')}</span>`}</div>`;
+  const onerr = "this.closest('.photo').classList.add('ph-none');this.remove()";   // back to the silhouette if Commons is unreachable
+  return `<div class="photo ${big?'big':''}"><img src="${esc(r.url)}" alt="${esc(c.make+' '+c.model)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="${onerr}">${sil}${big ? '' : `<span class="credit" title="${esc('Photo: '+(r.artist||'Wikimedia Commons')+(r.license?' · '+r.license:''))}">${esc(r.license||'CC')}</span>`}</div>`;
 }
 function silKey(c){
   if (c.vt==='moto') return ({Scooter:'scooter',Commuter:'moto',Naked:'moto',Sport:'sport',Cruiser:'cruiser',Adventure:'adv',Touring:'cruiser','Dual-sport':'adv',Retro:'moto',Mini:'moto',Trike:'trike'})[c.body] || 'moto';
   if (c.vt==='boat') return ({PWC:'pwc',Pontoon:'pontoon',Sail:'sail',Dinghy:'dinghy',RIB:'rib',Cabin:'cabin'})[c.body] || 'boat';
   return ({SUV:'suv',Truck:'truck',Pickup:'truck',Van:'van',Minivan:'van',MPV:'van',Hatch:'hatch',Wagon:'wagon',Coupe:'coupe',Conv:'conv',Sports:'coupe'})[c.body] || 'sedan';
 }
-function creditHTML(c){ const r = imgRec(c); if (!r) return ''; const h = c.home || c; return `<p class="fine credit-line">Photo: ${esc(r[2]||'unknown author')}${r[3] ? ', '+esc(r[3]) : ''}, via <a href="https://commons.wikimedia.org/wiki/File:${encodeURIComponent(r[0])}" target="_blank" rel="noopener">Wikimedia Commons</a>${r[4] ? ' · may show a different year or market version' : ''}</p>`; }
+function creditHTML(c){ const r = imgRec(c); if (!r) return ''; return `<p class="fine credit-line">Photo: ${esc(r.artist||'unknown author')}${r.license ? ', '+esc(r.license) : ''}, via <a href="https://commons.wikimedia.org/wiki/File:${encodeURIComponent(r.file)}" target="_blank" rel="noopener">Wikimedia Commons</a>${r.approx ? ' · may show an earlier generation or another market’s version' : ''}</p>`; }
 function cardHTML(c){
   const o = CC==='ALL' ? {lo:c.wlo, hi:c.whi} : bd(c, c.price);
   const tags = [`<span class="tag">${C.bodyLabel[c.body]||c.body} · ${c.size}</span>`, `<span class="tag f-${c.fuel}">${c.fuels.map(fuelLbl).join(' / ')}</span>`];
