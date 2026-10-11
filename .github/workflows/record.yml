@@ -1,0 +1,42 @@
+# Re-records the landing-page video and GIFs from the built app (brand/tools/record.py) on a runner with internet
+# access, so the vehicle photos from Wikimedia Commons appear in them, and commits the results to this branch.
+# Runs on every push to the record-demo branch, or by hand from the Actions tab.
+name: Record demo
+on:
+  push:
+    branches: [record-demo]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the app page
+        run: node src/build.js
+      - name: Install Playwright and ffmpeg
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Record
+        run: python brand/tools/record.py
+      - name: Commit the recordings
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add brand/video
+          git diff --cached --quiet || git commit -m "Record demo video and GIFs [skip ci]"
+          git push
+      - uses: actions/upload-artifact@v4
+        with:
+          name: demo-video
+          path: brand/video/
+          retention-days: 14
