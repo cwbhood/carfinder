@@ -4,30 +4,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#04060a">
-<title>CarFinder 2026 · every new car, what it really costs</title>
+<title>CarFinder 2026 · every new car, bike and boat, what it really costs</title>
 <link rel="canonical" href="https://destinjones.github.io/carfinder/">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Destin Jones">
-<meta name="description" content="A free, open source car finder for 11 countries: every new car and truck on sale with its list price, what dealers really charge, and the drive-off price for your state or city with taxes and fees in. Filters, compare, MPG and EV range. No account, no ads.">
+<meta name="description" content="A free, open source vehicle finder for 11 countries: every new car, truck, motorcycle, scooter, boat and jet ski on sale with its list price, what dealers really charge, and the drive-off price for your state or city with taxes and fees in. Photos, filters, compare, fuel economy and EV range. No account, no ads.">
 <link rel="icon" href="brand/emblem/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="brand/emblem/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CarFinder 2026">
 <meta property="og:url" content="https://destinjones.github.io/carfinder/">
-<meta property="og:title" content="CarFinder 2026 · every new car, what it really costs">
-<meta property="og:description" content="2,729 new cars and trucks across 11 countries: list price, dealer price, and the drive-off price for your state with taxes and fees in. Free, open source, runs in your browser.">
+<meta property="og:title" content="CarFinder 2026 · every new car, bike and boat, what it really costs">
+<meta property="og:description" content="4,729 new cars, motorcycles and boats across 11 countries: list price, dealer price, and the drive-off price for your state with taxes and fees in. Free, open source, runs in your browser.">
 <meta property="og:image" content="https://destinjones.github.io/carfinder/brand/social/og-1200x630.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="CarFinder 2026: a phone showing the US car list with sticker and drive-off prices">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CarFinder 2026 · every new car, what it really costs">
-<meta name="twitter:description" content="2,729 new cars and trucks across 11 countries with list, dealer and drive-off prices for your state. Free, open source, in your browser.">
+<meta name="twitter:title" content="CarFinder 2026 · every new car, bike and boat, what it really costs">
+<meta name="twitter:description" content="4,729 new cars, motorcycles and boats across 11 countries with list, dealer and drive-off prices for your state. Free, open source, in your browser.">
 <meta name="twitter:image" content="https://destinjones.github.io/carfinder/brand/social/og-1200x630.png">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
- {"@type":"WebSite","@id":"https://destinjones.github.io/carfinder/#site","name":"CarFinder 2026","url":"https://destinjones.github.io/carfinder/","description":"Every new car and truck on sale in 11 countries with list, dealer and on-road prices for your state or city.","publisher":{"@id":"https://destinjones.github.io/carfinder/about.html#destin"}},
+ {"@type":"WebSite","@id":"https://destinjones.github.io/carfinder/#site","name":"CarFinder 2026","url":"https://destinjones.github.io/carfinder/","description":"Every new car, motorcycle and boat on sale in 11 countries with list, dealer and on-road prices for your state or city.","publisher":{"@id":"https://destinjones.github.io/carfinder/about.html#destin"}},
  {"@type":"WebApplication","name":"CarFinder 2026","applicationCategory":"ReferenceApplication","operatingSystem":"Any (web browser)","url":"https://destinjones.github.io/carfinder/carfinder.html","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
-  "description":"2,729 new cars and trucks across the USA, India, China, the UK, Australia, Mexico, Spain, Thailand, Russia, Brazil and Canada, each with list price, typical dealer price and an estimated on-road price for the buyer's state or city.","codeRepository":"https://github.com/destinjones/carfinder","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://destinjones.github.io/carfinder/about.html#destin"},"screenshot":"https://destinjones.github.io/carfinder/brand/social/og-1200x630.png"},
+  "description":"2,729 new cars and trucks, 1,444 motorcycles and scooters and 556 boats and jet skis across the USA, India, China, the UK, Australia, Mexico, Spain, Thailand, Russia, Brazil and Canada, each with a photo, list price, typical dealer price and an estimated on-road price for the buyer's state or city.","codeRepository":"https://github.com/destinjones/carfinder","license":"https://opensource.org/licenses/MIT","creator":{"@id":"https://destinjones.github.io/carfinder/about.html#destin"},"screenshot":"https://destinjones.github.io/carfinder/brand/social/og-1200x630.png"},
  {"@type":"Person","@id":"https://destinjones.github.io/carfinder/about.html#destin","name":"Destin Jones","url":"https://destinjones.github.io/carfinder/about.html","sameAs":["https://github.com/destinjones","https://destinjones.github.io/open-overwatch/about.html"]}
 ]}
 </script>
@@ -163,6 +163,25 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
 .close .final a{color:var(--accent);text-decoration:none;border-bottom:4px solid var(--accent)}
 .close .final a:hover{color:#a7c3ff;border-color:#a7c3ff}
 @media (max-width:860px){.trick{grid-template-columns:1fr}.three,.trust{grid-template-columns:1fr}}
+/* video and gifs */
+.browser video{display:block;width:100%;height:auto;background:#0f1317}
+.browser img.still{display:none}
+@media (prefers-reduced-motion:reduce){.browser video{display:none}.browser img.still{display:block}}
+.clips{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.clip.tall{grid-column:2;grid-row:1 / span 2}
+.clip{background:var(--bg);padding:0;display:flex;flex-direction:column;min-width:0}
+.clip figure{margin:0;padding:0;background:#0f1317;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;min-height:200px}
+.clip img{width:100%;height:auto;display:block}
+.clip.tall figure{background:var(--panel);flex:1 1 auto;padding:24px 0} .clip.tall img{width:min(100%,280px);border-radius:22px;border:1px solid var(--line-strong)}
+.clip div{padding:20px 24px} .clip h3{font-size:22px;margin-bottom:8px} .clip p{margin:0;color:var(--ink-dim);font-size:15.5px}
+.clip .tag{font:500 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:10px}
+.vert{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.vert div{background:var(--bg);padding:26px;min-width:0}
+.vert b{display:block;font:900 30px/1 var(--display);text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.vert p{margin:0;color:var(--ink-dim);font-size:16px} .vert p+p{margin-top:10px}
+.vert .n{font:500 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:12px}
+@media (max-width:960px){.vert{grid-template-columns:1fr}}
+@media (max-width:860px){.clips{grid-template-columns:1fr}.clip.tall{grid-column:auto;grid-row:auto}}
 </style>
 </head>
 <body>
@@ -170,7 +189,7 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
 <nav aria-label="Main">
   <div class="wrap">
     <a class="brand" href="./"><img src="brand/emblem/emblem-256.png" alt="">CarFinder</a>
-    <div class="links"><a href="#trick">The trick</a><a href="#proof">Try it</a><a href="#trust">Trust</a><a href="about.html">About</a><a href="https://github.com/destinjones/carfinder">GitHub</a><a class="go" href="carfinder.html">Open CarFinder</a></div>
+    <div class="links"><a href="#action">See it</a><a href="#trick">The trick</a><a href="#proof">Try it</a><a href="#trust">Trust</a><a href="about.html">About</a><a href="https://github.com/destinjones/carfinder">GitHub</a><a class="go" href="carfinder.html">Open CarFinder</a></div>
   </div>
 </nav>
 
@@ -178,18 +197,18 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
 <header class="hero">
   <div class="wrap">
     <div>
-      <div class="eyebrow">Free · open source · 11 countries</div>
+      <div class="eyebrow">Free · open source · 11 countries · cars, bikes, boats</div>
       <h1>The dealer quotes you $399 a month. <span>Here's what the car actually costs.</span></h1>
       <p class="lede">Car sites show you the sticker. Dealers steer you to the monthly payment. The number that actually leaves your bank account, with your state's tax, title and fees in, is the one nobody prints.</p>
-      <p class="lede"><b>CarFinder prints it, on every car, for your state.</b> It runs in your browser, on a phone too, and asks for nothing: no account, no email, no phone number.</p>
+      <p class="lede"><b>CarFinder prints it, on every car, for your state.</b> And now on every motorcycle, scooter, boat and jet ski too, with a photo of each. It runs in your browser, on a phone too, and asks for nothing: no account, no email, no phone number.</p>
       <div class="cta">
         <a class="btn primary" href="carfinder.html">Find your real price</a>
-        <a class="btn" href="#trick">How the trick works</a>
+        <a class="btn" href="#action">Watch it work</a>
       </div>
-      <p class="fine">Open source · one HTML file · no sign-up<br>Prices compiled 29 September 2026 · estimates to bargain within, not quotes</p>
+      <p class="fine">Open source · one HTML file · no sign-up<br>Cars compiled 29 September 2026, bikes and boats 10 October · estimates to bargain within, not quotes</p>
     </div>
     <div class="devices" aria-hidden="true">
-      <div class="browser"><div class="bar"><i></i><i></i><i></i><span>destinjones.github.io/carfinder</span></div><img src="brand/shots/desktop-us.webp" width="1280" height="800" alt="" fetchpriority="high"></div>
+      <div class="browser"><div class="bar"><i></i><i></i><i></i><span>destinjones.github.io/carfinder</span></div><video autoplay muted loop playsinline poster="brand/video/hero-poster.jpg" width="1280" height="720" aria-label="CarFinder in use: picking a state, opening a car, then switching to motorcycles and boats"><source src="brand/video/hero.webm" type="video/webm"><source src="brand/video/hero.mp4" type="video/mp4"></video><img class="still" src="brand/shots/desktop-us.webp" width="1280" height="800" alt=""></div>
       <div class="phone"><img src="brand/shots/phone-us-dark.webp" width="390" height="844" alt="" loading="lazy"></div>
     </div>
   </div>
@@ -197,12 +216,25 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
 
 <div class="wrap">
   <div class="stats" aria-label="CarFinder by the numbers">
-    <div><b>2,729</b><span>new cars, SUVs, pickups and vans, each with three prices</span></div>
-    <div><b>11</b><span>countries, plus a World tab that puts them in one list</span></div>
-    <div><b>150+</b><span>states, provinces and cities, each with its own tax rules</span></div>
+    <div><b>4,729</b><span>vehicles with three prices each: 2,729 cars and trucks, 1,444 motorcycles and scooters, 556 boats and jet skis</span></div>
+    <div><b>11</b><span>countries and 150+ states, provinces and cities, plus a World tab that puts them in one list</span></div>
+    <div><b>3,298</b><span>photos from Wikimedia Commons, each credited to its photographer</span></div>
     <div><b>0</b><span>accounts, ads, cookies or trackers</span></div>
   </div>
 </div>
+
+<section id="action" aria-labelledby="action-h">
+  <div class="wrap">
+    <div class="eyebrow">See it in action</div>
+    <h2 id="action-h">Thirty seconds, <span>no sign-up, no sales pitch.</span></h2>
+    <p class="intro">Every clip is the real page, recorded from the app in a headless browser. Pick a state and watch the drive-off prices move, switch from cars to bikes to boats and watch every filter change with them, or open a card on a phone and drag the trim slider.</p>
+    <div class="clips">
+      <article class="clip"><figure><img src="brand/video/state.gif" width="640" height="360" alt="Changing the state from California to Texas to Oregon: the drive-off price on every card recomputes; then the SUV and Hybrid chips narrow the list" loading="lazy"></figure><div><span class="tag">Your state, every price</span><h3>Pick a state. Every price moves.</h3><p>California, Texas, Oregon: the sticker stays, the drive-off number changes with sales tax, doc fee and plates. Then two taps narrow 414 cars to hybrid SUVs.</p></div></article>
+      <article class="clip"><figure><img src="brand/video/verticals.gif" width="640" height="360" alt="Switching from Cars to Motorcycles to Boats: the body-type chips, filters and prices change to scooters and engine sizes, then jet skis and boat lengths" loading="lazy"></figure><div><span class="tag">Cars · bikes · boats</span><h3>Three kinds of vehicle, one page.</h3><p>Switch to motorcycles and the filters become engine size and transmission; switch to boats and they become length, propulsion and fuel burn per hour. Photos, prices and fees follow.</p></div></article>
+      <article class="clip tall"><figure><img src="brand/video/phone.gif" width="300" height="649" alt="On a phone: tapping a card opens the cost breakdown, the trim slider raises the total from base to top trim, then a price preset in the filter sheet narrows the list" loading="lazy"></figure><div><span class="tag">On your phone</span><h3>Built for the dealership parking lot.</h3><p>Tap a card for the breakdown from sticker to drive-off, drag the trim slider, scroll the fee lines, then set a budget in the filter sheet. 44 px targets, one hand.</p></div></article>
+    </div>
+  </div>
+</section>
 
 <section id="trick" aria-labelledby="trick-h">
   <div class="wrap">
@@ -238,11 +270,11 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
     <p class="intro">Choose a US state, an Indian state, a Chinese city, an Australian state, a Mexican estado, a Spanish region, a Russian region, a Brazilian state or a Canadian province, and every drive-off price on the page recomputes with its sales tax, road tax, plates, registration, insurance and rebates. Nothing to install, nothing to sign up for.</p>
     <div class="steps">
       <ol>
-        <li><b>Pick your country tab</b><p>The tabs across the top switch the whole page: the cars, the price basis (MSRP, ex-showroom, OTR, 指导价, RRP…), the tax rules and the glossary. <kbd>World</kbd> pools every country in one list.</p></li>
+        <li><b>Pick cars, motorcycles or boats, then your country</b><p>The three buttons at the very top switch the kind of vehicle; the country tabs under them switch the whole page: the vehicles, the price basis (MSRP, ex-showroom, OTR, 指导价, RRP, ride-away…), the tax rules and the glossary. <kbd>World</kbd> pools every country in one list.</p></li>
         <li><b>Pick your state or city</b><p>The picker under the search bar (next to it on a desktop) sets the taxes and fees. Every <em>drive-off</em> price recomputes for it, and the page remembers your choice in your own browser.</p></li>
-        <li><b>Narrow it down</b><p>Tap the body-type and fuel chips, or open <kbd>Filters</kbd> for price range, size, brand tier, seats, drivetrain, minimum MPG and minimum electric range. Or press <kbd>Help me choose</kbd> and answer four questions: budget with taxes in, what the car will mostly do, fuel, and whether you need all-wheel drive.</p></li>
+        <li><b>Narrow it down</b><p>Tap the body-type and fuel chips, or open <kbd>Filters</kbd> for price range, size, brand tier, seats, drivetrain, minimum MPG and minimum electric range. For bikes the filters become engine size and transmission; for boats, length, capacity, propulsion and fuel burn. Or press <kbd>Help me choose</kbd> and answer four questions.</p></li>
         <li><b>Sort by what matters to you</b><p>Price, lowest yearly fuel cost, best MPG, longest electric range, most horsepower, cheapest per horsepower, most seats. On a phone the sort lives behind the ⇅ button next to the search box.</p></li>
-        <li><b>Open a car, then compare</b><p>Tap any card for the cost breakdown and drag the trim slider from base to top trim. Tap <kbd>+ Compare</kbd> on up to four cards and see them side by side.</p></li>
+        <li><b>Open a card, then compare</b><p>Tap any card for its photo, the cost breakdown and the trim slider from base to top trim. Tap <kbd>+ Compare</kbd> on up to four cards and see them side by side.</p></li>
       </ol>
       <div class="phone-lg" aria-hidden="true"><img src="brand/shots/phone-detail-sticker.webp" width="390" height="844" alt="" loading="lazy"></div>
     </div>
@@ -250,18 +282,26 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
     <h3 class="sub-h" id="countries">The same car, <span>eleven prices.</span></h3>
     <p class="intro">Each tab starts from the price that country actually publishes and adds what that country actually charges. The rules were researched market by market and are written down in the repository.</p>
     <div class="countries">
-      <article class="country"><span class="cc">USA</span><h3>United States</h3><p class="basis">414 vehicles · MSRP + destination</p><p>Sales tax by state (with the Connecticut and South Carolina special cases), typical dealer doc fee by state, title and plates. 2025 leftovers and 2027 early arrivals labelled.</p><small>50 states + DC</small></article>
-      <article class="country"><span class="cc">IN</span><h3>India</h3><p class="basis">208 vehicles · ex-showroom (GST in)</p><p>RTO road tax by state, price slab and fuel, with EV waivers; registration, HSRP plates and FASTag; first-year insurance; 1% TCS above ₹10 lakh. GST at the September 2025 slabs.</p><small>States + BH series</small></article>
-      <article class="country"><span class="cc">CN</span><h3>China</h3><p class="basis">188 vehicles · 厂商指导价</p><p>Purchase tax (10%, half for NEVs with the ¥15,000 cap), compulsory and commercial insurance, registration, and the plate: Shanghai's auction, Beijing's lottery, the smaller auctions elsewhere, free green plates for NEVs.</p><small>8 cities + everywhere else</small></article>
-      <article class="country"><span class="cc">UK</span><h3>United Kingdom</h3><p class="basis">280 vehicles · OTR price</p><p>Typical broker and dealer discounts, the Electric Car Grant where the maker and the trim qualify, first-year VED already in the OTR, the Expensive Car Supplement flagged, insurance by region.</p><small>GB + Northern Ireland</small></article>
-      <article class="country"><span class="cc">AU</span><h3>Australia</h3><p class="basis">302 vehicles · RRP before on-roads</p><p>Stamp duty by state formula, 12 months of rego and CTP, plates, dealer delivery, with Luxury Car Tax already inside the RRP and utes exempt.</p><small>6 states + ACT + NT</small></article>
-      <article class="country"><span class="cc">MX</span><h3>Mexico</h3><p class="basis">324 vehicles · precio de lista</p><p>ISAN inside the price, alta de placas by estado, the holograma for the Megalópolis, first-year tenencia where it still applies (EVs and hybrids exempt), typical bonos by model.</p><small>11 estados + otro</small></article>
-      <article class="country"><span class="cc">ES</span><h3>Spain</h3><p class="basis">164 vehicles · PVP (IVA + matriculación)</p><p>Impuesto de matriculación by CO2 band, DGT fee, plates and gestoría, prorated IVTM, Canarias recomputed with IGIC and Ceuta y Melilla with IPSI, Plan Auto+ and the IRPF deduction shown.</p><small>8 regions + Península</small></article>
-      <article class="country"><span class="cc">TH</span><h3>Thailand</h3><p class="basis">211 vehicles · ราคาป้าย</p><p>Excise by CO2 and technology already inside the sticker, DLT registration, first-year annual tax by engine size, พ.ร.บ. compulsory insurance, dealer processing, the EV3.5 subsidy already deducted.</p><small>National rules</small></article>
-      <article class="country"><span class="cc">RU</span><h3>Russia</h3><p class="basis">159 vehicles · РРЦ (VAT in)</p><p>Direct, trade-in and credit benefits by model, dealer add-on packages, the 4,500 ₽ registration duty, first-year ОСАГО by region, transport tax by horsepower and region, the state loan discount for Russian-built cars.</p><small>10 regions + other</small></article>
-      <article class="country"><span class="cc">BR</span><h3>Brazil</h3><p class="basis">233 vehicles · preço de tabela</p><p>Bônus de fábrica by model, emplacamento by state, first-year IPVA prorated with each state's EV and hybrid rules, regional price factor, CNPJ and PcD channels explained.</p><small>11 states + outro</small></article>
-      <article class="country"><span class="cc">CA</span><h3>Canada</h3><p class="basis">246 vehicles · MSRP before freight</p><p>Freight and PDI by brand, A/C tax, green levy, federal luxury tax, HST, GST plus PST or QST (with BC's price tiers), registration, and the federal EVAP rebate plus Quebec, PEI and Yukon rebates taken off.</p><small>10 provinces + territories</small></article>
-      <article class="country"><span class="cc">ALL</span><h3>World</h3><p class="basis">2,729 vehicles · converted</p><p>Every car at its home list price converted at ECB reference rates, on-road computed with its home rules for its default region, a country filter, your choice of currency and efficiency units, and the cheapest-per-horsepower sort.</p><small>11 currencies</small></article>
+      <article class="country"><span class="cc">USA</span><h3>United States</h3><p class="basis">414 cars · 270 bikes · 162 boats · MSRP</p><p>Sales tax by state (with the Connecticut and South Carolina special cases), typical dealer doc fee by state, title and plates. 2025 leftovers and 2027 early arrivals labelled.</p><small>50 states + DC</small></article>
+      <article class="country"><span class="cc">IN</span><h3>India</h3><p class="basis">208 cars · 175 bikes · 24 boats · ex-showroom</p><p>RTO road tax by state, price slab and fuel, with EV waivers; registration, HSRP plates and FASTag; first-year insurance; 1% TCS above ₹10 lakh. GST at the September 2025 slabs.</p><small>States + BH series</small></article>
+      <article class="country"><span class="cc">CN</span><h3>China</h3><p class="basis">188 cars · 102 bikes · 25 boats · 厂商指导价</p><p>Purchase tax (10%, half for NEVs with the ¥15,000 cap), compulsory and commercial insurance, registration, and the plate: Shanghai's auction, Beijing's lottery, the smaller auctions elsewhere, free green plates for NEVs.</p><small>8 cities + everywhere else</small></article>
+      <article class="country"><span class="cc">UK</span><h3>United Kingdom</h3><p class="basis">280 cars · 175 bikes · 54 boats · OTR</p><p>Typical broker and dealer discounts, the Electric Car Grant where the maker and the trim qualify, first-year VED already in the OTR, the Expensive Car Supplement flagged, insurance by region.</p><small>GB + Northern Ireland</small></article>
+      <article class="country"><span class="cc">AU</span><h3>Australia</h3><p class="basis">302 cars · 121 bikes · 53 boats · RRP / ride-away</p><p>Stamp duty by state formula, 12 months of rego and CTP, plates, dealer delivery, with Luxury Car Tax already inside the RRP and utes exempt.</p><small>6 states + ACT + NT</small></article>
+      <article class="country"><span class="cc">MX</span><h3>Mexico</h3><p class="basis">324 cars · 107 bikes · 32 boats · precio de lista</p><p>ISAN inside the price, alta de placas by estado, the holograma for the Megalópolis, first-year tenencia where it still applies (EVs and hybrids exempt), typical bonos by model.</p><small>11 estados + otro</small></article>
+      <article class="country"><span class="cc">ES</span><h3>Spain</h3><p class="basis">164 cars · 127 bikes · 54 boats · PVP</p><p>Impuesto de matriculación by CO2 band, DGT fee, plates and gestoría, prorated IVTM, Canarias recomputed with IGIC and Ceuta y Melilla with IPSI, Plan Auto+ and the IRPF deduction shown.</p><small>8 regions + Península</small></article>
+      <article class="country"><span class="cc">TH</span><h3>Thailand</h3><p class="basis">211 cars · 97 bikes · 26 boats · ราคาป้าย</p><p>Excise by CO2 and technology already inside the sticker, DLT registration, first-year annual tax by engine size, พ.ร.บ. compulsory insurance, dealer processing, the EV3.5 subsidy already deducted.</p><small>National rules</small></article>
+      <article class="country"><span class="cc">RU</span><h3>Russia</h3><p class="basis">159 cars · 54 bikes · 24 boats · РРЦ</p><p>Direct, trade-in and credit benefits by model, dealer add-on packages, the 4,500 ₽ registration duty, first-year ОСАГО by region, transport tax by horsepower and region, the state loan discount for Russian-built cars.</p><small>10 regions + other</small></article>
+      <article class="country"><span class="cc">BR</span><h3>Brazil</h3><p class="basis">233 cars · 88 bikes · 45 boats · preço de tabela</p><p>Bônus de fábrica by model, emplacamento by state, first-year IPVA prorated with each state's EV and hybrid rules, regional price factor, CNPJ and PcD channels explained.</p><small>11 states + outro</small></article>
+      <article class="country"><span class="cc">CA</span><h3>Canada</h3><p class="basis">246 cars · 128 bikes · 57 boats · MSRP before freight</p><p>Freight and PDI by brand, A/C tax, green levy, federal luxury tax, HST, GST plus PST or QST (with BC's price tiers), registration, and the federal EVAP rebate plus Quebec, PEI and Yukon rebates taken off.</p><small>10 provinces + territories</small></article>
+      <article class="country"><span class="cc">ALL</span><h3>World</h3><p class="basis">4,729 vehicles · converted</p><p>Every car, bike and boat at its home list price converted at ECB reference rates, on-road computed with its home rules for its default region, a country filter, your choice of currency and efficiency units, and the cheapest-per-horsepower sort.</p><small>11 currencies</small></article>
+    </div>
+
+    <h3 class="sub-h" id="verticals">Not only cars. <span>Bikes and boats, same rules.</span></h3>
+    <p class="intro">Switch the page to motorcycles or boats and nothing is a car in disguise: the price basis, the fees, the filters, the wizard questions and the glossary are the ones that market actually uses for that kind of vehicle.</p>
+    <div class="vert">
+      <div><span class="n">1,444 motorcycles and scooters</span><b>Ride-away</b><p>From a 97 cc Hero Splendor to a Gold Wing, with the same three prices. The breakdown adds what bikes really pay: freight and setup, the sales or road tax for your state, plates, compulsory insurance, and the licence class you need (A1, A2, LAMS, CBT, M endorsement).</p><p>Filters by engine size and transmission; the wizard asks whether you are on a learner licence.</p></div>
+      <div><span class="n">556 boats and jet skis</span><b>On the water</b><p>Jet skis, pontoons, bowriders, center consoles, bass boats, wake boats, RIBs, sailboats and dinghies. The breakdown adds freight and commissioning, the boat sales-tax caps (Florida $18,000, Virginia $2,000…), registration by length, trailer plates, and the licence and mooring costs as information.</p><p>Filters by length, capacity, propulsion and fuel burn per hour; yearly fuel from your engine hours.</p></div>
+      <div><span class="n">3,298 photos</span><b>With a picture</b><p>Each card and detail sheet shows the vehicle's lead photo from its Wikipedia article, credited to the photographer with its Creative Commons licence, and flagged when it may show an earlier generation. The rest get a silhouette of their body type until a photo is found.</p><p>Photos stay on Wikimedia's servers; the page only links to them.</p></div>
     </div>
   </div>
 </section>
@@ -283,7 +323,7 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
     </div>
     <div class="grid" style="margin-top:clamp(40px,6vw,64px)">
       <article class="card"><span class="tag">Compare</span><h3>Four cars side by side</h3><p>Price, drive-off, monthly, efficiency, power, seats, drivetrain and market notes in one table, on a phone too.</p></article>
-      <article class="card"><span class="tag">World tab</span><h3>Every market in one list</h3><p>All 2,729 cars converted to one currency at ECB rates, so you can see what a Seagull costs against a Mirage and rank the cheapest horsepower on Earth.</p></article>
+      <article class="card"><span class="tag">World tab</span><h3>Every market in one list</h3><p>All 2,729 cars, 1,444 bikes or 556 boats converted to one currency at ECB rates, so you can see what a Seagull costs against a Mirage and rank the cheapest horsepower on Earth.</p></article>
       <article class="card"><span class="tag">Plain English</span><h3>No jargon left unexplained</h3><p>MSRP, destination, doc fee, OTR, ex-showroom, RTO, 落地价, tenencia, IPVA, ОСАГО: each tab has a glossary written for someone buying their first car there.</p></article>
     </div>
   </div>
@@ -298,8 +338,8 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
       <div><b>No account</b><p>No sign-up, no email, no phone number. Open the page and use it.</p></div>
       <div><b>No ads, no cookies, no trackers</b><p>Nobody is paying to put a car in front of you. Your state choice is saved in your own browser and goes nowhere else.</p></div>
       <div><b>One file</b><p>Markup, CSS, plain JavaScript and the data in one self-contained HTML page. It keeps working offline once loaded.</p></div>
-      <div><b>Open data</b><p>Each country's cars are a JSON file with a documented row schema; each country's taxes and fees are one function. MIT licence. A wrong rate is a one-line fix and a pull request.</p></div>
-      <div><b>Tested before it ships</b><p><code>node --test</code> checks every row of every dataset, then runs the pricing core for all 44,000 car-and-region combinations and checks known quotes. A headless Chromium pass drives every tab and control at phone and desktop widths.</p></div>
+      <div><b>Open data</b><p>Each country's cars, bikes and boats are JSON files with a documented row schema; each country's car taxes are one function and its bike and boat fees one table. MIT licence. A wrong rate is a one-line fix and a pull request.</p></div>
+      <div><b>Tested before it ships</b><p><code>node --test</code> checks every row of every dataset, then runs the pricing engines for all 83,000 vehicle-and-region combinations and checks known quotes. A headless Chromium pass drives every tab and control of all three verticals at phone and desktop widths.</p></div>
       <div><b>Estimates, labelled as estimates</b><p>Dealer prices are bands by demand level, not quotes. Taxes follow the published rules on the compile date. Every tab ends with a plain note on what was assumed, and provisional prices carry a <em>Preliminary</em> tag.</p></div>
     </div>
     <pre class="code" tabindex="0">git clone https://github.com/destinjones/carfinder
@@ -332,7 +372,7 @@ python3 -m http.server   # then open http://localhost:8000/</pre>
   <div class="wrap">
     <div class="eyebrow">Before you go</div>
     <h2 id="close-h">Use it as a starting point, <span>not a quote.</span></h2>
-    <p class="intro">Prices were compiled on 29 September 2026 from manufacturer price lists and the main listing sites in each country. Incentives, fuel prices and exchange rates move monthly, and tax rules change with budgets. Always get the out-the-door price in writing from two or three dealers. If you spot a wrong price or rate, <a href="https://github.com/destinjones/carfinder/issues">open an issue</a> or fix the JSON and send a pull request.</p>
+    <p class="intro">Car prices were compiled on 29 September 2026 and motorcycle and boat prices on 10 October 2026, from manufacturer price lists and the main listing sites in each country; most bike and boat rows outside the US are marked <em>preliminary</em> until a dealer price list confirms them. Incentives, fuel prices and exchange rates move monthly, and tax rules change with budgets. Always get the out-the-door price in writing from two or three dealers. If you spot a wrong price or rate, <a href="https://github.com/destinjones/carfinder/issues">open an issue</a> or fix the JSON and send a pull request.</p>
     <p class="final">The dealer hopes you never open this. <a href="carfinder.html">Open it.</a></p>
   </div>
 </section>
@@ -345,7 +385,7 @@ python3 -m http.server   # then open http://localhost:8000/</pre>
       <p>A free, open source project by <a href="about.html">Destin Jones</a>, vibe coded with Claude. Estimates for awareness while car shopping, not quotes, offers or financial advice. No accounts, no ads, no tracking.</p>
     </div>
     <div>
-      <p><a href="carfinder.html">Open CarFinder</a> · <a href="#proof">How to use</a> · <a href="#countries">Countries</a> · <a href="about.html">About</a></p>
+      <p><a href="carfinder.html">Open CarFinder</a> · <a href="#action">See it in action</a> · <a href="#proof">How to use</a> · <a href="#countries">Countries</a> · <a href="#verticals">Bikes and boats</a> · <a href="about.html">About</a></p>
       <p><a href="https://github.com/destinjones/carfinder">Source on GitHub</a> · <a href="https://github.com/destinjones/carfinder/issues">Report a wrong price</a> · <a href="https://github.com/destinjones/carfinder/blob/main/LICENSE">MIT licence</a></p>
       <p>Also by me: <a href="https://destinjones.github.io/open-overwatch/">Open Overwatch</a> and <a href="https://destinjones.github.io/godot-open-rts/">Ironbound</a>.</p>
     </div>

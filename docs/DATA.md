@@ -106,3 +106,50 @@ Edit the JSON (keep the field order), then `node src/build.js && node --test`. T
 unknown enum, a range outside the plausible limits, a duplicate make+model, a note with a double quote, and any
 car-region combination whose total comes out non-finite or implausible. A pull request with the source of the price in
 its description is all it takes.
+
+## Motorcycle schema: 21 fields (`moto_<cc>.json`, every country)
+```
+[make, model, body, size, cls, fuelsStr, fuel, price_min, price_max, cc, l100, range_km, kwh, hp, seats, trans, mkt, note, est, isNew, freight]
+```
+- `body`: Scooter · Commuter · Naked · Sport · Cruiser · Adventure · Touring · Dual-sport · Retro · Mini · Trike.
+- `size` follows `cc`: Under 125cc (< 125) · 125-300cc · 300-650cc · 650-1000cc · Over 1000cc; electric bikes are
+  classed by motor power.
+- `fuelsStr` / `fuel`: Petrol, CNG, Hybrid, EV (first of `fuelsStr`). `cc` and `l100` are `null` for EVs; `range_km`
+  and `kwh` are the claimed range and battery for EVs.
+- Prices are whole local units in every country (India in rupees, not lakh). `freight` is the freight-and-setup (PDI)
+  charge where it is added on top (US, Canada); 0 where the published price already includes delivery.
+- `trans`: the transmission text ("Manual 6-speed", "CVT automatic", "DCT automatic", "Single-speed").
+
+## Boat schema: 21 fields (`boat_<cc>.json`, every country)
+```
+[make, model, body, size, cls, fuelsStr, fuel, price_min, price_max, length_ft, gph, range_km, kwh, hp, seats, propulsion, mkt, note, est, isNew, freight]
+```
+- `body`: PWC · Pontoon · Bowrider · Deck boat · Center console · Fishing · Bass boat · Jon boat · Cabin · Wake · RIB ·
+  Sail · Dinghy. `size` follows `length_ft`: Under 16 ft · 16-20 ft · 20-26 ft · 26-35 ft · Over 35 ft.
+- `fuel`: Petrol, Diesel, EV, Sail. `gph` is a typical cruise fuel burn in US gallons per hour for the standard engine
+  (`null` for sail and electric); `hp` may be 0 on an engineless sailing dinghy; `seats` is the rated capacity.
+- `note` says what the price includes (hull only, boat-and-motor, boat-motor-trailer package). `freight` is the
+  freight / prep / commissioning charge where it is added on top.
+
+### Price basis for bikes and boats
+US and Canada MSRP before freight and setup; UK OTR (bikes) and VAT-inclusive dealer price (boats); Australia
+ride-away (bikes) and RRP (boats); India ex-showroom (GST 18% up to 350 cc, 40% above, 5% EV; 40% on boats); China
+guide price with VAT; Mexico, Spain, Thailand, Russia and Brazil the published retail price with tax inside. The rules
+that turn each into an on-road price are in `data/vfees.json`.
+
+## Fee rules: `vfees.json`
+`VFEES[cc].moto` and `.boat` each hold `bands` (dealer price as a share of list per market level), `basis` (the label
+and explanation of the published price), `fees` (the lines of the breakdown, in order) and `glossary` (extra terms for
+that country). A fee line is `{k, sub}` plus one of `fixed` (a number, or `"dest"` for the row's freight), `pct`,
+`rates` (by region code, `XX` for the rest), `brackets` (`[[upto, value], …]` on `on: "ccm" | "hp" | "len" |
+"price"`), `hook` (`usSales` with `rates` / `caps` / `exempt`, `usDoc`, `inRoad`, `caProv`, `cnPurchase`, `esMatric`) or
+`text` (information only). `mode` is `pct` (default), `fixed` or `perhp`; modifiers: `fuel`, `notFuel`, `fuels`,
+`body`, `notBody`, `bodies`, `evMult`, `min`, `max`, `ofList`, `withDest`, `plus`, `suffix`, `info`, `skipZero`,
+`approx`.
+
+## Photo index: `images.json`
+`files` lists each Wikimedia Commons file once as `[name, host, md5 prefix, author, licence, "o"?]` and `map` goes from
+`"vt/cc"` to `"make|model"` to `[file index, approx]` (approx = the photo may show an earlier generation or another
+market's version). The index was built from the English Wikipedia API on 10 October 2026 (lead image of the article
+found for the make and model, author and licence from `imageinfo`); re-run the lookup when models are added. Only
+page titles containing the make were accepted, brand pages and photos dated before 2005 were rejected.

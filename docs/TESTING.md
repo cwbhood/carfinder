@@ -32,3 +32,12 @@ Both run in CI (`.github/workflows/ci.yml`) on every push and pull request.
 ## What is not tested automatically
 Real quotes drift: incentives change monthly, fuel prices weekly, exchange rates daily. The known-quote assertions are
 deliberately wide bands. When a rate changes, update the function, the tax note and, if needed, the band in the test.
+
+## Motorcycles and boats (`test/verticals.test.mjs`)
+Schema checks for every `moto_<cc>.json` and `boat_<cc>.json` (21 fields, enums, size matches engine size or length,
+price limits per country, EV fields), the shape of every fee line in `data/vfees.json`, the table-driven engine run for
+every bike and boat in every region (finite, ordered totals within 0.7× to 1.9× of list, no NaN text, mpg companions
+on every non-US bike), and known quotes (a Grom in Texas, a Splendor in Delhi, a Classic 350 in Karnataka, a Sea-Doo
+Spark in Florida, a PCX125 in the UK, a Hunter 350 in Ontario). The browser checks also switch verticals: the data pass
+renders every card, breakdown, compare table and detail sheet of all three verticals, and `interact.py` checks the
+bike and boat filters, chips, wizard, glossary, the length slider and persistence of the vertical across a reload.

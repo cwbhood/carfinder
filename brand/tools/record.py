@@ -2,7 +2,7 @@
 
     python3 brand/tools/record.py          (needs: pip install playwright && playwright install chromium; ffmpeg on PATH)
 
-Writes brand/video/hero.mp4 + hero-poster.jpg (the loop in the landing-page hero), and three GIFs for the
+Writes brand/video/hero.mp4 + hero.webm + hero-poster.jpg (the loop in the landing-page hero), and three GIFs for the
 "See it in action" section: state.gif (pick a state, every price moves), verticals.gif (cars → bikes → boats)
 and phone.gif (a card, the trim slider and the cost breakdown on a phone). Photos come from Wikimedia Commons,
 so the machine recording needs internet access; .github/workflows/record.yml runs this on a GitHub runner.
@@ -152,6 +152,7 @@ def encode(src, name, kind, fps=12, width=720, start=1.2, dur=None):
     """the first second of every recording is the page before its fonts arrive, so it is cut"""
     if kind == 'mp4':
         ffmpeg('-ss', str(start), '-i', src, '-c:v', 'libx264', '-preset', 'slow', '-crf', '27', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', '-r', '30', '-vf', 'scale=1280:-2', OUT / f'{name}.mp4')
+        ffmpeg('-ss', str(start), '-i', src, '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '36', '-row-mt', '1', '-an', '-r', '30', '-vf', 'scale=1280:-2', OUT / f'{name}.webm')
         ffmpeg('-ss', '2', '-i', OUT / f'{name}.mp4', '-frames:v', '1', '-q:v', '3', OUT / f'{name}-poster.jpg')
     else:
         seg = ['-ss', str(start)] + (['-t', str(dur)] if dur else [])
