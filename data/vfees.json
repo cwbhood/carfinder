@@ -1,0 +1,2070 @@
+{
+"US": {
+"moto": {
+"bands": {
+"hot": [
+1.0,
+1.02
+],
+"steady": [
+0.96,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "MSRP",
+"sub": "the maker’s suggested retail price for this variant, before freight, setup, tax and fees"
+},
+"fees": [
+{
+"k": "Freight & dealer setup",
+"sub": "crate-to-showroom shipping plus assembly and pre-delivery inspection, as the maker publishes it; taxable in most states",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Dealer doc fee",
+"sub": "paperwork fee; capped by law in CA ($85), NY ($175), MN ($125), IA ($180), AR ($129); $199 to $599 elsewhere",
+"hook": "usDoc",
+"max": 599,
+"approx": true
+},
+{
+"k": "Sales or use tax",
+"sub": "your state’s rate on the bike, freight and setup (DC 6%; WA skips the 0.3% motor-vehicle tax)",
+"hook": "usSales",
+"withDest": true,
+"rates": {
+"DC": 0.06,
+"WA": 0.09
+}
+},
+{
+"k": "Title fee",
+"sub": "one-time state title",
+"rates": {
+"US": 25,
+"CA": 27,
+"FL": 77,
+"IL": 155,
+"PA": 67,
+"NY": 50,
+"MA": 75,
+"TX": 33,
+"OH": 15,
+"NC": 56,
+"VA": 15
+},
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Plates and first-year registration",
+"sub": "state plate and registration; renewals run $40 to $100 a year",
+"rates": {
+"US": 125,
+"CA": 120,
+"IL": 210,
+"MA": 190,
+"PA": 150,
+"NY": 130,
+"WA": 130,
+"NJ": 130,
+"FL": 120,
+"TX": 110,
+"MI": 60,
+"OH": 75,
+"CO": 100
+},
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Vehicle licence / ownership tax, year 1",
+"sub": "CA 0.65% VLF, AZ licence tax on 60% of MSRP, CO specific ownership tax; most states charge none",
+"rates": {
+"US": 0,
+"CA": 0.0065,
+"AZ": 0.0168,
+"CO": 0.018
+},
+"approx": true,
+"skipZero": true
+},
+{
+"k": "Safety inspection",
+"sub": "annual or two-yearly in NY, NJ, MA, PA, VA, NC, NH, ME, DE, HI and DC",
+"rates": {
+"US": 0,
+"NY": 25,
+"NJ": 20,
+"MA": 35,
+"PA": 40,
+"VA": 20,
+"NC": 30,
+"NH": 40,
+"ME": 15,
+"DE": 10,
+"HI": 25,
+"DC": 35
+},
+"mode": "fixed",
+"approx": true,
+"skipZero": true
+},
+{
+"k": "Full-coverage insurance, first year",
+"sub": "liability cover is compulsory in 48 states; full cover for a 35 to 50-year-old: cruisers and standards $600–$900, sportbikes $900–$1,500, riders under 25 up to $3,000",
+"text": "~$600 – $1,500",
+"notBody": "Trike"
+},
+{
+"k": "Full-coverage insurance, first year",
+"sub": "three-wheelers are cheaper to insure than two-wheelers",
+"text": "~$500 – $900",
+"body": "Trike"
+},
+{
+"k": "Rider course (optional)",
+"sub": "MSF Basic RiderCourse $0–$350; waives the road test in most states and earns 5% to 15% off insurance",
+"text": "$0 – $350"
+}
+],
+"glossary": [
+[
+"M endorsement",
+"The motorcycle class added to a US driver licence after a written and road test, or an MSF rider course. No engine-size ladder for adults: pass once and any bike is legal."
+],
+[
+"Autocycle",
+"Three-wheelers such as the Polaris Slingshot are \"autocycles\" in about 45 states (a car licence is enough); Can-Am Spyder and Ryker and Harley trikes count as motorcycles in many states and need the M endorsement."
+],
+[
+"DCT / E-Clutch",
+"Honda’s dual-clutch automatic (no clutch lever) and its E-Clutch, which works the clutch for you while you still shift gears. Twist-and-go scooters use a CVT instead."
+],
+[
+"Helmet laws",
+"Universal helmet laws in 19 states plus DC; most other states require helmets under 18 or 21; Illinois, Iowa and New Hampshire have none."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+1.0,
+1.01
+],
+"steady": [
+0.94,
+1.0
+],
+"deals": [
+0.85,
+0.94
+]
+},
+"basis": {
+"k": "MSRP",
+"sub": "the maker’s price for the standard package (the row note says whether engine and trailer are in), before freight, prep, tax and fees"
+},
+"fees": [
+{
+"k": "Freight, prep & commissioning",
+"sub": "delivery, rigging, fluids, battery and sea trial, as the maker or dealer publishes it; added to Tracker-group \"national prices\" too",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Dealer doc fee",
+"sub": "paperwork fee of $150 to $995; Florida dealers charge the most",
+"rates": {
+"US": 399,
+"FL": 699,
+"CA": 85,
+"NY": 175
+},
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Sales or use tax",
+"sub": "your state’s boat rate on boat, motor and freight; capped in FL ($18,000), TX ($18,750), MD ($16,100), VA ($2,000), NC ($1,500), SC ($500); RI, OR, MT, NH, DE and AK charge none",
+"hook": "usSales",
+"withDest": true,
+"rates": {
+"US": 0.06,
+"AL": 0.02,
+"AK": 0.0,
+"AZ": 0.084,
+"AR": 0.095,
+"CA": 0.0875,
+"CO": 0.078,
+"CT": 0.029900000000000003,
+"DE": 0.0,
+"DC": 0.06,
+"FL": 0.06,
+"GA": 0.07,
+"HI": 0.045,
+"ID": 0.06,
+"IL": 0.08800000000000001,
+"IN": 0.07,
+"IA": 0.06,
+"KS": 0.087,
+"KY": 0.06,
+"LA": 0.1,
+"ME": 0.055,
+"MD": 0.05,
+"MA": 0.0625,
+"MI": 0.06,
+"MN": 0.06875,
+"MS": 0.07,
+"MO": 0.079,
+"MT": 0.0,
+"NE": 0.07,
+"NV": 0.0825,
+"NH": 0.0,
+"NJ": 0.06625,
+"NM": 0.071,
+"NY": 0.085,
+"NC": 0.03,
+"ND": 0.065,
+"OH": 0.0725,
+"OK": 0.045,
+"OR": 0.0,
+"PA": 0.06,
+"RI": 0.0,
+"SC": 0.05,
+"SD": 0.045,
+"TN": 0.0725,
+"TX": 0.0625,
+"UT": 0.07200000000000001,
+"VT": 0.06,
+"VA": 0.02,
+"WA": 0.09,
+"WV": 0.06,
+"WI": 0.055,
+"WY": 0.054000000000000006
+},
+"caps": {
+"FL": 18000,
+"TX": 18750,
+"MD": 16100,
+"VA": 2000,
+"NC": 1500,
+"SC": 500,
+"NY": 19550
+}
+},
+{
+"k": "Title",
+"sub": "about 30 states title boats; $5 to $75",
+"rates": {
+"US": 30,
+"TX": 33,
+"FL": 10,
+"VA": 7,
+"MD": 2,
+"OR": 0,
+"AK": 0,
+"NH": 0
+},
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Registration (by length)",
+"sub": "state registration decal for one to three years; under 16 ft $15–$45, 16–26 ft $30–$110, 26–40 ft $80–$220, 40 ft and over $150–$400",
+"brackets": [
+[
+16,
+30
+],
+[
+26,
+70
+],
+[
+40,
+150
+],
+[
+999,
+275
+]
+],
+"on": "len",
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Trailer registration",
+"sub": "$10 to $100 a year plus a $5 to $50 trailer title where the package includes a trailer",
+"fixed": 60,
+"approx": true
+},
+{
+"k": "Trailer, if not in the package",
+"sub": "single-axle $2,500–$4,500, tandem $5,000–$9,000, tritoon and 25 ft-plus hulls $9,000–$14,000; a PWC trailer $1,000–$2,500",
+"text": "$1,000 – $14,000",
+"notBody": "Sail"
+},
+{
+"k": "Insurance, first year",
+"sub": "no state requires it, but lenders and marinas do; hull plus liability runs 1% to 2% of value a year (PWC $250–$600, pontoon $400–$900, wake boat $900–$2,500, center console $800–$3,000); hurricane states cost more",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Slip, mooring or storage, per year",
+"sub": "wet slip $60–$250 per foot a year in coastal metros, dry stack $2,000–$9,000, trailer storage $500–$1,500; trailer boats at home pay nothing",
+"text": "$0 – $12,000"
+},
+{
+"k": "Winterising & annual service",
+"sub": "winterising and shrink-wrap $300–$1,200, engine service $300–$1,000, bottom paint $500–$2,500 for boats kept in the water",
+"text": "$600 – $4,000"
+}
+],
+"glossary": [
+[
+"BMT / national price",
+"Boat, motor and trailer sold as one priced package. The Tracker group (Tracker, Sun Tracker, Nitro, Mako, Tahoe, Ranger) sells at a fixed \"national price\" that dealers do not haggle on; freight and prep are added."
+],
+[
+"Boater education card",
+"No federal licence, but almost every state requires a safety course for operators born after a cut-off year (Florida 1988, Texas 1993, Georgia 1998) or for everyone (California, New York). Online NASBLA courses cost $0–$60."
+],
+[
+"USCG documentation",
+"Optional federal registration for boats of 5 net tons and over (roughly 27 ft up): about $133 to start and $26 a year; lenders often require it above $50,000."
+],
+[
+"Engine cut-off switch",
+"Since 2021 federal law requires the lanyard on planing boats under 26 ft; on a PWC it must be worn at all times."
+],
+[
+"Boat excise / property tax",
+"Massachusetts charges $10 per $1,000 of value a year; Connecticut, Maine, South Carolina, Virginia, Missouri and Kansas levy personal-property tax on boats. Shown as information, not added."
+]
+]
+}
+},
+"IN": {
+"moto": {
+"bands": {
+"hot": [
+1.0,
+1.02
+],
+"steady": [
+0.97,
+1.0
+],
+"deals": [
+0.9,
+0.97
+]
+},
+"basis": {
+"k": "Ex-showroom price",
+"sub": "the maker’s published price with GST inside (18% up to 350 cc, 40% above, 5% electric)"
+},
+"fees": [
+{
+"k": "Road tax (RTO)",
+"sub": "one-time state two-wheeler tax on ex-showroom; most states waive it for electric two-wheelers",
+"hook": "inRoad",
+"rates": {
+"IN": 0.09,
+"AP": 0.12,
+"AS": 0.09,
+"BR": 0.08,
+"CH": 0.06,
+"CG": 0.08,
+"DL": 0.06,
+"GA": 0.09,
+"GJ": 0.06,
+"HR": 0.08,
+"HP": 0.06,
+"JK": 0.09,
+"JH": 0.06,
+"KA": 0.12,
+"KL": 0.11,
+"MP": 0.08,
+"MH": 0.11,
+"OD": 0.06,
+"PY": 0.08,
+"PB": 0.09,
+"RJ": 0.08,
+"TN": 0.09,
+"TS": 0.09,
+"UP": 0.08,
+"UK": 0.08,
+"WB": 0.08,
+"BH": 0.08
+},
+"approx": true
+},
+{
+"k": "Registration, HSRP plates & smart card",
+"sub": "RTO fee, high-security plates and the registration card",
+"fixed": 1000,
+"approx": true
+},
+{
+"k": "Insurance (5-year third-party + 1-year own damage)",
+"sub": "new two-wheelers must carry five years of third-party cover; dealers bundle a year of own-damage cover",
+"brackets": [
+[
+75,
+3200
+],
+[
+150,
+6500
+],
+[
+350,
+9500
+],
+[
+99999,
+15000
+]
+],
+"on": "ccm",
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Handling / logistics charge",
+"sub": "a dealer add-on that courts have ruled cannot be charged separately; ask for it to be dropped",
+"fixed": 1500,
+"approx": true,
+"cls": "est"
+},
+{
+"k": "TCS (1%)",
+"sub": "tax collected at source on vehicles above ₹10 lakh, adjustable against income tax",
+"brackets": [
+[
+1000000,
+0
+],
+[
+1000000000000.0,
+0.01
+]
+],
+"on": "price",
+"skipZero": true
+},
+{
+"k": "PM E-DRIVE subsidy",
+"sub": "central e-two-wheeler incentive of ₹2,500 per kWh, capped at ₹5,000, while the scheme stays open; not deducted here",
+"text": "up to ₹5,000",
+"fuel": "EV"
+}
+],
+"glossary": [
+[
+"Two-wheeler road tax",
+"A one-time state tax of 6% to 18% of ex-showroom; Karnataka, Kerala and Maharashtra are highest, Delhi and Gujarat lowest. Nearly every state waives it for electric two-wheelers."
+],
+[
+"GST 18% / 40%",
+"Since 22 September 2025 motorcycles up to 350 cc carry 18% GST and bigger bikes 40%; electric two-wheelers stay at 5%."
+],
+[
+"5-year third-party insurance",
+"Supreme Court rules make dealers sell five years of third-party cover with every new two-wheeler; own-damage cover is optional after the first year."
+],
+[
+"Gearless licence (MCWOG)",
+"Scooters and other clutchless bikes can be ridden on a motorcycle-without-gear licence; 16-year-olds may ride gearless 50 cc bikes with parental consent."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+1.0,
+1.0
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.85,
+0.95
+]
+},
+"basis": {
+"k": "Dealer price",
+"sub": "importer price with 40% GST and customs duty inside; almost every pleasure boat is imported"
+},
+"fees": [
+{
+"k": "State registration (Inland Vessels Act / Maritime Board)",
+"sub": "registration with the state maritime board or inland waterways authority",
+"fixed": 15000,
+"approx": true
+},
+{
+"k": "Survey & certificate",
+"sub": "initial survey and certificate of registry",
+"fixed": 5000,
+"approx": true
+},
+{
+"k": "Insurance, first year",
+"sub": "hull and third-party cover, 1% to 2% of value",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Mooring (Mumbai, Goa, Kochi)",
+"sub": "marina or club berth",
+"text": "₹1 – 4 lakh a year"
+}
+],
+"glossary": [
+[
+"GST 40% on yachts",
+"Pleasure boats, jet skis and yachts moved to the 40% GST slab in September 2025, on top of 25% basic customs duty for imports."
+],
+[
+"Inland Vessels Act 2021",
+"Recreational craft on rivers, lakes and backwaters register with the state under the 2021 Act; sea-going boats with the Mercantile Marine Department."
+]
+]
+}
+},
+"UK": {
+"moto": {
+"bands": {
+"hot": [
+0.98,
+1.0
+],
+"steady": [
+0.93,
+0.98
+],
+"deals": [
+0.85,
+0.93
+]
+},
+"basis": {
+"k": "OTR price",
+"sub": "on-the-road: VAT, delivery, number plates, the £55 registration fee and first-year VED included"
+},
+"fees": [
+{
+"k": "VED (road tax) from year two",
+"sub": "by engine size: £27 up to 150 cc, £59 to 400 cc, £90 to 600 cc, £125 above; electric bikes pay the lowest band",
+"brackets": [
+[
+150,
+27
+],
+[
+400,
+59
+],
+[
+600,
+90
+],
+[
+99999,
+125
+]
+],
+"on": "ccm",
+"mode": "fixed",
+"info": true,
+"suffix": "/yr",
+"approx": true
+},
+{
+"k": "Insurance, first year",
+"sub": "third-party cover is compulsory; a 125 for a new rider £300 to £900, a sportbike for a 25-year-old £1,000 to £2,500, a tourer for an experienced rider £250 to £600",
+"text": "~£300 – £1,500"
+},
+{
+"k": "CBT and licence",
+"sub": "Compulsory Basic Training lets 17-year-olds ride a 125 on L-plates; A1, A2 and full A licences need theory and two practical tests",
+"text": "£130 – £170 CBT, £300 – £700 for tests"
+}
+],
+"glossary": [
+[
+"OTR for bikes",
+"Most UK bike prices are quoted on the road, so nothing is added at the till except optional extras and insurance. A few brands still quote RRP plus £150 to £400 of OTR charges."
+],
+[
+"CBT / A1 / A2 / A",
+"Compulsory Basic Training lets you ride a 125 on L-plates from 17; A1 (125 cc) from 17, A2 (35 kW) from 19, full A from 24 or two years after A2."
+],
+[
+"Pre-registered bike",
+"A bike the dealer has registered to meet targets, sold with delivery miles at 10% to 25% off; you are the second keeper."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+0.98,
+1.0
+],
+"steady": [
+0.92,
+0.98
+],
+"deals": [
+0.85,
+0.92
+]
+},
+"basis": {
+"k": "Price (VAT included)",
+"sub": "the dealer’s list price with 20% VAT; engine and basic fit-out as described in the row"
+},
+"fees": [
+{
+"k": "Commissioning & delivery",
+"sub": "rigging, antifoul, sea trial and transport where the dealer charges them",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "SSR registration (optional)",
+"sub": "Part III Small Ships Register, £35 for five years; needed for taking the boat abroad",
+"fixed": 35,
+"approx": true
+},
+{
+"k": "Canal & River Trust licence",
+"sub": "needed on inland waterways, priced by length; coastal boats pay none",
+"brackets": [
+[
+20,
+700
+],
+[
+40,
+1100
+],
+[
+60,
+1500
+],
+[
+999,
+1800
+]
+],
+"on": "len",
+"mode": "fixed",
+"info": true,
+"suffix": "/yr",
+"approx": true
+},
+{
+"k": "Insurance, first year",
+"sub": "not compulsory at sea, required by marinas and inland licences; about 1% to 1.5% of value",
+"pct": 0.012,
+"info": true,
+"approx": true
+},
+{
+"k": "Mooring, per year",
+"sub": "coastal marina £2,000 to £10,000 by length and region; canal moorings £1,500 to £5,000; London far more",
+"text": "£2,000 – £10,000"
+},
+{
+"k": "Boat Safety Scheme",
+"sub": "four-yearly inspection for inland boats",
+"text": "£150 – £250 every 4 years"
+}
+],
+"glossary": [
+[
+"SSR",
+"The UK Small Ships Register, a cheap optional registration that proves nationality abroad; UK waters need none."
+],
+[
+"Canal & River Trust licence",
+"The annual licence for canals and most rivers, priced by boat length; continuous cruisers pay a surcharge."
+],
+[
+"Boat Safety Scheme",
+"The inland boat MOT: a four-yearly check of gas, fuel and electrical systems required for a licence."
+],
+[
+"RYA Day Skipper / Powerboat Level 2",
+"No licence is needed in UK waters, but these are the courses insurers, marinas and charter companies look for."
+]
+]
+}
+},
+"AU": {
+"moto": {
+"bands": {
+"hot": [
+0.99,
+1.01
+],
+"steady": [
+0.95,
+0.99
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Ride-away price",
+"sub": "GST, 12 months registration, CTP, stamp duty, plates and dealer delivery included for a NSW metro buyer"
+},
+"fees": [
+{
+"k": "State on-road adjustment",
+"sub": "ride-away prices move with each state’s CTP, duty and rego; roughly what to add or subtract",
+"rates": {
+"NSW": 0,
+"VIC": 150,
+"QLD": -100,
+"WA": -300,
+"SA": 100,
+"TAS": -200,
+"ACT": 200,
+"NT": -300
+},
+"mode": "fixed",
+"approx": true,
+"skipZero": true
+},
+{
+"k": "Comprehensive insurance, first year",
+"sub": "CTP is in the ride-away price; full cover for a 30-year-old with a clean record",
+"text": "~A$500 – A$2,000"
+},
+{
+"k": "Licence",
+"sub": "learner permit, then LAMS bikes (up to 660 cc and 150 kW/tonne) for 12 to 24 months before an unrestricted licence",
+"text": "A$200 – A$400 courses"
+}
+],
+"glossary": [
+[
+"Ride-away",
+"The all-in price most Australian bike brands advertise: GST, rego, CTP, stamp duty and dealer delivery for a given state and postcode."
+],
+[
+"LAMS",
+"The Learner Approved Motorcycle Scheme: bikes up to 660 cc and 150 kW per tonne that learners and provisional riders may ride in every state."
+],
+[
+"CTP / green slip / TAC",
+"Compulsory injury insurance bought with registration; motorcycles pay by engine size and rider age, A$300 to A$1,200 a year."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+1.0,
+1.01
+],
+"steady": [
+0.94,
+1.0
+],
+"deals": [
+0.85,
+0.94
+]
+},
+"basis": {
+"k": "RRP",
+"sub": "GST included; boat-motor-trailer packages where the row says so, hull or boat-and-motor otherwise"
+},
+"fees": [
+{
+"k": "Freight & dealer prep",
+"sub": "delivery, rigging and pre-delivery where charged",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Boat registration, 12 months",
+"sub": "state rego by length; NSW, QLD, VIC and WA all register powered boats",
+"brackets": [
+[
+16,
+130
+],
+[
+20,
+190
+],
+[
+26,
+280
+],
+[
+40,
+420
+],
+[
+999,
+650
+]
+],
+"on": "len",
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Trailer registration, 12 months",
+"sub": "state trailer rego and plate",
+"fixed": 180,
+"approx": true,
+"bodies": [
+"PWC",
+"Pontoon",
+"Bowrider",
+"Deck boat",
+"Center console",
+"Fishing",
+"Bass boat",
+"Jon boat",
+"Wake",
+"RIB",
+"Dinghy"
+]
+},
+{
+"k": "Insurance, first year",
+"sub": "not compulsory; marinas and lenders require it; about 1% to 1.5% of value",
+"pct": 0.012,
+"info": true,
+"approx": true
+},
+{
+"k": "Boat licence",
+"sub": "needed in every state to drive faster than 10 knots; online course plus test",
+"text": "A$100 – A$300"
+},
+{
+"k": "Marina berth or storage",
+"sub": "wet berth or dry stack, by length and city",
+"text": "A$3,000 – A$15,000 a year"
+}
+],
+"glossary": [
+[
+"BMT package",
+"Boat, motor and trailer sold together; Quintrex, Stacer and Savage packages come this way."
+],
+[
+"Boat licence",
+"A state general boat licence (and a PWC endorsement for jet skis) is required to drive any powered vessel over 10 knots."
+],
+[
+"Plate alloy",
+"Welded aluminium plate hulls (Bar Crusher, Yellowfin, Stabicraft) built for offshore fishing, versus pressed-alloy tinnies for estuaries."
+]
+]
+}
+},
+"CA": {
+"moto": {
+"bands": {
+"hot": [
+0.99,
+1.02
+],
+"steady": [
+0.96,
+1.0
+],
+"deals": [
+0.88,
+0.96
+]
+},
+"basis": {
+"k": "MSRP",
+"sub": "the maker’s Canadian sticker before freight & PDI, dealer fees and taxes"
+},
+"fees": [
+{
+"k": "Freight & PDI",
+"sub": "the maker’s published delivery and pre-delivery charge",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Admin / documentation fee",
+"sub": "dealer paperwork fee, C$199 to C$699; inside all-in prices in Ontario and Quebec",
+"fixed": 399,
+"approx": true
+},
+{
+"k": "Sales tax",
+"sub": "GST plus provincial tax (HST 13% Ontario, GST + QST 14.975% Quebec, 12% BC) on bike, freight and fees",
+"hook": "caProv",
+"withDest": true,
+"plus": 399,
+"bcRate": 0.12
+},
+{
+"k": "Plates & registration, year 1",
+"sub": "Quebec’s SAAQ fee includes injury insurance and runs C$400 to C$1,500 by bike type; BC and Manitoba buy public insurance with the plate",
+"rates": {
+"ON": 60,
+"QC": 650,
+"BC": 60,
+"AB": 95,
+"MB": 100,
+"SK": 90,
+"NS": 110,
+"NB": 110,
+"NL": 120,
+"PE": 100,
+"YT": 70
+},
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Insurance, first year",
+"sub": "liability is compulsory; full cover for a 35-year-old with a clean record; Ontario sport bikes and riders under 25 pay far more",
+"text": "~C$600 – C$2,500"
+}
+],
+"glossary": [
+[
+"Freight & PDI",
+"The maker’s fixed delivery and pre-delivery inspection charge, C$500 to C$1,500 on a motorcycle, added to every sale and taxed."
+],
+[
+"M1 / M2 / M (Ontario)",
+"Graduated licensing: a written test for M1, a road test for M2 after 60 days, and a second road test for the full M."
+],
+[
+"SAAQ / ICBC / MPI",
+"Quebec, BC and Manitoba sell injury (or full) insurance with the plate, so their registration bills are much higher than Ontario’s."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+1.0,
+1.01
+],
+"steady": [
+0.93,
+1.0
+],
+"deals": [
+0.85,
+0.93
+]
+},
+"basis": {
+"k": "MSRP",
+"sub": "the maker’s Canadian price for the standard package before freight, prep, fees and taxes"
+},
+"fees": [
+{
+"k": "Freight, prep & rigging",
+"sub": "delivery and commissioning as published or typical for the brand",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Admin fee",
+"sub": "dealer paperwork fee",
+"fixed": 399,
+"approx": true
+},
+{
+"k": "Sales tax",
+"sub": "GST plus provincial tax on boat, motor and freight (BC PST 7% on boats)",
+"hook": "caProv",
+"withDest": true,
+"plus": 399,
+"bcRate": 0.12
+},
+{
+"k": "Federal luxury tax",
+"sub": "on boats over C$250,000: the lesser of 10% of the price or 20% of the amount above C$250,000",
+"brackets": [
+[
+250000,
+0
+],
+[
+1000000000000.0,
+0.1
+]
+],
+"on": "price",
+"approx": true,
+"skipZero": true
+},
+{
+"k": "Trailer plate",
+"sub": "provincial trailer registration",
+"fixed": 80,
+"approx": true,
+"bodies": [
+"PWC",
+"Pontoon",
+"Bowrider",
+"Deck boat",
+"Center console",
+"Fishing",
+"Bass boat",
+"Jon boat",
+"Wake",
+"RIB",
+"Dinghy"
+]
+},
+{
+"k": "Insurance, first year",
+"sub": "not compulsory; lenders and marinas require it; about 1% to 1.5% of value",
+"pct": 0.012,
+"info": true,
+"approx": true
+},
+{
+"k": "Pleasure Craft Licence",
+"sub": "free from Transport Canada for any boat over 10 hp, valid ten years",
+"text": "C$0"
+},
+{
+"k": "Pleasure Craft Operator Card",
+"sub": "the boating-safety card every operator needs, online course and exam",
+"text": "C$50 once"
+},
+{
+"k": "Slip or storage",
+"sub": "marina slip plus winter storage",
+"text": "C$2,000 – C$12,000 a year"
+}
+],
+"glossary": [
+[
+"Pleasure Craft Licence",
+"The free Transport Canada registration number painted on the bow; mandatory on any boat with a motor of 10 hp or more."
+],
+[
+"PCOC",
+"The Pleasure Craft Operator Card, a lifetime boating-safety certificate required for anyone driving a motorised boat."
+],
+[
+"Luxury tax",
+"The federal Select Luxury Items Tax on boats over C$250,000, charged on top of GST and provincial tax."
+]
+]
+}
+},
+"MX": {
+"moto": {
+"bands": {
+"hot": [
+0.99,
+1.02
+],
+"steady": [
+0.95,
+0.99
+],
+"deals": [
+0.85,
+0.95
+]
+},
+"basis": {
+"k": "Precio de lista",
+"sub": "the brand’s published price with 16% IVA; motorcycles pay no ISAN"
+},
+"fees": [
+{
+"k": "Placas y tarjeta de circulación",
+"sub": "first registration with the state; motorcycle plates are cheaper than car plates",
+"rates": {
+"CDMX": 1500,
+"MEX": 1300,
+"JAL": 1100,
+"NL": 1200,
+"GTO": 1000,
+"PUE": 1000,
+"QRO": 1000,
+"VER": 900,
+"YUC": 900,
+"BC": 1500,
+"CHH": 1000,
+"XX": 1100
+},
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Gestoría del distribuidor",
+"sub": "the dealer’s plating service, optional if you go to the módulo yourself",
+"fixed": 1500,
+"approx": true
+},
+{
+"k": "Refrendo y tenencia",
+"sub": "motorcycles are exempt from tenencia in most states; the yearly plate renewal runs MX$500 to MX$1,000",
+"text": "MX$500 – MX$1,000 a year"
+},
+{
+"k": "Seguro de responsabilidad civil, primer año",
+"sub": "compulsory on federal highways and in CDMX and Edomex; full cover costs more",
+"text": "~MX$1,500 – MX$4,000"
+}
+],
+"glossary": [
+[
+"Licencia tipo A",
+"The motorcycle licence; CDMX issues a permanent one and most states require a written and practical test."
+],
+[
+"Sin ISAN",
+"The federal new-vehicle tax applies to cars and trucks, not motorcycles, so a bike’s list price is IVA only."
+],
+[
+"Verificación",
+"Motorcycles over 125 cc in the Megalópolis must pass the emissions check from 2024; new bikes get two years’ grace."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+1.0,
+1.01
+],
+"steady": [
+0.93,
+1.0
+],
+"deals": [
+0.85,
+0.93
+]
+},
+"basis": {
+"k": "Precio de lista",
+"sub": "IVA 16% included; imported boats carry duty and freight inside"
+},
+"fees": [
+{
+"k": "Flete y entrega",
+"sub": "delivery and commissioning where charged",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Matrícula ante la Capitanía de Puerto",
+"sub": "registration with the port authority (SEMAR) through a gestor",
+"fixed": 4500,
+"approx": true
+},
+{
+"k": "Permiso de navegación / tarjeta de identificación",
+"sub": "annual navigation permit and the skipper’s card",
+"fixed": 1200,
+"approx": true
+},
+{
+"k": "Seguro, primer año",
+"sub": "optional but required by marinas; 1% to 2% of value",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Marina (Cancún, Los Cabos, Vallarta, Valle de Bravo)",
+"sub": "slip fees quoted per foot per month",
+"text": "US$10 – US$25 per foot a month"
+}
+],
+"glossary": [
+[
+"Matrícula",
+"Boats over a few metres register with the Capitanía de Puerto; the number is painted on the hull and renewed when sold."
+],
+[
+"Panga",
+"The open fibreglass fishing boat found on every Mexican coast, usually a 22 to 26 ft hull with a single outboard."
+]
+]
+}
+},
+"ES": {
+"moto": {
+"bands": {
+"hot": [
+0.98,
+1.0
+],
+"steady": [
+0.93,
+0.98
+],
+"deals": [
+0.85,
+0.93
+]
+},
+"basis": {
+"k": "PVP",
+"sub": "the brand’s tariff with 21% IVA and the impuesto de matriculación inside (Península)"
+},
+"fees": [
+{
+"k": "Canarias price adjustment",
+"sub": "IGIC instead of 21% IVA; Ceuta and Melilla pay IPSI",
+"rates": {
+"CAN": -0.09,
+"CEU": -0.15,
+"XX": 0
+},
+"approx": true,
+"skipZero": true
+},
+{
+"k": "Tasa DGT de matriculación",
+"sub": "€99.77 for a motorcycle, €27.85 for a moped",
+"brackets": [
+[
+50,
+27.85
+],
+[
+99999,
+99.77
+]
+],
+"on": "ccm",
+"mode": "fixed"
+},
+{
+"k": "Placa y gestoría",
+"sub": "number plate plus the dealer’s paperwork agent",
+"fixed": 180,
+"approx": true
+},
+{
+"k": "IVTM (impuesto de circulación), año 1",
+"sub": "the town-hall tax by engine size, prorated; electric bikes get 75% off in most cities",
+"brackets": [
+[
+125,
+9
+],
+[
+250,
+15
+],
+[
+500,
+30
+],
+[
+1000,
+61
+],
+[
+99999,
+122
+]
+],
+"on": "ccm",
+"mode": "fixed",
+"approx": true,
+"evMult": 0.25
+},
+{
+"k": "Seguro obligatorio, primer año",
+"sub": "third-party cover is compulsory; a 125 scooter €150 to €350, a big sportbike for a young rider up to €1,500",
+"text": "~€150 – €600"
+}
+],
+"glossary": [
+[
+"Carnet B + 3 años",
+"Car-licence holders with three years’ experience may ride 125 cc scooters and bikes up to 11 kW; the reason Spain buys so many 125s."
+],
+[
+"A1 / A2 / A",
+"Licence classes: A1 from 16 (125 cc), A2 from 18 (35 kW), full A two years after A2."
+],
+[
+"Impuesto de matriculación (motos)",
+"0% up to 100 g/km CO2, 4.75% to 120 g, 9.75% to 140 g and 14.75% above or over 74 kW; inside the PVP."
+],
+[
+"IVTM",
+"The annual municipal tax by engine size, €9 to €120 at the base rate and up to double in big cities."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+0.98,
+1.0
+],
+"steady": [
+0.92,
+0.98
+],
+"deals": [
+0.85,
+0.92
+]
+},
+"basis": {
+"k": "PVP (IVA incluido)",
+"sub": "dealer price with 21% IVA; the impuesto de matriculación is extra where it applies"
+},
+"fees": [
+{
+"k": "Impuesto de matriculación (12%)",
+"sub": "12% of the pre-IVA price on jet skis of any length",
+"body": "PWC",
+"pct": 0.099,
+"skipZero": true
+},
+{
+"k": "Impuesto de matriculación (12%)",
+"sub": "12% of the pre-IVA price on boats over 8 m; shorter boats pay none",
+"brackets": [
+[
+26.25,
+0
+],
+[
+999,
+0.099
+]
+],
+"on": "len",
+"notBody": "PWC",
+"skipZero": true
+},
+{
+"k": "Abanderamiento y matriculación",
+"sub": "Capitanía Marítima registration in lista 7ª through a gestoría",
+"fixed": 400,
+"approx": true
+},
+{
+"k": "Tasa de ayudas a la navegación",
+"sub": "the annual lighthouse fee",
+"fixed": 60,
+"approx": true
+},
+{
+"k": "Seguro obligatorio RC",
+"sub": "compulsory third-party cover for any motorised boat",
+"text": "€100 – €400 a year"
+},
+{
+"k": "Titulación",
+"sub": "Licencia de navegación (6 m, 2 miles) or PER (15 m, 12 miles) course and exam",
+"text": "€150 – €800"
+},
+{
+"k": "Amarre",
+"sub": "marina berth by length and region; the Balearics and Costa Brava top the scale",
+"text": "€2,000 – €12,000 a year"
+}
+],
+"glossary": [
+[
+"Impuesto de matriculación (barcos)",
+"12% of the pre-IVA price on recreational boats over 8 m and on every jet ski; 11% in Canarias."
+],
+[
+"Lista 7ª",
+"The register for private pleasure craft; charter boats go in lista 6ª and pay different taxes."
+],
+[
+"PER / Licencia de navegación",
+"The Patrón de Embarcaciones de Recreo licence (15 m, 12 miles) and the cheaper one-day licence for boats up to 6 m by day."
+]
+]
+}
+},
+"TH": {
+"moto": {
+"bands": {
+"hot": [
+1.0,
+1.0
+],
+"steady": [
+0.97,
+1.0
+],
+"deals": [
+0.88,
+0.96
+]
+},
+"basis": {
+"k": "Retail price (ราคาป้าย)",
+"sub": "the brand’s published price with excise and 7% VAT inside"
+},
+"fees": [
+{
+"k": "Registration & plates (DLT) with dealer service",
+"sub": "first registration at the Department of Land Transport, usually done by the dealer",
+"fixed": 1500,
+"approx": true
+},
+{
+"k": "Annual tax (ภาษีประจำปี)",
+"sub": "flat ฿100 a year for motorcycles",
+"fixed": 100
+},
+{
+"k": "พ.ร.บ. compulsory insurance",
+"sub": "by engine size: ฿161 up to 75 cc, ฿324 to 125 cc, ฿430 to 150 cc, ฿645 above",
+"brackets": [
+[
+75,
+161
+],
+[
+125,
+324
+],
+[
+150,
+430
+],
+[
+99999,
+645
+]
+],
+"on": "ccm",
+"mode": "fixed"
+},
+{
+"k": "Voluntary insurance",
+"sub": "first-class cover on a big bike; most small bikes carry only พ.ร.บ.",
+"text": "฿2,000 – ฿15,000 a year"
+},
+{
+"k": "EV3.5 subsidy",
+"sub": "government incentive on eligible electric motorcycles, already reflected in some stickers; not deducted",
+"text": "up to ฿10,000",
+"fuel": "EV"
+}
+],
+"glossary": [
+[
+"ป้ายแดง (red plate)",
+"Temporary dealer plate used until the white plate arrives, usually within a month."
+],
+[
+"Big bike licence",
+"Since 2021 bikes over 400 cc need a separate A2-style licence and training course."
+],
+[
+"CBU vs CKD",
+"Imported bikes carry 60% duty inside the price; Thai-built Hondas, Yamahas, Triumphs, Ducatis, BMWs and Harleys do not."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+1.0,
+1.0
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.85,
+0.95
+]
+},
+"basis": {
+"k": "Retail price",
+"sub": "importer price with duty and 7% VAT inside"
+},
+"fees": [
+{
+"k": "Delivery & commissioning",
+"sub": "where the dealer charges it",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Marine Department registration (ทะเบียนเรือ)",
+"sub": "registration and survey for a pleasure craft",
+"fixed": 2500,
+"approx": true
+},
+{
+"k": "Boat licence (ใบอนุญาตใช้เรือ), annual",
+"sub": "the yearly operating licence",
+"fixed": 500,
+"approx": true
+},
+{
+"k": "Insurance, first year",
+"sub": "optional; marinas require it",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Marina berth (Phuket, Pattaya)",
+"sub": "berth by length",
+"text": "฿15,000 – ฿45,000 a month"
+}
+],
+"glossary": [
+[
+"ทะเบียนเรือ",
+"Every motorised pleasure boat registers with the Marine Department; the skipper needs a boat-driving licence course."
+]
+]
+}
+},
+"RU": {
+"moto": {
+"bands": {
+"hot": [
+0.98,
+1.0
+],
+"steady": [
+0.92,
+0.98
+],
+"deals": [
+0.82,
+0.92
+]
+},
+"basis": {
+"k": "Recommended price (РРЦ)",
+"sub": "the importer’s list price with 20% VAT; the utilisation fee is inside imported prices"
+},
+"fees": [
+{
+"k": "Registration duty (ГИБДД: plates, СТС, ЭПТС)",
+"sub": "state duty for plates, the registration card and the electronic passport",
+"fixed": 2850,
+"approx": true
+},
+{
+"k": "ОСАГО, first year",
+"sub": "compulsory third-party cover, cheap for motorcycles; by power",
+"brackets": [
+[
+20,
+1200
+],
+[
+35,
+2500
+],
+[
+99999,
+4500
+]
+],
+"on": "hp",
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "Transport tax (next year)",
+"sub": "Moscow rates per horsepower: 7 ₽ up to 20 hp, 15 ₽ to 35 hp, 50 ₽ above; other regions charge less",
+"brackets": [
+[
+20,
+7
+],
+[
+35,
+15
+],
+[
+99999,
+50
+]
+],
+"on": "hp",
+"mode": "perhp",
+"info": true,
+"suffix": "/yr",
+"approx": true
+},
+{
+"k": "Dealer add-ons (допы)",
+"sub": "accessory packages pushed with the sale; refuse them",
+"text": "0 – 50,000 ₽"
+}
+],
+"glossary": [
+[
+"Категория А / А1",
+"A1 covers 125 cc from 16; the full A category from 18 after a driving-school course and GIBDD exams."
+],
+[
+"Утильсбор на мотоциклы",
+"The recycling fee importers pay on every bike, raised again in 2025; inside the price of imported Chinese and Indian models."
+],
+[
+"Параллельный импорт",
+"Japanese, European and American brands have no official importer since 2022; grey-import bikes carry no factory warranty and are not listed here."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+0.98,
+1.0
+],
+"steady": [
+0.93,
+0.98
+],
+"deals": [
+0.85,
+0.93
+]
+},
+"basis": {
+"k": "Price (VAT included)",
+"sub": "the builder’s price for the hull, with the motor where the row says so"
+},
+"fees": [
+{
+"k": "ГИМС registration & судовой билет",
+"sub": "boats over 200 kg or with motors over 8 kW (about 11 hp) must register with ГИМС",
+"brackets": [
+[
+10,
+0
+],
+[
+99999,
+2000
+]
+],
+"on": "hp",
+"mode": "fixed",
+"approx": true,
+"skipZero": true
+},
+{
+"k": "Transport tax (next year)",
+"sub": "Moscow rates per horsepower: 100 ₽ up to 100 hp, 200 ₽ above",
+"brackets": [
+[
+100,
+100
+],
+[
+99999,
+200
+]
+],
+"on": "hp",
+"mode": "perhp",
+"info": true,
+"suffix": "/yr",
+"approx": true
+},
+{
+"k": "Boat licence (права ГИМС)",
+"sub": "course and exam for any registered boat",
+"text": "5,000 – 15,000 ₽"
+},
+{
+"k": "Insurance",
+"sub": "not compulsory; КАСКО on a new boat",
+"text": "1% – 3% of value a year"
+},
+{
+"k": "Storage and mooring",
+"sub": "yacht club or boat station",
+"text": "60,000 – 300,000 ₽ a year"
+}
+],
+"glossary": [
+[
+"ГИМС",
+"The small-craft inspectorate that registers boats and licenses skippers; light boats under 200 kg with motors under 8 kW need no registration."
+]
+]
+}
+},
+"BR": {
+"moto": {
+"bands": {
+"hot": [
+0.99,
+1.02
+],
+"steady": [
+0.95,
+0.99
+],
+"deals": [
+0.86,
+0.95
+]
+},
+"basis": {
+"k": "Preço público sugerido",
+"sub": "the brand’s São Paulo price with IPI, PIS/COFINS, ICMS and frete inside"
+},
+"fees": [
+{
+"k": "Emplacamento (Detran, placa Mercosul, despachante)",
+"sub": "first registration, plate and the paperwork agent",
+"rates": {
+"SP": 900,
+"RJ": 1100,
+"MG": 900,
+"PR": 850,
+"RS": 900,
+"SC": 850,
+"BA": 800,
+"DF": 900,
+"GO": 800,
+"PE": 800,
+"CE": 800,
+"XX": 850
+},
+"mode": "fixed",
+"approx": true
+},
+{
+"k": "IPVA, year 1 (prorated)",
+"sub": "state ownership tax of 2% to 3.75% of the invoice, prorated for a late-year purchase; several states exempt electric bikes",
+"rates": {
+"SP": 0.005,
+"RJ": 0.005,
+"MG": 0.005,
+"PR": 0.0088,
+"RS": 0.0075,
+"SC": 0.005,
+"BA": 0.0063,
+"DF": 0.0063,
+"GO": 0.0094,
+"PE": 0.0063,
+"CE": 0.0063,
+"XX": 0.0063
+},
+"approx": true,
+"evMult": 0
+},
+{
+"k": "Licenciamento anual",
+"sub": "the yearly Detran renewal",
+"fixed": 160,
+"approx": true
+},
+{
+"k": "Seguro",
+"sub": "optional; DPVAT/SPVAT not charged; comprehensive cover on a new bike",
+"text": "R$1,500 – R$6,000 a year"
+}
+],
+"glossary": [
+[
+"Habilitação categoria A",
+"The motorcycle licence, from 18 after a theory course and road test; the 50 cc Shineray mopeds need the ACC permit or category A."
+],
+[
+"Emplacamento",
+"First registration with the state Detran plus the Mercosul plate and, usually, a despachante’s fee."
+],
+[
+"Consórcio de motos",
+"A savings pool that delivers a bike without interest but with an admin fee; a quarter of Brazilian bikes are bought this way."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+1.0,
+1.01
+],
+"steady": [
+0.93,
+1.0
+],
+"deals": [
+0.85,
+0.93
+]
+},
+"basis": {
+"k": "Preço de tabela",
+"sub": "the builder’s price with taxes inside; engine included where the row says so"
+},
+"fees": [
+{
+"k": "Frete e comissionamento",
+"sub": "delivery and rigging where charged",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Inscrição na Capitania (TIE / TIEM) com despachante",
+"sub": "Navy registration of the boat and the agent who files it",
+"fixed": 900,
+"approx": true
+},
+{
+"k": "Emplacamento do reboque",
+"sub": "trailer registration where a trailer is used",
+"fixed": 1000,
+"approx": true,
+"bodies": [
+"PWC",
+"Pontoon",
+"Bowrider",
+"Deck boat",
+"Center console",
+"Fishing",
+"Bass boat",
+"Jon boat",
+"Wake",
+"RIB",
+"Dinghy"
+]
+},
+{
+"k": "Seguro, primeiro ano",
+"sub": "optional but required by marinas; about 2% of value",
+"pct": 0.02,
+"info": true,
+"approx": true
+},
+{
+"k": "Habilitação Arrais Amador",
+"sub": "the amateur skipper licence course and exam",
+"text": "R$800 – R$2,000"
+},
+{
+"k": "Vaga em marina",
+"sub": "marina or garage náutica, by length and city",
+"text": "R$1,500 – R$6,000 a month"
+},
+{
+"k": "IPVA",
+"sub": "no IPVA on boats after the Supreme Court ruling",
+"text": "R$0"
+}
+],
+"glossary": [
+[
+"Arrais Amador",
+"The Navy licence for inshore pleasure boating; Mestre Amador and Capitão Amador extend the range."
+],
+[
+"TIE / TIEM",
+"The Capitania dos Portos registration documents for boats over and under 50 tons."
+],
+[
+"Sem IPVA",
+"The Supreme Court ruled in 2007 that IPVA cannot be charged on boats and aircraft."
+]
+]
+}
+},
+"CN": {
+"moto": {
+"bands": {
+"hot": [
+0.99,
+1.0
+],
+"steady": [
+0.92,
+0.98
+],
+"deals": [
+0.8,
+0.9
+]
+},
+"basis": {
+"k": "厂商指导价 (guide price)",
+"sub": "the maker’s list price with 13% VAT"
+},
+"fees": [
+{
+"k": "购置税 (purchase tax)",
+"sub": "10% of the pre-VAT price on motorcycles over 150 cc; smaller bikes and electric motorcycles pay none",
+"brackets": [
+[
+150,
+0
+],
+[
+99999,
+0.0885
+]
+],
+"on": "ccm",
+"evMult": 0,
+"skipZero": true,
+"approx": true
+},
+{
+"k": "交强险 (compulsory insurance), first year",
+"sub": "by engine size: ¥80 up to 50 cc, ¥120 to 250 cc, ¥400 above",
+"brackets": [
+[
+50,
+80
+],
+[
+250,
+120
+],
+[
+99999,
+400
+]
+],
+"on": "ccm",
+"mode": "fixed"
+},
+{
+"k": "上牌 (registration & plates)",
+"sub": "vehicle management office fee and plates",
+"fixed": 150,
+"approx": true
+},
+{
+"k": "城市禁摩 (city bans)",
+"sub": "petrol motorcycles are banned from central Beijing, Shanghai, Guangzhou, Shenzhen and most big cities; local-plate rules and lotteries apply",
+"text": "check your city"
+}
+],
+"glossary": [
+[
+"禁摩 / 禁限摩",
+"Bans or limits on motorcycles in city centres since the 1990s; Beijing issues scarce 京A plates and most cities ban petrol bikes on main roads."
+],
+[
+"E / D 驾照",
+"D (any motorcycle) and E (two-wheelers) licence classes; electric motorcycles (电摩) need one, electric bicycles (电动自行车, under 25 km/h) do not."
+],
+[
+"电摩 vs 电动自行车",
+"Electric motorcycles are registered and taxed like motorcycles; the 25 km/h e-bikes from Yadea and NIU are bicycles under the 2019 national standard."
+]
+]
+},
+"boat": {
+"bands": {
+"hot": [
+1.0,
+1.0
+],
+"steady": [
+0.92,
+1.0
+],
+"deals": [
+0.8,
+0.92
+]
+},
+"basis": {
+"k": "Price (VAT and consumption tax included)",
+"sub": "importer or builder price; 10% consumption tax on yachts over 8 m and import duty inside"
+},
+"fees": [
+{
+"k": "Delivery & commissioning",
+"sub": "where the dealer charges it",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "船舶登记 (MSA registration)",
+"sub": "registration with the local Maritime Safety Administration",
+"fixed": 1500,
+"approx": true
+},
+{
+"k": "船检 (inspection certificate)",
+"sub": "initial survey",
+"fixed": 2000,
+"approx": true
+},
+{
+"k": "Insurance, first year",
+"sub": "optional; marinas require it",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "游艇驾驶证 (yacht licence)",
+"sub": "course and exam",
+"text": "¥5,000 – ¥10,000"
+},
+{
+"k": "Berth (Sanya, Shenzhen, Xiamen, Shanghai)",
+"sub": "marina berth by length",
+"text": "¥30,000 – ¥150,000 a year"
+}
+],
+"glossary": [
+[
+"游艇驾驶证",
+"The yacht operator licence from the MSA, needed for any registered pleasure craft."
+],
+[
+"消费税",
+"A 10% consumption tax on yachts over 8 m, charged with VAT and duty on imports."
+]
+]
+}
+}
+}
