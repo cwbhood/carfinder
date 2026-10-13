@@ -13,15 +13,15 @@ const ROOT = path.resolve(__dirname, '..');
 const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
 const SITE = 'https://destinjones.github.io/carfinder/';
-const DESC = 'Every new car, truck, motorcycle, scooter, boat and jet ski on sale in the USA, India, China, the UK, Australia, Mexico, Spain, Thailand, Russia, Brazil and Canada: list price, what dealers really charge, and the on-road price for your state or city. Photos, filters, compare, fuel economy and EV range. Free, open source, no account.';
+const DESC = 'Every new car, truck, motorcycle, scooter, boat, plane, jet and helicopter on sale in the USA, India, China, the UK, Australia, Mexico, Spain, Thailand, Russia, Brazil and Canada: list price, what dealers really charge, and the on-road price for your state or city. Photos, filters, compare, fuel economy and EV range. Free, open source, no account.';
 
 const CCS = ['US','IN','CN','UK','AU','MX','ES','TH','RU','BR','CA'];
 const exists = p => fs.existsSync(path.join(ROOT, p));
 
 function assemble(){
   let script = read('src/script.html');
-  /* three verticals × eleven countries; a missing motorcycle or boat file is an empty tab, a missing car file is an error */
-  for (const [tag, file, required] of [['CARS','cars',true], ['MOTO','moto',false], ['BOAT','boat',false]]){
+  /* four verticals × eleven countries; a missing motorcycle, boat or aircraft file is an empty tab, a missing car file is an error */
+  for (const [tag, file, required] of [['CARS','cars',true], ['MOTO','moto',false], ['BOAT','boat',false], ['AIR','air',false]]){
     for (const cc of CCS){
       const ph = `/*__${tag}_${cc}__*/[]`;
       if (!script.includes(ph)) throw new Error('placeholder missing: ' + ph);
@@ -52,7 +52,7 @@ function page(body){
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#eef1f4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1317" media="(prefers-color-scheme: dark)">
-<title>CarFinder 2026 · every new car, bike and boat, what it really costs</title>
+<title>CarFinder 2026 · every new car, bike, boat and plane, what it really costs</title>
 <meta name="description" content="${DESC}">
 <meta name="author" content="Destin Jones">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -62,12 +62,12 @@ function page(body){
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CarFinder 2026">
 <meta property="og:url" content="${SITE}carfinder.html">
-<meta property="og:title" content="CarFinder 2026 · every new car, bike and boat, what it really costs">
+<meta property="og:title" content="CarFinder 2026 · every new car, bike, boat and plane, what it really costs">
 <meta property="og:description" content="${DESC}">
 <meta property="og:image" content="${SITE}brand/social/og-1200x630.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CarFinder 2026 · every new car, bike and boat, what it really costs">
+<meta name="twitter:title" content="CarFinder 2026 · every new car, bike, boat and plane, what it really costs">
 <meta name="twitter:description" content="${DESC}">
 <meta name="twitter:image" content="${SITE}brand/social/og-1200x630.png">
 <link rel="stylesheet" href="brand/fonts/fonts.css">

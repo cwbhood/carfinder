@@ -3,11 +3,12 @@
 const RAW = {
   car:  { US: /*__CARS_US__*/[], IN: /*__CARS_IN__*/[], CN: /*__CARS_CN__*/[], UK: /*__CARS_UK__*/[], AU: /*__CARS_AU__*/[], MX: /*__CARS_MX__*/[], ES: /*__CARS_ES__*/[], TH: /*__CARS_TH__*/[], RU: /*__CARS_RU__*/[], BR: /*__CARS_BR__*/[], CA: /*__CARS_CA__*/[] },
   moto: { US: /*__MOTO_US__*/[], IN: /*__MOTO_IN__*/[], CN: /*__MOTO_CN__*/[], UK: /*__MOTO_UK__*/[], AU: /*__MOTO_AU__*/[], MX: /*__MOTO_MX__*/[], ES: /*__MOTO_ES__*/[], TH: /*__MOTO_TH__*/[], RU: /*__MOTO_RU__*/[], BR: /*__MOTO_BR__*/[], CA: /*__MOTO_CA__*/[] },
-  boat: { US: /*__BOAT_US__*/[], IN: /*__BOAT_IN__*/[], CN: /*__BOAT_CN__*/[], UK: /*__BOAT_UK__*/[], AU: /*__BOAT_AU__*/[], MX: /*__BOAT_MX__*/[], ES: /*__BOAT_ES__*/[], TH: /*__BOAT_TH__*/[], RU: /*__BOAT_RU__*/[], BR: /*__BOAT_BR__*/[], CA: /*__BOAT_CA__*/[] }
+  boat: { US: /*__BOAT_US__*/[], IN: /*__BOAT_IN__*/[], CN: /*__BOAT_CN__*/[], UK: /*__BOAT_UK__*/[], AU: /*__BOAT_AU__*/[], MX: /*__BOAT_MX__*/[], ES: /*__BOAT_ES__*/[], TH: /*__BOAT_TH__*/[], RU: /*__BOAT_RU__*/[], BR: /*__BOAT_BR__*/[], CA: /*__BOAT_CA__*/[] },
+  air:  { US: /*__AIR_US__*/[], IN: /*__AIR_IN__*/[], CN: /*__AIR_CN__*/[], UK: /*__AIR_UK__*/[], AU: /*__AIR_AU__*/[], MX: /*__AIR_MX__*/[], ES: /*__AIR_ES__*/[], TH: /*__AIR_TH__*/[], RU: /*__AIR_RU__*/[], BR: /*__AIR_BR__*/[], CA: /*__AIR_CA__*/[] }
 };
 const STATES_US = /*__STATES_US__*/{};
 const STATES_IN = /*__STATES_IN__*/{};
-const VFEES = /*__VFEES__*/{};          // motorcycle and boat fee rules per country (data/vfees.json)
+const VFEES = /*__VFEES__*/{};          // motorcycle, boat and aircraft fee rules per country (data/vfees.json)
 const IMAGES = /*__IMAGES__*/{};        // Wikipedia lead photos: {files:[[name, host, md5 prefix, author, licence]], map:{'vt/cc':{'make|model':[fileIndex, approx]}}} (data/images.json)
 //<<core
 /* ---------- normalisation into one schema ---------- */
@@ -16,11 +17,12 @@ const IN_FIELDS = ['make','model','body','size','cls','fuelsStr','fuel','price',
 const G_FIELDS  = ['make','model','body','size','cls','fuelsStr','fuel','price','top','co2','l100','rng','kwh','hp','seats','drive','mkt','note','est','isNew'];
 const MOTO_FIELDS = ['make','model','body','size','cls','fuelsStr','fuel','price','top','ccm','l100','rng','kwh','hp','seats','drive','mkt','note','est','isNew','dest'];
 const BOAT_FIELDS = ['make','model','body','size','cls','fuelsStr','fuel','price','top','len','gph','rng','kwh','hp','seats','drive','mkt','note','est','isNew','dest'];
+const AIR_FIELDS  = ['make','model','body','size','cls','fuelsStr','fuel','price','top','ktas','gph','rng','kwh','hp','seats','drive','mkt','note','est','isNew','dest'];   // ktas = cruise speed in knots; rng in km for every country; hp = shaft horsepower, or pounds of thrust on turbofans
 function normalize(raw, cc, vt){
   vt = vt || 'car';
   return raw.map((r,i) => {
-    const o = {id:i, cc, vt, year:2026, isNew:0, co2:null, l100:null, rng:null, kwh:null, dest:0, gst:null, mpge:null, city:null, hwy:null, ccm:null, len:null, gph:null};
-    const F = vt==='moto' ? MOTO_FIELDS : vt==='boat' ? BOAT_FIELDS : cc==='US' ? US_FIELDS : cc==='IN' ? IN_FIELDS : G_FIELDS;
+    const o = {id:i, cc, vt, year:2026, isNew:0, co2:null, l100:null, rng:null, kwh:null, dest:0, gst:null, mpge:null, city:null, hwy:null, ccm:null, len:null, gph:null, ktas:null};
+    const F = vt==='moto' ? MOTO_FIELDS : vt==='boat' ? BOAT_FIELDS : vt==='air' ? AIR_FIELDS : cc==='US' ? US_FIELDS : cc==='IN' ? IN_FIELDS : G_FIELDS;
     F.forEach((k,j) => o[k] = r[j]);
     if (vt==='car'){
       if (cc==='US'){ o.fuels = [o.fuel]; o.eff = o.mpg; o.rng = o.rngMi; if (o.mpg) o.l100 = 235.215/o.mpg; }
@@ -28,13 +30,15 @@ function normalize(raw, cc, vt){
       else { o.fuels = o.fuelsStr.split('/'); o.eff = o.l100; }
       return o;
     }
-    // motorcycles and boats share one row shape in every country: prices in whole local units, metric figures
+    // motorcycles, boats and aircraft share one row shape in every country: prices in whole local units, metric figures
     o.fuels = o.fuelsStr.split('/'); o.dest = o.dest || 0;
     if (vt==='moto'){
       if (cc==='US'){ o.mpg = o.l100 ? Math.round(235.215/o.l100) : null; o.rngMi = o.rng ? Math.round(o.rng/1.609) : null; o.rng = o.rngMi; o.eff = o.mpg; }
       else if (cc==='IN'){ o.kmpl = o.l100 ? Math.round(100/o.l100*10)/10 : null; o.eff = o.kmpl; o.gst = o.fuel==='EV' ? 5 : (o.ccm && o.ccm > 350 ? 40 : 18); }
       else o.eff = o.l100;
       if (o.fuel==='EV') o.co2 = 0; else if (o.l100) o.co2 = Math.round(o.l100*23.2);   // petrol: ~23.2 g CO2 per 0.01 L
+    } else if (vt==='air'){
+      o.eff = o.gph; if (cc==='IN') o.gst = 28;                      // range stays in km everywhere: aviation shows it in nautical miles, with km alongside
     } else {
       o.eff = o.gph; if (cc==='IN') o.gst = 18;
       if (cc==='US' && o.rng){ o.rngMi = Math.round(o.rng/1.609); o.rng = o.rngMi; }
@@ -100,6 +104,13 @@ const MKT_TXT = {
   CA:{hot:['Sells at MSRP; sometimes a wait','Toyota hybrids and the Canadian-built RAV4, Kia EV4/EV5, Defender, Porsche 911: dealers trim the admin fee at most; Quebec gets a third of the country\u2019s EV supply.'], steady:['2% to 5% off, or a subsidised rate','C$500 to C$2,000 cash or 0.99% to 3.99% financing worth C$1,500 to C$3,000; quarter-end and the September to November model-year changeover are the moments to push.'], deals:['6% to 15% off is typical','Nissan, Mitsubishi, Stellantis, GM trucks and EVs, VW at 0% over 60 months, and sub-C$50,000 EVs competing with the C$39,490 Model 3 and C$38,995 EV4 on top of the federal EVAP rebate.']},
   ALL:{hot:['Sells at list in its home market','Waiting list or allocation at home; discounts are rare.'], steady:['Small discounts typical at home','A few percent off list in its home market with normal negotiation.'], deals:['Big discounts typical at home','Slow seller, run-out or price war in its home market; expect 10% or more off list.']}
 };
+/* aircraft are priced globally in dollars or euros, so the market text is the same in every country */
+const MKT_TXT_V = {
+  air: {hot:['Sells at list; delivery positions trade above it','Backlog of one to three years on this type. The maker does not discount; early delivery positions change hands at a premium and demonstrators go at list.'],
+        steady:['List price with small concessions','Normal backlog. A few percent off or options thrown in, more at quarter-end when the maker chases deliveries; demonstrators and white-tails go 5% to 10% under.'],
+        deals:['Discounts and white-tails typical','End of a production run, a type being replaced, or more positions than buyers: 8% to 12% off list, and unsold white-tail aircraft deeper still.']}
+};
+function mktTxt(cc, c){ return (MKT_TXT_V[c.vt] || MKT_TXT[cc])[c.mkt]; }
 /* ---------- fuel cost, payment ---------- */
 function monthlyPay(price, A){ const P = price*(1 - A.down/100); const r = A.apr/100/12; const n = A.term; if (r===0) return P/n; return P*r/(1-Math.pow(1+r,-n)); }
 function fuelCost(c, A, cc){
@@ -110,6 +121,13 @@ function fuelCost(c, A, cc){
     const litres = c.gph*3.785*A.hours;
     if (cc==='US') return c.gph*A.hours*A.gas*1.15;
     return litres*(c.fuel==='Diesel' ? A.diesel : A.petrol)*1.15;
+  }
+  if (c.vt==='air'){                                                // flight hours × burn at cruise; avgas and Jet-A are priced per gallon in the US, per litre elsewhere
+    if (!A.hours || !c.hp) return null;                             // gliders: no engine, no fuel bill
+    if (c.fuel==='EV') return c.kwh ? A.hours*c.kwh*1.1*A.elec : null;     // a full pack is roughly an hour aloft, plus charging losses
+    if (!c.gph) return null;
+    const per = c.fuel==='Jet-A' ? A.jeta : A.avgas; if (per==null) return null;
+    return cc==='US' ? c.gph*A.hours*per : c.gph*3.785*A.hours*per;
   }
   if (c.vt==='moto' && cc==='US' && c.fuel==='EV'){ const perMi = c.kwh && c.rng ? c.kwh/c.rng*1.12 : null; return perMi ? A.miles*perMi*A.elec : null; }
   if (cc==='US'){
@@ -132,7 +150,17 @@ function fuelCost(c, A, cc){
 /* US-unit companions: every non-US figure carries a slash with its mpg / miles equivalent */
 const usMpg = l100 => l100 ? Math.round(235.215/l100) : null;                 // US gallon
 const usMi = km => km ? Math.round(km/1.609) : null;
+/* aircraft: knots and nautical miles are the aviation units everywhere; km/h, mph and km ride alongside */
+const usUnits = cc => cc==='US' || (cc==='ALL' && WUNIT==='mpg');
+function airSpeedTxt(c, cc){ if (!c.ktas) return 'Speed not published'; return c.ktas+' kt / '+(usUnits(cc) ? Math.round(c.ktas*1.151)+' mph' : Math.round(c.ktas*1.852)+' km/h'); }
+function airRangeTxt(c, cc, word){ if (!c.rng) return !c.hp ? 'Soars, no fuel range' : 'Range not published'; return Math.round(c.rng/1.852).toLocaleString('en-US')+' nm / '+(usUnits(cc) ? Math.round(c.rng/1.609).toLocaleString('en-US')+' mi' : Math.round(c.rng).toLocaleString('en-US')+' km')+(word ? ' range' : ''); }
+function powerLbl(c, unit){ return c.vt==='air' ? (/turbofan/i.test(c.drive) ? 'lbf thrust' : /electric/i.test(c.drive) ? 'hp (electric)' : 'hp') : unit; }   // turbofans are rated in pounds of thrust, everything else in shaft horsepower
 function effShort(c, cc){
+  if (c.vt==='air'){
+    if (c.fuel==='EV') return c.kwh ? c.kwh+' kWh battery' : 'Electric'; if (!c.hp) return 'No engine';
+    if (!c.gph) return 'Fuel burn not published';
+    return usUnits(cc) ? c.gph+' gal/h at cruise' : Math.round(c.gph*3.785)+' L/h / '+c.gph+' gal/h';
+  }
   if (c.vt==='boat'){
     if (c.fuel==='Sail') return 'Sail power'; if (c.fuel==='EV') return c.kwh ? c.kwh+' kWh battery' : 'Electric';
     if (!c.gph) return 'Fuel use not published';
@@ -448,7 +476,7 @@ function bdCA(c, msrp, r, M){
   return {dlo:lo, dhi:hi, lo:f(lo), hi:f(hi), lines:L, head:REGIONS.CA[r][0]};
 }
 function pct(b){ const a = Math.round((b[0]-1)*100), z = Math.round((b[1]-1)*100); return `${a}% to ${z>0?'+':''}${z}%`; }
-/* ---------- motorcycles and boats: one table-driven breakdown (rules in data/vfees.json) ----------
+/* ---------- motorcycles, boats and aircraft: one table-driven breakdown (rules in data/vfees.json) ----------
    Each fee line is {k, sub, cls?, info?} plus ONE of: fixed (number or "dest"), pct (share of the price base),
    rates {region: value} with mode "pct"|"fixed", brackets [[upto, value]...] on "ccm"|"hp"|"len"|"price" with mode,
    or hook ("usSales" | "usDoc" | "inRoad" | "caProv" | "cnPurchase" | "esMatric"), or text (shown verbatim, information only).
@@ -463,14 +491,14 @@ function feeAmount(f, c, cc, region, p, list){
   const pick = (map, def) => { if (!map) return def; const k = region in map ? region : (cc in map ? cc : (map.XX!==undefined ? 'XX' : null)); return k===null ? def : map[k]; };
   if (f.fixed!==undefined) v = f.fixed==='dest' ? (c.dest||0) : f.fixed;
   else if (f.pct!==undefined) v = base*f.pct;
-  else if (f.rates){ const r = pick(f.rates, 0); v = f.mode==='fixed' ? r : f.mode==='perhp' ? r*c.hp : base*r; }
-  else if (f.brackets){ const x = f.on==='ccm' ? (c.ccm||0) : f.on==='hp' ? c.hp : f.on==='len' ? (c.len||0) : base; let r = f.brackets[f.brackets.length-1][1]; for (const [upto, val] of f.brackets){ if (x <= upto){ r = val; break; } } v = f.mode==='fixed' ? r : f.mode==='perhp' ? r*c.hp : base*r; }
-  else if (f.hook==='usSales'){ const st = usState(region); if ((f.exempt||[]).includes(st.code)) v = 0; else { const rate = f.rates && f.rates[st.code]!==undefined ? f.rates[st.code] : st.rate/100; v = base*rate; const cap = f.caps && f.caps[st.code]; if (cap) v = Math.min(v, cap); } }
+  else if (f.hook==='usSales'){ const st = usState(region); if ((f.exempt||[]).includes(st.code)) v = 0; else { const rate = f.rates && f.rates[st.code]!==undefined ? f.rates[st.code] : st.rate/100; v = base*rate; const cap = f.caps && f.caps[st.code]; if (cap) v = Math.min(v, cap); } }   // hooks come before rates: a hook's rates are its parameters
   else if (f.hook==='usDoc'){ v = usState(region).doc; }
   else if (f.hook==='inRoad'){ const st = inState(region); const r = pick(f.rates, 0); const b = f.preGst && c.gst ? base/(1+c.gst/100) : base; v = b*r; if (st.ev && st.ev.length===0 && c.fuel==='EV') v = 0; }
   else if (f.hook==='caProv'){ v = region==='BC' ? base*(f.bcRate!==undefined ? f.bcRate : 0.12) : base*CA_PROV[region][0]; }
   else if (f.hook==='cnPurchase'){ v = base/1.13*0.10; }
   else if (f.hook==='esMatric'){ const g = c.co2==null ? 0 : c.co2; let r = 0; for (const [upto, val] of f.bands){ if (g <= upto){ r = val; break; } r = val; } if (f.kwLimit && c.hp/1.34 > f.kwLimit) r = f.bands[f.bands.length-1][1]; v = base*r; }
+  else if (f.rates){ const r = pick(f.rates, 0); v = f.mode==='fixed' ? r : f.mode==='perhp' ? r*c.hp : base*r; }
+  else if (f.brackets){ const x = f.on==='ccm' ? (c.ccm||0) : f.on==='hp' ? c.hp : f.on==='len' ? (c.len||0) : base; let r = f.brackets[f.brackets.length-1][1]; for (const [upto, val] of f.brackets){ if (x <= upto){ r = val; break; } } v = f.mode==='fixed' ? r : f.mode==='perhp' ? r*c.hp : base*r; }
   if (c.fuel==='EV' && f.evMult!==undefined) v *= f.evMult;
   if (f.min!==undefined) v = Math.max(v, f.min); if (f.max!==undefined) v = Math.min(v, f.max);
   return v;
@@ -480,7 +508,7 @@ function bdV(cc, c, price, region, M){
   const b = F.bands[c.mkt]; const lo = price*b[0], hi = price*b[1];
   const L = [];
   L.push({k:F.basis.k, sub:F.basis.sub, v:M.money(price)});
-  L.push({k:'Typical dealer price', sub:`${MKT_TXT[cc][c.mkt][0].toLowerCase()} (${pct(b)})`, v:`${M.money(lo)} – ${M.money(hi)}`, cls:'est'});
+  L.push({k:F.typical || 'Typical dealer price', sub:`${mktTxt(cc, c)[0].toLowerCase()} (${pct(b)})`, v:`${M.money(lo)} – ${M.money(hi)}`, cls:'est'});
   let tLo = lo, tHi = hi;
   for (const f of F.fees){
     if (f.text){ if ((f.fuel && c.fuel!==f.fuel) || (f.notFuel && c.fuel===f.notFuel) || (f.fuels && !f.fuels.includes(c.fuel)) || (f.body && c.body!==f.body) || (f.bodies && !f.bodies.includes(c.body))) continue; L.push({k:f.k, sub:f.sub, v:f.text, cls:'info'}); continue; }
@@ -502,14 +530,14 @@ function breakdown(cc, c, price, region, M){
 }
 //core>>
 /* ===== datasets: DATA[vertical][country], plus a pooled World list per vertical ===== */
-const VERTS = ['car','moto','boat'];
+const VERTS = ['car','moto','boat','air'];
 const W_BODY = {Truck:'Pickup', Minivan:'MPV'}; const W_SIZE = {Subcompact:'Small', Entry:'City', 'Sub-4m':'Small', 'Heavy-duty':'Full-size'}; const W_FUEL = {Gas:'Petrol', Hydrogen:'EV'};
 const DATA = {};
 VERTS.forEach(vt => {
   DATA[vt] = {}; Object.keys(RAW[vt]).forEach(cc => DATA[vt][cc] = normalize(RAW[vt][cc], cc, vt));
   const ALL = DATA[vt].ALL = [];
   ['US','CA','MX','BR','UK','ES','RU','IN','CN','TH','AU'].forEach(cc => DATA[vt][cc].forEach(c => {
-    const w = Object.assign({}, c, {id: ALL.length, cc, home: c, rng: c.cc==='US' && c.rng ? c.rng*1.609 : c.rng, body: vt==='car' ? (W_BODY[c.body]||c.body) : c.body, size: vt==='car' ? (W_SIZE[c.size]||c.size) : c.size, fuel: W_FUEL[c.fuel]||c.fuel, fuels: [...new Set(c.fuels.map(f=>W_FUEL[f]||f))]});
+    const w = Object.assign({}, c, {id: ALL.length, cc, home: c, rng: c.cc==='US' && c.rng && vt!=='air' ? c.rng*1.609 : c.rng, body: vt==='car' ? (W_BODY[c.body]||c.body) : c.body, size: vt==='car' ? (W_SIZE[c.size]||c.size) : c.size, fuel: W_FUEL[c.fuel]||c.fuel, fuels: [...new Set(c.fuels.map(f=>W_FUEL[f]||f))]});
     ALL.push(w);
   }));
 });
@@ -675,6 +703,7 @@ let WUNIT = 'l100';
 function applyWorldUnits(){
   const u = WORLD_UNITS[WUNIT];
   if (VT==='boat'){ C.eff = boatEff('ALL', WUNIT==='mpg'); C.rng = boatLen(); return; }
+  if (VT==='air'){ C.eff = airEff('ALL', WUNIT==='mpg'); C.rng = airRng(); return; }
   C.eff = {mode:u.mode, label:u.label, hint:u.hint, max:u.max, step:u.step, unit:u.unit, sort:u.sort, get:u.get}; C.rng = Object.assign({}, u.rng);
   if (VT==='moto') motoEffScale(C, 'ALL');
 }
@@ -717,9 +746,29 @@ const VERT = {
     wizardAwd:'Need to tow it home behind the car?', wizardYes:'Yes, trailerable sizes only', wizardNo:'No, it can live at a marina', learnerSizes:['Under 16 ft','16-20 ft','20-26 ft'],
     wizardFuels:[['','No preference'],['Petrol','Gas / petrol'],['Diesel','Diesel'],['EV','Electric'],['Sail','Sail'],['cheap','Whatever costs least to run']],
     rangeSort:'Longest boat', assume:{aprAdd:1.5, term:144, down:15, hours:75},
-    lede:cc=>`Every new boat and jet ski sold through dealers in ${CC_NAME[cc]||'eleven markets'}, with list prices, what dealers actually charge, and the on-the-water price for your region after tax, registration and fees.` }
+    lede:cc=>`Every new boat and jet ski sold through dealers in ${CC_NAME[cc]||'eleven markets'}, with list prices, what dealers actually charge, and the on-the-water price for your region after tax, registration and fees.` },
+  air:  { name:'Planes, jets & helicopters', short:'Aircraft', noun:'aircraft', one:'aircraft',
+    bodyOrder:['LSA','Piston single','Piston twin','Turboprop','Light jet','Midsize jet','Large jet','Helicopter','eVTOL','Gyroplane','Glider'],
+    bodyLabel:{LSA:'Light sport','Piston single':'Piston single','Piston twin':'Piston twin',Turboprop:'Turboprop','Light jet':'Light jet','Midsize jet':'Midsize jet','Large jet':'Large-cabin jet',Helicopter:'Helicopter',eVTOL:'eVTOL',Gyroplane:'Gyroplane',Glider:'Glider'},
+    bodyPlural:{LSA:'Light sport','Piston single':'Piston singles','Piston twin':'Piston twins',Turboprop:'Turboprops','Light jet':'Light jets','Midsize jet':'Midsize jets','Large jet':'Large-cabin jets',Helicopter:'Helicopters',eVTOL:'eVTOLs',Gyroplane:'Gyroplanes',Glider:'Gliders'},
+    sizes:['Up to 2','3-4','5-8','9-14','Over 14'], sizeLabel:'Seats', fuelOrder:['Avgas','Jet-A','EV','None'], fuelLabel:{Avgas:'Avgas',EV:'Electric',None:'No engine'}, clsLabel:{Mainstream:'General aviation',Luxury:'Business & premium',Exotic:'Large-cabin'},
+    presetsUSD:[[0,250000],[250000,1000000],[1000000,3000000],[3000000,10000000],[10000000,0]], budgetShare:0.85,
+    otd:{MX:'Est. precio final', ES:'Est. precio final', BR:'Est. preço final'}, otdDefault:'Est. delivered', otdSub:'base spec, delivery, tax & registration in', trimWord:'spec',
+    priceLabel:'Factory list price', cardPriceLabel:'Factory list',
+    seatsLabel:null, driveLabel:'Engines', driveOpts:[['any','Any'],['piston','Piston'],['turbine','Turboprop or turboshaft'],['jet','Turbofan (jet)'],['electric','Electric'],['single','Single engine'],['twin','Twin or more']],
+    driveTest:{piston:c=>/piston/i.test(c.drive), turbine:c=>/turboprop|turboshaft/i.test(c.drive), jet:c=>/turbofan/i.test(c.drive), electric:c=>/electric/i.test(c.drive), single:c=>/^Single/i.test(c.drive), twin:c=>/^(Twin|Tri)|motors/i.test(c.drive)},
+    wizardUseLabels:{commute:'Learning to fly and local flights', family:'Touring with family or friends', work:'Business travel for 4 to 8', fun:'Soaring, aerobatics and pure fun', trips:'Intercontinental range', all:'Vertical take-off: helicopters and eVTOL'},
+    wizardUse:{commute:{body:['LSA','Piston single'],size:['Up to 2','3-4']}, family:{body:['Piston single','Piston twin','Turboprop'],size:['3-4','5-8']}, work:{body:['Turboprop','Light jet','Midsize jet'],size:['5-8','9-14']}, fun:{body:['Glider','Gyroplane','LSA','Piston single']}, trips:{body:['Large jet','Midsize jet'],size:['9-14','Over 14']}, all:{body:['Helicopter','eVTOL']}},
+    wizardAwd:'Will you fly it yourself on a private licence?', wizardYes:'Yes, owner-flown types only', wizardNo:'No, a professional crew is fine', learnerBodies:['LSA','Piston single','Piston twin','Turboprop','Light jet','Helicopter','Gyroplane','Glider','eVTOL'],     // single-pilot types: every piston and turboprop, the light jets, no midsize or large jets
+    wizardFuels:[['','No preference'],['Avgas','Avgas piston'],['Jet-A','Jet-A turbine'],['EV','Electric'],['cheap','Whatever costs least to run']],
+    rangeSort:'Longest range', powerSort:'Most power', perSort:'Cheapest per seat', assume:{aprAdd:0.5, term:180, down:15, hours:100},
+    // avgas and Jet-A at the pump: $/US gallon in the US, local currency per litre elsewhere (typical FBO / airfield prices, autumn 2026)
+    fuel:{US:[['Avgas 100LL $/gal',6.95,0.05],['Jet-A $/gal',6.25,0.05]], CA:[['Avgas C$/litre',2.90,0.05],['Jet-A C$/litre',2.00,0.05]], UK:[['Avgas £/litre',2.60,0.05],['Jet-A £/litre',1.20,0.05]], ES:[['Avgas €/litre',2.90,0.05],['Jet-A €/litre',1.30,0.05]],
+          AU:[['Avgas A$/litre',3.10,0.05],['Jet-A A$/litre',1.90,0.05]], MX:[['Avgas MX$/litre',55,1],['Turbosina MX$/litre',30,1]], TH:[['Avgas ฿/litre',110,1],['Jet-A ฿/litre',40,1]], RU:[['Avgas ₽/litre',400,5],['Jet fuel (ТС-1) ₽/litre',95,1]],
+          BR:[['Avgas R$/litre',12.0,0.1],['QAV-1 (Jet-A) R$/litre',7.5,0.1]], CN:[['Avgas ¥/litre',25,0.5],['Jet-A ¥/litre',8,0.5]], IN:[['Avgas ₹/litre',400,5],['ATF (Jet-A) ₹/litre',110,1]]},
+    lede:cc=>`Every new plane, business jet, helicopter and eVTOL on sale in ${CC_NAME[cc]||'eleven markets'}, from a two-seat trainer to a Gulfstream, with factory list prices, what the market actually pays, and the delivered price for your region after tax, registration and fees.` }
 };
-const VT_LABEL = {car:'Cars & trucks', moto:'Motorcycles', boat:'Boats'};
+const VT_LABEL = {car:'Cars & trucks', moto:'Motorcycles', boat:'Boats', air:'Aircraft'};
 function motoEffScale(cfg, cc){             // bikes are two to three times thriftier than cars, so the sliders go further
   const e = cfg.eff; const u = e.unit;
   if (u==='mpg'){ e.max = cc==='UK' ? 150 : 130; e.step = 5; } else if (u==='kmpl'){ e.max = 80; e.step = 5; } else if (u==='L/100km'){ e.max = 8; e.step = 0.25; } else if (u==='km/L'){ e.max = 60; e.step = 2; }
@@ -730,6 +779,15 @@ function boatEff(cc, usUnits){ const us = usUnits===undefined ? cc==='US' : usUn
   ? {mode:'max', label:'Max fuel use (gal/h at cruise)', hint:'gas & diesel; sail and electric always pass', max:30, step:1, unit:'gal/h', sort:'Lowest fuel use', get:c=>c.gph}
   : {mode:'max', label:'Max fuel use (L/h at cruise)', hint:'gas & diesel; sail and electric always pass · 20 L/h ≈ 5.3 gal/h', max:110, step:5, unit:'L/h', sort:'Lowest fuel use', get:c=>c.gph?c.gph*3.785:null}; }
 function boatLen(){ return {mode:'min', label:'Minimum length', hint:'overall length', max:40, step:1, unit:'ft', get:c=>c.len}; }
+function airEff(cc, usUnits){ const us = usUnits===undefined ? cc==='US' : usUnits; return us
+  ? {mode:'max', label:'Max fuel burn (gal/h at cruise)', hint:'avgas & Jet-A; electric and gliders always pass', max:100, step:5, unit:'gal/h', sort:'Lowest fuel burn', get:c=>c.gph}
+  : {mode:'max', label:'Max fuel burn (L/h at cruise)', hint:'avgas & Jet-A; electric and gliders always pass · 40 L/h ≈ 10.6 gal/h', max:400, step:10, unit:'L/h', sort:'Lowest fuel burn', get:c=>c.gph?c.gph*3.785:null}; }
+function airRng(){ return {mode:'min', label:'Minimum range', hint:'full fuel, long-range cruise · 500 nm ≈ 926 km', max:4000, step:100, unit:'nm', get:c=>c.rng?c.rng/1.852:null}; }
+function usdPresets(cc, K, base){      // price presets set in US dollars, converted to the local currency and rounded to two significant figures
+  const cv = v => v ? sig2(v*FX[CUR[cc]||'USD']) : 0;
+  return base.map(([a,b]) => [cv(a), cv(b), !a ? 'Under '+K.k(cv(b)) : !b ? K.k(cv(a))+'+' : K.range(cv(a), cv(b))]);
+}
+function budgetsFrom(presets){ return presets.map(([a,b,l], i) => [b, i===0 ? l : !b ? 'No limit' : l]); }
 function scalePresets(cc, vt, base, K){
   const f = VERT[vt].presetScale[cc]!==undefined ? VERT[vt].presetScale[cc] : 1; const cv = v => v ? sig2(v*f) : 0;
   return base.map(([a,b]) => [cv(a), cv(b), !a ? 'Under '+K.k(cv(b)) : !b ? K.k(cv(a))+'+' : K.range(cv(a), cv(b))]);
@@ -740,6 +798,11 @@ function assumeFor(cc, vt){
   if (vt==='car' || !Object.keys(base).length) return out;
   const V = VERT[vt].assume;
   if (vt==='moto'){ if (out.miles) out.miles = [out.miles[0], Math.round(out.miles[1]*V.distMult/500)*500, out.miles[2]]; }
+  else if (vt==='air'){                                              // aviation fuel replaces road fuel; hours replace distance
+    ['gas','petrol','diesel','cng','miles'].forEach(k => delete out[k]);
+    const F = VERT.air.fuel[cc]; const o2 = {avgas:F[0], jeta:F[1], hours:['Flight hours per year', V.hours, 10]};
+    Object.entries(out).forEach(([k,v]) => o2[k] = v); Object.keys(out).forEach(k => delete out[k]); Object.assign(out, o2);
+  }
   else { delete out.miles; out.hours = ['Engine hours per year', V.hours, 5]; }
   if (out.apr) out.apr = [out.apr[0], Math.round((out.apr[1]+V.aprAdd)*10)/10, out.apr[2]];
   if (out.term) out.term = [out.term[0], V.term, out.term[2]]; if (out.down) out.down = [out.down[0], V.down, out.down[2]];
@@ -757,11 +820,17 @@ function countryConfig(cc, vt){
   c.otdLabel = V.otd[cc] || V.otdDefault; c.otdSub = V.otdSub; c.trimWord = V.trimWord;
   if (cc==='AU' && vt==='moto'){ c.cardPriceLabel = 'Ride-away'; c.priceLabel = 'Ride-away price (A$)'; }
   if (cc==='IN'){ c.priceUnit = 1; c.priceInputLabel = '₹'; c.priceLabel = 'Ex-showroom price (₹)'; }
-  c.presets = scalePresets(cc, vt, base.presets, K);
-  c.wizardBudgets = base.wizardBudgets.map(([v,l]) => [v ? sig2(v*(V.presetScale[cc]!==undefined ? V.presetScale[cc] : 1)) : 0, v ? 'Under '+K.k(sig2(v*(V.presetScale[cc]!==undefined ? V.presetScale[cc] : 1))) : 'No limit']);
-  for (let i = 1; i < c.wizardBudgets.length; i++){ if (c.wizardBudgets[i][0] && c.wizardBudgets[i-1][0]) c.wizardBudgets[i][1] = K.range(c.wizardBudgets[i-1][0], c.wizardBudgets[i][0]); }
-  c.budgetShare = V.budgetShare; c.wizardFuels = V.wizardFuels; c.wizardAwd = V.wizardAwd; c.wizardYes = V.wizardYes; c.wizardNo = V.wizardNo; c.learnerSizes = V.learnerSizes; c.wizardUse = V.wizardUse; c.wizardWork = V.wizardUseLabels.work;
+  if (V.priceLabel){ c.cardPriceLabel = V.cardPriceLabel; c.priceLabel = `${V.priceLabel} (${c.priceInputLabel})`; }
+  if (V.presetsUSD){ c.presets = usdPresets(cc, K, V.presetsUSD); c.wizardBudgets = budgetsFrom(c.presets); }
+  else {
+    c.presets = scalePresets(cc, vt, base.presets, K);
+    c.wizardBudgets = base.wizardBudgets.map(([v,l]) => [v ? sig2(v*(V.presetScale[cc]!==undefined ? V.presetScale[cc] : 1)) : 0, v ? 'Under '+K.k(sig2(v*(V.presetScale[cc]!==undefined ? V.presetScale[cc] : 1))) : 'No limit']);
+    for (let i = 1; i < c.wizardBudgets.length; i++){ if (c.wizardBudgets[i][0] && c.wizardBudgets[i-1][0]) c.wizardBudgets[i][1] = K.range(c.wizardBudgets[i-1][0], c.wizardBudgets[i][0]); }
+  }
+  c.budgetShare = V.budgetShare; c.wizardFuels = V.wizardFuels; c.wizardAwd = V.wizardAwd; c.wizardYes = V.wizardYes; c.wizardNo = V.wizardNo; c.learnerSizes = V.learnerSizes; c.learnerBodies = V.learnerBodies; c.wizardUse = V.wizardUse; c.wizardWork = V.wizardUseLabels.work;
+  c.powerSort = V.powerSort; c.perSort = V.perSort;
   if (vt==='moto'){ motoEffScale(c, cc); }
+  else if (vt==='air'){ c.eff = airEff(cc); c.rng = airRng(); }
   else { c.eff = boatEff(cc); c.rng = boatLen(); }
   return c;
 }
@@ -778,11 +847,17 @@ function regionName(cc, code){ if (cc==='ALL') return 'prices in '+CUR_NAME[WCUR
 const WORLD_PRESETS_USD = [[0,20000],[20000,35000],[35000,50000],[50000,80000],[80000,0]];
 function sig2(x){ if (!x) return 0; const m = Math.pow(10, Math.floor(Math.log10(x)) - 1); return Math.round(x/m)*m; }
 function worldPresets(){
-  const cv = v => sig2(v*FX[WCUR]); const K = MONEY.ALL;
-  const f = VERT[VT].presetScale ? (VERT[VT].presetScale.ALL||1) : 1; const cs = v => sig2(v*FX[WCUR]*f);
-  C.presets = WORLD_PRESETS_USD.map(([a,b]) => [cs(a), cs(b), !a ? 'Under '+K.k(cs(b)) : !b ? K.k(cs(a))+'+' : K.range(cs(a), cs(b))]);
-  C.wizardBudgets = [[20000*f,'Under '+K.k(cs(20000))],[35000*f,K.range(cs(20000),cs(35000))],[50000*f,K.range(cs(35000),cs(50000))],[80000*f,K.range(cs(50000),cs(80000))],[0,'No limit']];
-  C.priceInputLabel = WCUR; C.priceLabel = 'List price ('+WCUR+')';
+  const K = MONEY.ALL; const V = VERT[VT];
+  if (V.presetsUSD){
+    const cs = v => v ? sig2(v*FX[WCUR]) : 0;
+    C.presets = V.presetsUSD.map(([a,b]) => [cs(a), cs(b), !a ? 'Under '+K.k(cs(b)) : !b ? K.k(cs(a))+'+' : K.range(cs(a), cs(b))]);
+    C.wizardBudgets = budgetsFrom(C.presets).map(([v,l], i) => [V.presetsUSD[i][1], l]);     // the wizard keeps World budgets in US dollars and converts when applied
+  } else {
+    const f = V.presetScale ? (V.presetScale.ALL||1) : 1; const cs = v => sig2(v*FX[WCUR]*f);
+    C.presets = WORLD_PRESETS_USD.map(([a,b]) => [cs(a), cs(b), !a ? 'Under '+K.k(cs(b)) : !b ? K.k(cs(a))+'+' : K.range(cs(a), cs(b))]);
+    C.wizardBudgets = [[20000*f,'Under '+K.k(cs(20000))],[35000*f,K.range(cs(20000),cs(35000))],[50000*f,K.range(cs(35000),cs(50000))],[80000*f,K.range(cs(50000),cs(80000))],[0,'No limit']];
+  }
+  C.priceInputLabel = WCUR; C.priceLabel = (V.priceLabel||'List price')+' ('+WCUR+')';
 }
 
 /* ===== glossaries and footers ===== */
@@ -817,10 +892,12 @@ const ABOUT = {
 
 const GLOSS_V = {
   moto: [['List / ride-away price','What the brand publishes for the bike. In Australia and some UK adverts that already includes registration and delivery (ride-away or OTR); in the US, Canada and India it does not, so freight, setup, tax and plates come on top.'],['Freight & setup / PDI','The crate-to-showroom shipping plus the dealer\u2019s assembly and pre-delivery inspection. Printed on the quote, rarely negotiable on hot models, often waived on slow ones.'],['Engine size (cc)','Cylinder displacement. Under 125 cc is the learner and city class almost everywhere; 300 to 650 cc is the mid-weight sweet spot; litre-class bikes (1,000 cc+) need an unrestricted licence.'],['Learner licence (A1 / A2 / LAMS / CBT)','Most countries let new riders start on bikes up to 125 cc, then a power-limited class (35 kW in Europe, LAMS in Australia) before an unrestricted licence. Check the row note for the class.'],['Twist-and-go','Scooters with a CVT automatic: no clutch, no gears. The reason Vespa, PCX and NMAX dominate city sales.'],['ABS','Anti-lock brakes, mandatory on new bikes over 125 cc in Europe, India and many other markets; the single most important safety option on a motorcycle.'],['Ride-away / out-the-door','Everything you pay before you ride off: the bike, freight, setup, sales or registration tax, plates and compulsory insurance. Negotiate on this number.'],['Compulsory insurance','Third-party cover you must hold to register (CTP in Australia, พ.ร.บ. in Thailand, ОСАГО in Russia, third-party in India and the UK). Full cover on a new sportbike can cost several times more; get quotes before you buy.'],['kmpl / mpg','Fuel economy; small bikes return 40 to 70 km per litre (100 to 160 mpg), litre-class bikes 15 to 20 km per litre. Every figure here carries its US-unit twin.'],['Electric scooter range','The claimed range on a full charge, usually a city cycle; expect 70% to 85% of it in mixed riding. Home charging costs a fraction of petrol per kilometre.']],
+  air: [['Factory list price','The maker\u2019s published price for a new aircraft, from the base configuration to a typically equipped one. Outside the US it is converted from the dollar or euro list at ECB rates and shown before VAT, GST or duty, which the breakdown adds.'],['Typically equipped','Light aircraft are quoted base and with the avionics and options almost every buyer takes (a second screen, autopilot, air conditioning, de-ice); the top of each row\u2019s range is that figure.'],['Delivery / acceptance','The ferry flight to your base, factory handover training and documentation. Many makers include it; the row\u2019s delivery figure is a typical charge where they do not.'],['Knots (kt) and nautical miles (nm)','Aviation measures speed in knots (1 kt = 1.852 km/h = 1.151 mph) and distance in nautical miles; every figure here carries its km or mile twin.'],['KTAS','True airspeed at cruise in knots, at the altitude and power setting the maker quotes; headwinds and economy settings reduce it.'],['Range','The maker\u2019s maximum range with full fuel and reserves at long-range cruise, usually with fewer than the full seats occupied; plan on 80% to 90% in practice.'],['Gallons per hour','Fuel burn at cruise. A piston single burns 8 to 18 gal/h of avgas, a turboprop 40 to 90 gal/h of Jet-A, a large-cabin jet 300 to 500; multiply by your hours for the fuel bill.'],['Avgas 100LL / Jet-A','Leaded aviation petrol for most piston engines versus kerosene for turbines and the diesel pistons (Continental CD, Austro); Jet-A is cheaper per litre and available at every airport, avgas is not.'],['Shaft horsepower / thrust','Pistons and turboprops are rated in horsepower; turbofans in pounds of thrust (lbf), so the two are not comparable. Power is per aircraft, all engines together.'],['Pressurised','Cabins that let you cruise above the weather (above about 12,000 ft) without oxygen masks: turboprops, jets and a few pistons (Piper M350, Cirrus Vision Jet).'],['Single-pilot','Aircraft certified for one pilot: all pistons, most turboprops and light jets up to about the Citation CJ4 and Phenom 300; bigger jets need two crew.'],['Hangar, insurance, annual','The running costs: hangarage, hull and liability insurance (1% to 2% of value a year) and the annual inspection; shown as information, not added, and the reason a cheap aircraft is rarely cheap.']],
   boat: [['MSRP / package price','The brand\u2019s published price. In the US and Canada many boats are priced as a boat-motor-trailer (BMT) package; others list the hull alone and the engine is extra. The row note says which.'],['Freight & prep / commissioning','Shipping from the factory plus rigging, fluids, battery and sea trial. Typically 3% to 6% of the price, charged on top in North America, often inside the price in Europe.'],['Outboard / sterndrive / inboard / jet','Where the engine lives. Outboards hang off the transom (easy to service, most fishing boats), sterndrives sit inside with a drive unit through the transom (runabouts), inboards are fully inside (wake boats), jets have no propeller (jet skis, jet boats).'],['Length overall (LOA)','Hull length in feet; registration fees, slip rents and towing rules scale with it. Boats over about 26 ft are hard to trailer behind a normal car.'],['Capacity plate','The maximum persons and weight the hull is rated for; printed on a plate inside the boat and enforced on the water.'],['Hull types','Deep-V hulls cut chop (center consoles, bowriders); flat and pontoon hulls are stable and shallow (fishing, pontoons); planing wake hulls make the biggest wave.'],['Gallons per hour (gph)','Fuel use at cruise with the standard engine. A 150 hp outboard burns about 6 to 7 gph at 25 knots; multiply by your hours on the water for the fuel bill.'],['Registration / titling','Most countries register boats over a size or power threshold with a state, provincial or maritime authority; fees scale with length and the sticker is renewed every year or three.'],['Trailer','Usually a separate purchase or an option (US$1,500 to US$6,000) and separately registered. Check the tow rating of your car against the boat-motor-trailer weight.'],['Boating licence','Many places require a boating safety certificate or licence above a horsepower or length threshold (PCOC in Canada, state cards in the US, PER/PNB in Spain, boat licences in Australian states).'],['Slip, mooring, storage','Keeping a boat at a marina costs more than the loan payment on many boats; trailer boats avoid it. Shown as information, not added.']]
 };
 const ABOUT_V = {
   moto: cc => `<h2>How these numbers work</h2><p><b>List price</b> is the maker\u2019s published price for each model\u2019s cheapest variant through its most expensive, on the basis used locally (${cc==='US'||cc==='CA' ? 'MSRP before freight and setup' : cc==='UK' ? 'OTR, with VAT, delivery, registration and first-year VED inside' : cc==='AU' ? 'ride-away where the brand publishes it, RRP plus typical on-road costs otherwise' : cc==='IN' ? 'ex-showroom, GST included' : 'the brand\u2019s retail price with taxes inside'}), compiled in early October 2026. Rows marked <i>preliminary</i> use estimated or unconfirmed pricing.</p><p><b>Estimated ride-away</b> applies the discount typical for that model\u2019s demand, then adds freight and setup where they are charged, the sales, purchase or road tax for your region, registration and plates, and the compulsory insurance where it is bought with the bike. Full insurance is shown as information. Dealer-fitted extras and accessories are not included.</p><p><b>Fuel economy</b> is the maker\u2019s or the official combined figure; electric range is the claimed figure for the biggest battery. Licence classes, learner restrictions and city bans are noted per model where they matter.</p>`,
+  air: cc => `<h2>How these numbers work</h2><p><b>Factory list price</b> is the maker\u2019s 2026 price for each type from the base configuration to a typically equipped one, compiled in October 2026 from manufacturer price lists, type announcements and the trade press. ${cc==='US' ? 'US prices are the maker\u2019s dollar list before sales or use tax.' : cc==='ES' ? 'Prices are the maker\u2019s euro list, or the dollar list converted at ECB rates, before IVA and the registration tax.' : 'Prices are the maker\u2019s dollar or euro list converted at ECB reference rates of 29 September 2026 and shown before VAT, GST and duty, so every row is marked <i>preliminary</i>: the invoice is in the maker\u2019s currency and moves with the exchange rate.'} Business jets and helicopters are quoted typically equipped; the spread in each row covers the usual options.</p><p><b>Estimated delivered</b> applies the discount or premium typical for that type (delivery positions on hot types trade above list; slow sellers and end-of-run types go for 5% to 12% under), then adds delivery and acceptance where the maker charges it, the sales tax, VAT, GST or duty for your region with the exemptions and caps that apply to aircraft, and registration with the national authority. Insurance, hangarage, the annual inspection and a pilot licence are shown as information, since they dwarf the purchase taxes over the years you own it.</p><p><b>Fuel burn</b> is the maker\u2019s cruise figure in gallons or litres per hour; the yearly fuel estimate multiplies it by the flight hours you set in the cost assumptions at local avgas and Jet-A prices. Speed and range are the maker\u2019s long-range cruise figures in knots and nautical miles, with km or miles alongside.</p>`,
   boat: cc => `<h2>How these numbers work</h2><p><b>List price</b> is the brand\u2019s published price for each model\u2019s cheapest standard package through its most expensive, compiled in early October 2026. In ${cc==='US'||cc==='CA'||cc==='AU' ? 'this market many boats are priced as boat-motor-trailer packages and others as a hull with the engine extra; the note on each row says which' : 'this market the price normally includes the standard engine; trailers, electronics and canvas are extra'}. Rows marked <i>preliminary</i> use estimated or unconfirmed pricing.</p><p><b>Estimated on-the-water</b> applies the discount typical for that model, then adds freight and dealer preparation where they are charged, the sales or purchase tax for your region (with the caps some places apply to boats), registration and titling, and the compulsory insurance where any exists. Trailer registration, slips, mooring and full insurance are shown as information.</p><p><b>Fuel use</b> is a typical cruise figure in gallons or litres per hour for the standard engine; the yearly fuel estimate multiplies it by the engine hours you set in the cost assumptions.</p>`
 };
 function glossFor(cc, vt){ if (vt==='car') return GLOSS[cc]; const extra = ((VFEES[cc]||{})[vt]||{}).glossary || []; return GLOSS_V[vt].concat(extra); }
@@ -867,7 +944,7 @@ function passes(c){
   if (S.pmax && P(c) > S.pmax) return false;
   if (S.seats && c.seats < S.seats) return false;
   if (S.drive!=='any' && C.driveTest[S.drive] && !C.driveTest[S.drive](c)) return false;
-  if (S.eff && !(c.fuel==='EV'||c.fuel==='Hydrogen'||c.fuel==='Sail')){ const e = C.eff.get(c); if (C.eff.mode==='min' ? !(e && e >= S.eff) : !(e && e <= S.eff)) return false; }
+  if (S.eff && !(c.fuel==='EV'||c.fuel==='Hydrogen'||c.fuel==='Sail'||(c.vt==='air' && !c.hp))){ const e = C.eff.get(c); if (C.eff.mode==='min' ? !(e && e >= S.eff) : !(e && e <= S.eff)) return false; }
   if (S.rng){ const v = C.rng.get ? C.rng.get(c) : (c.rng ? rngShown(c) : null); if (!(v && v >= S.rng)) return false; }
   return true;
 }
@@ -881,7 +958,7 @@ function sortList(list){
     'mpg': (a,b)=>{ const x=effv(a), y=effv(b); if (x==null&&y==null) return P(a)-P(b); if (x==null) return 1; if (y==null) return -1; return (C.eff.mode==='min' ? y-x : x-y) || P(a)-P(b); },
     'range': (a,b)=>{ const rv = c => C.rng.get ? (C.rng.get(c)||0) : (c.fuel==='PHEV'?0:(c.rng||0)); const x=rv(a), y=rv(b); return y-x || P(a)-P(b); },
     'hp': (a,b)=>b.hp-a.hp || P(a)-P(b),
-    'perhp': (a,b)=>P(a)/(a.hp||1e-6) - P(b)/(b.hp||1e-6),
+    'perhp': VT==='air' ? (a,b)=>P(a)/(a.seats||1) - P(b)/(b.seats||1) : (a,b)=>P(a)/(a.hp||1e-6) - P(b)/(b.hp||1e-6),     // aircraft: price per seat, since thrust and shaft power do not compare
     'seats': (a,b)=>b.seats-a.seats || P(a)-P(b),
     'name': (a,b)=>(a.make+a.model).localeCompare(b.make+b.model)
   }[S.sort] || ((a,b)=>P(a)-P(b));
@@ -897,9 +974,10 @@ function activeCount(){
 /* ===== rendering ===== */
 function lenTxt(c){ return c.len ? `${c.len} ft / ${Math.round(c.len*0.3048*10)/10} m` : ''; }
 function specsHTML(c){
-  const hp = `<span><b>${c.hp.toLocaleString()}</b> ${C.powerUnit}</span>`;
+  const hp = `<span><b>${c.hp.toLocaleString()}</b> ${powerLbl(c, C.powerUnit)}</span>`;
   if (c.vt==='moto') return `<span class="eff">${effShort(c, CC)}</span>${c.ccm ? `<span><b>${c.ccm}</b> cc</span>` : (c.kwh ? `<span><b>${c.kwh}</b> kWh</span>` : '')}${hp}<span>${esc(c.drive)}</span>`;
   if (c.vt==='boat') return `<span class="eff">${lenTxt(c)}</span>${c.hp ? hp : '<span><b>Sail</b> only</span>'}<span><b>${c.seats}</b> people</span><span>${esc(c.drive)}</span><span>${effShort(c, CC)}</span>`;
+  if (c.vt==='air') return `<span class="eff">${airSpeedTxt(c, CC)}</span><span>${airRangeTxt(c, CC, true)}</span>${c.hp ? hp : '<span><b>No</b> engine</span>'}<span><b>${c.seats}</b> seats</span><span>${esc(c.drive)}</span>${c.hp ? `<span>${effShort(c, CC)}</span>` : ''}`;
   return `<span class="eff">${effShort(c, CC)}</span>${hp}<span><b>${c.seats}</b> seats</span><span>${esc(c.drive)}</span>`;
 }
 /* photos: a Wikimedia Commons image per vehicle when one is known (data/images.json), otherwise a body-type silhouette */
@@ -921,6 +999,7 @@ function photoHTML(c, where){
 function silKey(c){
   if (c.vt==='moto') return ({Scooter:'scooter',Commuter:'moto',Naked:'moto',Sport:'sport',Cruiser:'cruiser',Adventure:'adv',Touring:'cruiser','Dual-sport':'adv',Retro:'moto',Mini:'moto',Trike:'trike'})[c.body] || 'moto';
   if (c.vt==='boat') return ({PWC:'pwc',Pontoon:'pontoon',Sail:'sail',Dinghy:'dinghy',RIB:'rib',Cabin:'cabin'})[c.body] || 'boat';
+  if (c.vt==='air') return ({'Light jet':'jet','Midsize jet':'jet','Large jet':'jet',Helicopter:'heli',eVTOL:'evtol',Gyroplane:'gyro',Glider:'glider'})[c.body] || 'plane';
   return ({SUV:'suv',Truck:'truck',Pickup:'truck',Van:'van',Minivan:'van',MPV:'van',Hatch:'hatch',Wagon:'wagon',Coupe:'coupe',Conv:'conv',Sports:'coupe'})[c.body] || 'sedan';
 }
 function creditHTML(c){ const r = imgRec(c); if (!r) return ''; return `<p class="fine credit-line">Photo: ${esc(r.artist||'unknown author')}${r.license ? ', '+esc(r.license) : ''}, via <a href="https://commons.wikimedia.org/wiki/File:${encodeURIComponent(r.file)}" target="_blank" rel="noopener">Wikimedia Commons</a>${r.approx ? ' · may show an earlier generation or another market’s version' : ''}</p>`; }
@@ -935,7 +1014,7 @@ function cardHTML(c){
   if (c.est) tags.push(`<span class="tag est">Preliminary</span>`);
   const inCmp = compare.includes(c.id);
   const topTxt = TOP(c) > P(c) ? `up to ${moneyK(TOP(c))} · ` : '';
-  const sub = CC==='ALL' ? `${topTxt}${MONEY[c.cc].k(c.price)} at home` : VT!=='car' ? `${topTxt}${c.dest ? '+'+money(c.dest)+' freight' : (CC==='UK'||CC==='AU'||CC==='IN') ? 'as published' : 'taxes included'}` : CC==='US' ? `${topTxt}+${money(c.dest)} dest.` : CC==='IN' ? `${topTxt}incl. ${c.gst}% GST` : CC==='UK' ? `${topTxt}all taxes in` : CC==='AU' ? `${topTxt}before on-roads` : CC==='CA' ? `${topTxt}before freight & tax` : `${topTxt}taxes included`;
+  const sub = CC==='ALL' ? `${topTxt}${MONEY[c.cc].k(c.price)} at home` : VT==='air' ? `${topTxt}${c.dest ? '+'+moneyK(c.dest)+' delivery' : 'before tax'}` : VT!=='car' ? `${topTxt}${c.dest ? '+'+money(c.dest)+' freight' : (CC==='UK'||CC==='AU'||CC==='IN') ? 'as published' : 'taxes included'}` : CC==='US' ? `${topTxt}+${money(c.dest)} dest.` : CC==='IN' ? `${topTxt}incl. ${c.gst}% GST` : CC==='UK' ? `${topTxt}all taxes in` : CC==='AU' ? `${topTxt}before on-roads` : CC==='CA' ? `${topTxt}before freight & tax` : `${topTxt}taxes included`;
   const fuelCostV = annualFuel(c);
   return `<article class="card" data-id="${c.id}">
     ${photoHTML(c, 'card')}
@@ -945,11 +1024,11 @@ function cardHTML(c){
     </div>
     <div class="tags">${tags.join('')}</div>
     <div class="prices">
-      <div class="pbox"><div class="lbl">${C.cardPriceLabel}</div><div class="val">${CC==='US'||CC==='UK'||(CC==='ALL'&&['USD','GBP','EUR','CAD','AUD'].includes(WCUR))?money(P(c)):moneyK(P(c))}</div><div class="sub">${sub}</div></div>
+      <div class="pbox"><div class="lbl">${C.cardPriceLabel}</div><div class="val">${VT!=='air' && (CC==='US'||CC==='UK'||(CC==='ALL'&&['USD','GBP','EUR','CAD','AUD'].includes(WCUR)))?money(P(c)):moneyK(P(c))}</div><div class="sub">${sub}</div></div>
       <div class="pbox otd"><div class="lbl">${C.otdLabel} · ${esc(CC==='ALL'?WCUR:C.stateShort(S.state))}</div><div class="val${M.range(o.lo,o.hi).length>=12?' long':''}">${M.range(o.lo, o.hi).replace('–','–<wbr>')}</div><div class="sub">${C.otdSub}</div></div>
     </div>
     <div class="specs">${specsHTML(c)}${fuelCostV!=null?`<span class="muted">~${moneyK(fuelCostV)}/yr fuel</span>`:''}</div>
-    <div class="mkt m-${c.mkt}">${CC==='ALL' ? MKT_TXT[c.cc][c.mkt][0] : MKT_TXT[CC][c.mkt][0]}</div>
+    <div class="mkt m-${c.mkt}">${mktTxt(CC==='ALL' ? c.cc : CC, c)[0]}</div>
     <p class="note">${esc(c.note)}</p>
     <button class="btn more" type="button" data-detail="${c.id}">Details &amp; cost breakdown</button>
   </article>`;
@@ -1009,6 +1088,13 @@ function stickerHTML(o, totalLabel, ML){
   </div></div>`;
 }
 function effPanel(c){
+  if (c.vt==='air'){
+    const us = usUnits(CC);
+    const speed = c.ktas ? `<div><b>${c.ktas}</b><span>kt cruise</span></div><div><b>${us ? Math.round(c.ktas*1.151) : Math.round(c.ktas*1.852)}</b><span>${us ? 'mph' : 'km/h'}</span></div>` : '';
+    const range = c.rng ? `<div><b>${Math.round(c.rng/1.852).toLocaleString('en-US')}</b><span>nm range</span></div><div><b>${(us ? Math.round(c.rng/1.609) : Math.round(c.rng)).toLocaleString('en-US')}</b><span>${us ? 'miles' : 'km'} range</span></div>` : '';
+    const burn = c.fuel==='EV' ? `<div><b>${c.kwh||'–'}</b><span>kWh battery</span></div>` : !c.hp ? `<div><b>–</b><span>no engine</span></div>` : c.gph ? (us ? `<div><b>${c.gph}</b><span>gal/h at cruise</span></div>` : `<div><b>${Math.round(c.gph*3.785)}</b><span>L/h at cruise</span></div><div><b>${c.gph}</b><span>gal/h</span></div>`) : `<div><b>–</b><span>fuel burn n/a</span></div>`;
+    return `<div class="epa">${speed}${range}${burn}<div><b>${c.hp ? c.hp.toLocaleString() : '–'}</b><span>${c.hp ? powerLbl(c, 'hp') : 'towed or winched'}</span></div><div><b>${c.seats}</b><span>seats incl. pilot</span></div></div><p class="fine">Maker’s long-range cruise figures with full fuel and reserves; a full cabin or a headwind cuts range by 10% to 30%. ${/turbofan/i.test(c.drive) ? 'Thrust is the total for all engines in pounds-force.' : 'Power is the total shaft horsepower of all engines.'}</p>`;
+  }
   if (c.vt==='boat'){
     const us = CC==='US' || (CC==='ALL' && WUNIT==='mpg');
     const burn = c.fuel==='Sail' ? `<div><b>Sail</b><span>no engine burn</span></div>` : c.fuel==='EV' ? `<div><b>${c.kwh||'–'}</b><span>kWh battery</span></div>` : c.gph ? (us ? `<div><b>${c.gph}</b><span>gal/h at cruise</span></div>` : `<div><b>${Math.round(c.gph*3.785)}</b><span>L/h at cruise</span></div><div><b>${c.gph}</b><span>gal/h</span></div>`) : `<div><b>–</b><span>fuel use n/a</span></div>`;
@@ -1066,11 +1152,16 @@ function renderDetail(){
   const c = detailCar; const ML = localM(c); const AA = CC==='ALL' ? DEFA(c.cc, VT) : A; const HC = homeConfig(c); const HCC = CC==='ALL' ? c.cc : CC;
   const d = detailDynamic();
   const fc = annualFuel(c);
-  const dist = c.vt==='boat' ? `${AA.hours} engine hours` : AA.miles.toLocaleString('en-US') + ' ' + HC.distLabel;
-  const fuelExpl = HCC==='US'
+  const dist = c.vt==='boat' ? `${AA.hours} engine hours` : c.vt==='air' ? `${AA.hours} flight hours` : AA.miles.toLocaleString('en-US') + ' ' + HC.distLabel;
+  const perU = HCC==='US' ? 'per gallon' : 'a litre';
+  const fuelExpl = c.vt==='air'
+    ? (c.fuel==='EV'?`${HCC==='US'?'$':''}${AA.elec} per kWh of charging with losses`:c.fuel==='Jet-A'?`Jet-A at ${HCC==='US'?'$':''}${AA.jeta} ${perU}`:`avgas at ${HCC==='US'?'$':''}${AA.avgas} ${perU}`)
+    : HCC==='US'
     ? (c.fuel==='EV'?`$${AA.elec.toFixed(2)}/kWh at home`:c.fuel==='PHEV'?`about half on home electricity, half on $${AA.gas.toFixed(2)} gas`:c.fuel==='Hydrogen'?'$36/kg hydrogen (Toyota includes a $15,000 fuel credit)':`$${(c.fuel==='Diesel'?AA.gas+0.45:AA.gas).toFixed(2)} per gallon`)
     : (c.fuel==='EV'?`${AA.elec} per kWh of home charging with charging losses`:c.fuel==='PHEV'?`half on home electricity, half on petrol at ${AA.petrol} a litre`:c.fuel==='Diesel'?`diesel at ${AA.diesel} a litre`:c.fuel==='CNG'?`CNG at ${AA.cng} per kg`:`petrol at ${AA.petrol} a litre`);
-  const fuelLine = fc!=null ? `<div class="big">${money(fc)}<span class="sm"> / year</span></div><p class="sm">${dist} a year at ${c.vt==='boat' ? fuelExpl.replace(/^\$?/, m=>m) + ' plus about 15% for marina fuel' : fuelExpl}${CC==='ALL'?' (home-market prices, converted)':''}. That is about ${money(fc/12)} a month.</p>` : `<p class="sm">${c.vt==='boat' ? (c.fuel==='Sail' ? 'Wind is free; budget for the auxiliary engine, sails and rigging instead.' : 'No fuel-burn figure for this package, so no estimate.') : 'No official rating, so no estimate.'}</p>`;
+  const noFuel = c.vt==='boat' ? (c.fuel==='Sail' ? 'Wind is free; budget for the auxiliary engine, sails and rigging instead.' : 'No fuel-burn figure for this package, so no estimate.')
+    : c.vt==='air' ? (!c.hp ? 'Gliders are towed or winched aloft; budget for launches, a sustainer engine and the trailer instead.' : 'No fuel-burn figure for this type, so no estimate.') : 'No official rating, so no estimate.';
+  const fuelLine = fc!=null ? `<div class="big">${money(fc)}<span class="sm"> / year</span></div><p class="sm">${dist} a year at ${c.vt==='boat' ? fuelExpl.replace(/^\$?/, m=>m) + ' plus about 15% for marina fuel' : fuelExpl}${CC==='ALL'?' (home-market prices, converted)':''}. That is about ${money(fc/12)} a month.</p>` : `<p class="sm">${noFuel}</p>`;
   const evNote = {
     US: (c.fuel==='EV'||c.fuel==='PHEV') ? 'The federal $7,500 EV tax credit ended Sept 30, 2025. Some states (Colorado, Massachusetts, New York, New Jersey and others) and utilities still pay rebates.' : '',
     IN: c.fuel==='EV' ? 'EVs pay only 5% GST and most states waive road tax, which is why the on-road gap to a petrol car is smaller than the ex-showroom gap.' : (c.fuels.includes('CNG') ? 'A factory CNG kit costs about ₹90,000 to ₹1 lakh more and eats boot space, but running cost per km is roughly half of petrol.' : ''),
@@ -1084,7 +1175,7 @@ function renderDetail(){
     BR: c.fuel==='EV' ? 'EVs pay no IPVA in Paraná, Rio Grande do Sul, DF, Pernambuco and Bahia (under R$300k), 0.5% in Rio and the full 4% in São Paulo; home charging on tarifa branca costs about R$0.80/kWh.' : ((c.fuel==='Hybrid'||c.fuel==='PHEV') ? 'Flex hybrids up to R$261,154 pay no IPVA in São Paulo through 2026 (then 1% to 4% by 2030); Rio charges hybrids 1.5%.' : 'Flex: fill with ethanol when it costs under 70% of petrol, as it does in São Paulo, Minas and Paraná today.'),
     CA: (c.fuel==='EV'||c.fuel==='PHEV') ? 'The federal EVAP rebate (C$5,000 BEV / C$2,500 PHEV) applies only under C$50,000 all-in and not to Chinese-built cars; Quebec adds C$2,000 until 31 Dec 2026, PEI C$4,000. Ontario\u2019s ultra-low overnight rate charges an EV for about 3 cents a kWh.' : (c.body==='Pickup' ? 'Pickups are exempt from the green levy and most HD trucks from the luxury tax.' : (c.l100!=null && c.l100>=12.5 ? 'Rated at 13 L/100 km or worse, so the federal green levy of C$1,000 to C$4,000 applies.' : ''))
   }[HCC];
-  const industry = {US:'Industry-wide, incentives averaged about 6.6% of MSRP in August 2026 (about $3,100 per gas or hybrid vehicle, over $9,000 per EV).', IN:'Discounts peak at month-end, quarter-end and before Diwali; corporate, exchange and loyalty bonuses stack on top of the dealer’s own discount.', CN:'CPCA’s August 2026 data: retail down 24% year on year, NEV share a record 65%, pure-petrol sales down 40%, so petrol cars are being cleared and NEVs discounted less.', UK:'Carwow’s September 2026 sale headlined savings up to £7,700; pre-registered stock at quarter-end (March, June, September, December) is the cheapest route.', AU:'August 2026: EVs outsold petrol for the first time (24.9% share) after the fuel shock; Chinese brands hold 40% of the market and are cutting hardest.', MX:'El Buen Fin (mid-November) and the December remate de modelos are the two big discount windows; 0% interest for 12 to 36 months is the usual form.', ES:'Ganvam reports record average promotions of 12% to 14.5% in 2026; Plan Auto+ funds are expected to run out around late October.', TH:'Motor Show (March-April) and Motor Expo (December) bring the year’s best packages; the last week of a quarter is the next best time.', RU:'Dealer stocks sit at 2 to 3 months of sales, the key rate is 14% and the utilisation fee rises again in January 2027, so autumn 2026 promotions are the deepest in years.', BR:'Fenabrave counts a 15% sales rise in 2026 and Chinese brands at 22% of the market; the price war shows up as bônus, taxa zero and CNPJ tabelas rather than list cuts.', CA:'August 2026 sales rose 5.4%; 0% over 84 months is common at GM, Ram, VW and Nissan while Toyota hybrids sell at sticker.'}[HCC];
+  const industry = c.vt==='air' ? 'GAMA\u2019s shipment reports show business-jet backlogs at two to three years of output and piston deliveries at a two-decade high in 2026, so discounts are rare on anything in production and the bargains are types being replaced.' : {US:'Industry-wide, incentives averaged about 6.6% of MSRP in August 2026 (about $3,100 per gas or hybrid vehicle, over $9,000 per EV).', IN:'Discounts peak at month-end, quarter-end and before Diwali; corporate, exchange and loyalty bonuses stack on top of the dealer’s own discount.', CN:'CPCA’s August 2026 data: retail down 24% year on year, NEV share a record 65%, pure-petrol sales down 40%, so petrol cars are being cleared and NEVs discounted less.', UK:'Carwow’s September 2026 sale headlined savings up to £7,700; pre-registered stock at quarter-end (March, June, September, December) is the cheapest route.', AU:'August 2026: EVs outsold petrol for the first time (24.9% share) after the fuel shock; Chinese brands hold 40% of the market and are cutting hardest.', MX:'El Buen Fin (mid-November) and the December remate de modelos are the two big discount windows; 0% interest for 12 to 36 months is the usual form.', ES:'Ganvam reports record average promotions of 12% to 14.5% in 2026; Plan Auto+ funds are expected to run out around late October.', TH:'Motor Show (March-April) and Motor Expo (December) bring the year’s best packages; the last week of a quarter is the next best time.', RU:'Dealer stocks sit at 2 to 3 months of sales, the key rate is 14% and the utilisation fee rises again in January 2027, so autumn 2026 promotions are the deepest in years.', BR:'Fenabrave counts a 15% sales rise in 2026 and Chinese brands at 22% of the market; the price war shows up as bônus, taxa zero and CNPJ tabelas rather than list cuts.', CA:'August 2026 sales rose 5.4%; 0% over 84 months is common at GM, Ram, VW and Nissan while Toyota hybrids sell at sticker.'}[HCC];
   $('dBody').innerHTML = `
     ${photoHTML(c, 'detail')}${creditHTML(c)}
     <div class="tags">${CC==='ALL'?`<span class="tag cc">${CC_NAME[c.cc]}</span>`:''}<span class="tag">${C.bodyLabel[c.body]||c.body} · ${c.size}</span><span class="tag f-${c.fuel}">${c.fuels.map(fuelLbl).join(' / ')}</span><span class="tag">${C.clsLabel[c.cls]||c.cls}</span><span class="tag">${c.seats} ${c.vt==='boat'?'people':'seats'}</span><span class="tag">${esc(c.drive)}</span>${c.year===2025?'<span class="tag left">2025 leftover</span>':''}${c.year===2027?'<span class="tag new">2027 arrival</span>':''}${c.isNew?'<span class="tag new">New or updated</span>':''}</div>
@@ -1100,8 +1191,8 @@ function renderDetail(){
       <div class="panel" id="dPay">${d.pay}</div>
       <div class="panel"><h4>Est. yearly fuel or charging</h4>${fuelLine}</div>
     </div>
-    <div class="panel"><h4>${c.vt==='boat'?'Size, power and fuel burn':c.vt==='moto'?'Engine and economy':HCC==='US'?'EPA efficiency':'Efficiency'}</h4>${effPanel(c)}${c.vt==='car' && evNote?`<p class="fine">${evNote}</p>`:''}</div>
-    <div class="panel"><h4>Why this price band</h4><p class="sm">${MKT_TXT[HCC][c.mkt][1]}</p><p class="fine">${industry} Current offers are on ${esc(c.make)}’s website.</p></div>
+    <div class="panel"><h4>${c.vt==='boat'?'Size, power and fuel burn':c.vt==='air'?'Speed, range and fuel burn':c.vt==='moto'?'Engine and economy':HCC==='US'?'EPA efficiency':'Efficiency'}</h4>${effPanel(c)}${c.vt==='car' && evNote?`<p class="fine">${evNote}</p>`:''}</div>
+    <div class="panel"><h4>Why this price band</h4><p class="sm">${mktTxt(HCC, c)[1]}</p><p class="fine">${industry} Current offers are on ${esc(c.make)}’s website.</p></div>
     <div class="dlg-actions"><button class="btn primary" type="button" id="dCmpBtn">Add to compare</button><button class="btn" type="button" data-close>Close</button></div>`;
   updateDetailCmpBtn();
   const tr = $('trimRange');
@@ -1132,18 +1223,19 @@ function openCompare(){
     ${row(VT==='boat' ? 'Power source' : 'Fuel', c=>c.fuels.map(fuelLbl).join(' / '))}
     ${row(C.cardPriceLabel, c=>TOP(c)>P(c)?`${money(P(c))} – ${money(TOP(c))}`:money(P(c)), 'num')}
     ${CC==='ALL' ? row('Home-market price', c=>c.top>c.price?`${MONEY[c.cc].money(c.price)} – ${MONEY[c.cc].money(c.top)}`:MONEY[c.cc].money(c.price), 'num') : ''}
-    ${VT!=='car' ? (cs.some(c=>c.dest) ? row('Freight & setup', c=>c.dest?money(c.dest):'included', 'num') : '') : CC==='US' ? row('Destination', c=>money(c.dest), 'num') : CC==='IN' ? row('GST rate', c=>c.gst+'%', 'num') : ''}
+    ${VT!=='car' ? (cs.some(c=>c.dest) ? row(VT==='air' ? 'Delivery' : 'Freight & setup', c=>c.dest?money(c.dest):'included', 'num') : '') : CC==='US' ? row('Destination', c=>money(c.dest), 'num') : CC==='IN' ? row('GST rate', c=>c.gst+'%', 'num') : ''}
     ${row(`${C.otdLabel} (${esc(CC==='ALL'?'home region, '+WCUR:regionName(CC, S.state))})`, c=>{const o=bd(c,c.price); return `${money(o.lo)} – ${money(o.hi)}`;}, 'num')}
     ${row('Est. monthly', c=>{const o=bd(c,c.price); return money(monthlyPay((o.lo+o.hi)/2, CC==='ALL'?DEFA(c.cc, VT):A))+'/mo';}, 'num')}
-    ${row('Base price per hp (peak power)', c=>c.hp ? money(P(c)/c.hp) : 'n/a', 'num')}
+    ${VT==='air' ? row('Base price per seat', c=>money(P(c)/(c.seats||1)), 'num') : row('Base price per hp (peak power)', c=>c.hp ? money(P(c)/c.hp) : 'n/a', 'num')}
     ${VT==='boat' ? row('Length', c=>lenTxt(c)) : ''}
     ${VT==='moto' ? row('Engine', c=>c.ccm ? c.ccm+' cc' : (c.kwh ? c.kwh+' kWh battery' : 'electric')) : ''}
-    ${row(VT==='boat' ? 'Fuel use' : 'Efficiency', c=>effShort(c, CC))}
+    ${VT==='air' ? row('Cruise speed', c=>airSpeedTxt(c, CC)) + row('Range', c=>airRangeTxt(c, CC)) : ''}
+    ${row(VT==='boat' || VT==='air' ? 'Fuel use' : 'Efficiency', c=>effShort(c, CC))}
     ${row('Yearly fuel', c=>{const f=annualFuel(c); return f==null?'n/a':money(f);}, 'num')}
-    ${row(`Power (${C.powerUnit})`, c=>c.hp.toLocaleString(), 'num')}
-    ${VT==='car' ? row('Seats', c=>c.seats, 'num') : VT==='boat' ? row('Capacity', c=>c.seats+' people', 'num') : ''}
+    ${VT==='air' ? row('Power or thrust', c=>c.hp ? c.hp.toLocaleString()+' '+powerLbl(c, 'hp') : 'none', 'num') : row(`Power (${C.powerUnit})`, c=>c.hp.toLocaleString(), 'num')}
+    ${VT==='car' || VT==='air' ? row('Seats', c=>c.seats, 'num') : VT==='boat' ? row('Capacity', c=>c.seats+' people', 'num') : ''}
     ${row(C.driveLabel, c=>esc(c.drive))}
-    ${row('Market', c=>MKT_TXT[CC==='ALL'?c.cc:CC][c.mkt][0])}
+    ${row('Market', c=>mktTxt(CC==='ALL'?c.cc:CC, c)[0])}
     ${row('Notes', c=>esc(c.note))}
     ${row('', c=>`<button class="rm" type="button" data-rm="${c.id}">Remove</button>`)}
     </tbody></table></div>`;
@@ -1157,7 +1249,7 @@ let toastT;
 function toast(msg){ let t = document.querySelector('.toast'); if (!t){ t = document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); document.body.appendChild(t);} t.textContent = msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{t.hidden=true;},3200); }
 
 /* ===== country-specific chrome ===== */
-function effOut(v){ if (!v) return 'Any'; const u = C.eff.unit; if (u==='mpg' && CC!=='UK') return v+' mpg'; if (u==='mpg') return v+' mpg UK / '+Math.round(v*0.8327)+' US'; if (u==='kmpl' || u==='km/L') return v+' '+u+' / '+usMpg(100/v)+' mpg'; if (u==='L/100km') return v+' L/100km / '+usMpg(v)+' mpg'; return v+' '+u; }
+function effOut(v){ if (!v) return 'Any'; const u = C.eff.unit; if (u==='mpg' && CC!=='UK') return v+' mpg'; if (u==='mpg') return v+' mpg UK / '+Math.round(v*0.8327)+' US'; if (u==='kmpl' || u==='km/L') return v+' '+u+' / '+usMpg(100/v)+' mpg'; if (u==='L/100km') return v+' L/100km / '+usMpg(v)+' mpg'; if (u==='L/h') return v+' L/h / '+Math.round(v/3.785*10)/10+' gal/h'; return v+' '+u; }
 function setPressed(container, pred){ container.querySelectorAll('[aria-pressed]').forEach(b => b.setAttribute('aria-pressed', pred(b))); }
 function refreshPriceUI(){
   $('priceLbl').textContent = C.priceLabel;
@@ -1171,8 +1263,9 @@ function applySliders(){
   $('rngLbl').textContent = C.rng.label || 'Minimum electric range'; $('rngHint').textContent = C.rng.hint || 'EVs & plug-ins only';
   $('rng').max = C.rng.max; $('rng').step = C.rng.step; $('rng').setAttribute('aria-label', C.rng.label || 'Minimum electric range');
   $('optMpg').textContent = C.eff.sort; $('optRng').textContent = C.rangeSort;
+  $('optHp').textContent = C.powerSort || 'Most horsepower'; $('optPerhp').textContent = C.perSort || 'Cheapest per horsepower';
 }
-function rngOut(v){ if (!v) return 'Any'; const u = C.rng.unit; if (u==='km') return v+' km / '+usMi(v)+' mi'; if (u==='ft') return v+' ft / '+(v*0.3048).toFixed(1)+' m'; return v+' '+u; }
+function rngOut(v){ if (!v) return 'Any'; const u = C.rng.unit; if (u==='km') return v+' km / '+usMi(v)+' mi'; if (u==='ft') return v+' ft / '+(v*0.3048).toFixed(1)+' m'; if (u==='nm') return v.toLocaleString('en-US')+' nm / '+Math.round(v*1.852).toLocaleString('en-US')+' km'; return v+' '+u; }
 function buildChrome(){
   const V = VERT[VT];
   document.documentElement.setAttribute('data-country', CC); document.documentElement.setAttribute('data-vt', VT);
@@ -1226,7 +1319,7 @@ function buildChrome(){
   $('applyNoun').textContent = V.noun; $('empty').textContent = `Nothing matches those filters. Loosen the price range or clear a filter.`;
   // wizard
   const UL = C.wizardUseLabels;
-  $('wTitle').textContent = VT==='car' ? 'What do you need?' : VT==='moto' ? 'What kind of riding?' : 'What kind of boating?';
+  $('wTitle').textContent = VT==='car' ? 'What do you need?' : VT==='moto' ? 'What kind of riding?' : VT==='air' ? 'What kind of flying?' : 'What kind of boating?';
   $('wBody').innerHTML = `
     <div class="q"><h3>1. Total budget, taxes and fees included</h3><div class="opts" id="wBudget">${C.wizardBudgets.map(([v,l])=>`<button class="opt" type="button" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>
     <div class="q"><h3>2. What will it mostly do?</h3><div class="opts" id="wUse">${['commute','family','work','fun','trips','all'].map(k=>`<button class="opt" type="button" data-v="${k}" aria-pressed="false">${esc(UL[k])}</button>`).join('')}</div></div>
@@ -1242,7 +1335,11 @@ function buildChrome(){
     const b = +(W.budget||0); if (b) S.pmax = Math.round(b*C.budgetShare*(CC==='ALL' ? FX[WCUR] : 1));
     const u = C.wizardUse[W.use]; if (u){ (u.body||[]).forEach(x=>S.body.add(x)); (u.size||[]).forEach(x=>S.size.add(x)); if (u.seats) S.seats = u.seats; if (u.sort) S.sort = u.sort; }
     if (W.fuel==='cheap') S.sort='fuel'; else if (W.fuel) S.fuel.add(W.fuel);
-    if (W.awd==='awd'){ if (VT==='car') S.drive='awd'; else { S.size.clear(); C.learnerSizes.forEach(x=>S.size.add(x)); } }
+    if (W.awd==='awd'){
+      if (VT==='car') S.drive='awd';
+      else if (C.learnerBodies){ const keep = [...S.body].filter(b => C.learnerBodies.includes(b)); S.body.clear(); (keep.length ? keep : C.learnerBodies).forEach(x=>S.body.add(x)); }   // owner-flown types only
+      else { S.size.clear(); C.learnerSizes.forEach(x=>S.size.add(x)); }
+    }
     $('sort').value = S.sort; syncChips(); page=1; render();
     $('dlgWizard').close();
     toast(`${lastList.length} ${V.noun} fit your answers. Loosen any filter to see more.`);

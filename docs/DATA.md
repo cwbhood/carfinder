@@ -131,6 +131,26 @@ its description is all it takes.
 - `note` says what the price includes (hull only, boat-and-motor, boat-motor-trailer package). `freight` is the
   freight / prep / commissioning charge where it is added on top.
 
+## Aircraft schema: 21 fields (`air_<cc>.json`, every country)
+```
+[make, model, body, size, cls, fuelsStr, fuel, price_min, price_max, ktas, gph, range_km, kwh, hp, seats, engines, mkt, note, est, isNew, delivery]
+```
+- `body`: LSA · Piston single · Piston twin · Turboprop · Light jet · Midsize jet · Large jet · Helicopter · eVTOL ·
+  Gyroplane · Glider. `size` follows `seats` (pilot included): Up to 2 · 3-4 · 5-8 · 9-14 · Over 14.
+- `cls`: Mainstream (general aviation), Luxury (turboprops, light and midsize jets, premium helicopters), Exotic
+  (large-cabin jets).
+- `fuel`: Avgas, Jet-A (turbines and the Jet-A diesel pistons), EV, or None for a pure glider. `ktas` is the maker's
+  cruise speed in knots; `gph` the cruise fuel burn in US gallons per hour (`null` for electric and unpowered);
+  `range_km` the maximum range with reserves in km, shown in nautical miles (`null` for gliders); `kwh` the battery
+  for electric types; `hp` the total shaft horsepower of all engines, or pounds of thrust on turbofans (`engines`
+  says which: "Twin turbofan"), 0 for a glider.
+- `engines`: free text ("Single piston (Rotax)", "Twin turboshaft", "Electric motors (6)") that the engine filter
+  matches on. `delivery` is a typical delivery-and-acceptance charge in local units where the maker charges one.
+- Prices are the maker's 2026 factory list from base to typically equipped. The US file is in dollars before sales
+  tax; every other file is the dollar or euro list converted at the ECB rates in `FX` (`src/script.html`), rounded,
+  shown before VAT / GST / duty (the fee rules add them) and marked `est = 1`, since the invoice follows the exchange
+  rate. Russia keeps only Russian-built types and the Western types that still reach it as parallel imports.
+
 ### Price basis for bikes and boats
 US and Canada MSRP before freight and setup; UK OTR (bikes) and VAT-inclusive dealer price (boats); Australia
 ride-away (bikes) and RRP (boats); India ex-showroom (GST 18% up to 350 cc, 40% above, 5% EV; 40% on boats); China
@@ -138,14 +158,17 @@ guide price with VAT; Mexico, Spain, Thailand, Russia and Brazil the published r
 that turn each into an on-road price are in `data/vfees.json`.
 
 ## Fee rules: `vfees.json`
-`VFEES[cc].moto` and `.boat` each hold `bands` (dealer price as a share of list per market level), `basis` (the label
-and explanation of the published price), `fees` (the lines of the breakdown, in order) and `glossary` (extra terms for
-that country). A fee line is `{k, sub}` plus one of `fixed` (a number, or `"dest"` for the row's freight), `pct`,
+`VFEES[cc].moto`, `.boat` and `.air` each hold `bands` (dealer price as a share of list per market level), `basis` (the
+label and explanation of the published price), an optional `typical` label for the dealer-price line ("Typical
+transaction price" for aircraft), `fees` (the lines of the breakdown, in order) and `glossary` (extra terms for that
+country). A fee line is `{k, sub}` plus one of `fixed` (a number, or `"dest"` for the row's freight), `pct`,
 `rates` (by region code, `XX` for the rest), `brackets` (`[[upto, value], …]` on `on: "ccm" | "hp" | "len" |
 "price"`), `hook` (`usSales` with `rates` / `caps` / `exempt`, `usDoc`, `inRoad`, `caProv`, `cnPurchase`, `esMatric`) or
 `text` (information only). `mode` is `pct` (default), `fixed` or `perhp`; modifiers: `fuel`, `notFuel`, `fuels`,
 `body`, `notBody`, `bodies`, `evMult`, `min`, `max`, `ofList`, `withDest`, `plus`, `suffix`, `info`, `skipZero`,
-`approx`.
+`approx`. Aircraft lines use the same kinds: the US sales-tax hook carries the aircraft rates, caps and exemptions
+by state, Spain's registration tax applies through `bodies`, and the insurance, hangar, annual and licence lines are
+`info` or `text`.
 
 ## Photo index: `images.json`
 `files` lists each Wikimedia Commons file once as `[name, host, md5 prefix, author, licence, "o"?]` and `map` goes from

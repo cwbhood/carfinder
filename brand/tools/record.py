@@ -3,7 +3,7 @@
     python3 brand/tools/record.py          (needs: pip install playwright && playwright install chromium; ffmpeg on PATH)
 
 Writes brand/video/hero.mp4 + hero.webm + hero-poster.jpg (the loop in the landing-page hero), and three GIFs for the
-"See it in action" section: state.gif (pick a state, every price moves), verticals.gif (cars → bikes → boats)
+"See it in action" section: state.gif (pick a state, every price moves), verticals.gif (cars → bikes → boats → aircraft)
 and phone.gif (a card, the trim slider and the cost breakdown on a phone). Photos come from Wikimedia Commons,
 so the machine recording needs internet access; .github/workflows/record.yml runs this on a GitHub runner.
 
@@ -107,7 +107,8 @@ async def hero(page, a):
     await a.click('#dlgDetail [data-close]', after=0.6)
     await a.click('.vtab[data-vt="moto"]', after=0.8); await a.wait_photos(5000); await a.pause(0.6)
     await a.click('.ctab[data-country="IN"]', after=0.8); await a.wait_photos(5000); await a.scroll(300, steps=12); await a.pause(0.8)
-    await a.click('.vtab[data-vt="boat"]', after=0.8); await a.wait_photos(5000); await a.scroll(300, steps=12); await a.pause(1.2)
+    await a.click('.vtab[data-vt="boat"]', after=0.8); await a.wait_photos(5000); await a.scroll(300, steps=12); await a.pause(1.0)
+    await a.click('.vtab[data-vt="air"]', after=0.8); await a.wait_photos(5000); await a.click('#bodyChips .chip[data-body="Helicopter"]', after=1.0); await a.wait_photos(4000); await a.scroll(300, steps=12); await a.pause(1.2)
     await a.click('.vtab[data-vt="car"]', after=0.8); await a.wait_photos(4000); await a.pause(1.0)
 
 
@@ -126,6 +127,8 @@ async def verticals_scene(page, a):
     await a.click('#bodyChips .chip[data-body="Scooter"]', after=1.4); await a.wait_photos(4000)
     await a.click('.vtab[data-vt="boat"]', after=1.0); await a.wait_photos(5000); await a.pause(0.6)
     await a.click('#bodyChips .chip[data-body="PWC"]', after=1.4); await a.wait_photos(4000)
+    await a.click('.vtab[data-vt="air"]', after=1.0); await a.wait_photos(5000); await a.pause(0.6)
+    await a.click('#bodyChips .chip[data-body="Helicopter"]', after=1.4); await a.wait_photos(4000)
     await a.click('.vtab[data-vt="car"]', after=1.0); await a.wait_photos(4000); await a.pause(0.6)
 
 

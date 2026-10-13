@@ -353,6 +353,138 @@
 "Massachusetts charges $10 per $1,000 of value a year; Connecticut, Maine, South Carolina, Virginia, Missouri and Kansas levy personal-property tax on boats. Shown as information, not added."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Factory list price",
+"sub": "the maker’s 2026 price from base to typically equipped, in US dollars, before taxes, delivery and options"
+},
+"fees": [
+{
+"k": "Delivery and factory acceptance",
+"sub": "ferry flight, handover training and documentation as typical for the type",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Sales or use tax",
+"sub": "your state’s rate on aircraft; many states exempt aircraft or cap the tax (NC $2,500, SC $500, Virginia 2%), and fly-away rules exempt nonresidents who leave within days",
+"hook": "usSales",
+"withDest": true,
+"rates": {
+"VA": 0.02,
+"NC": 0.0475,
+"SC": 0.05
+},
+"caps": {
+"NC": 2500,
+"SC": 500
+},
+"exempt": [
+"MA",
+"CT",
+"NY",
+"ME",
+"RI",
+"NH",
+"OR",
+"MT",
+"AK",
+"DE"
+]
+},
+{
+"k": "FAA registration",
+"sub": "N-number registration, renewed every seven years",
+"fixed": 5
+},
+{
+"k": "State aircraft registration or property tax, year 1",
+"sub": "a dozen states register aircraft or levy personal-property tax on them; typical figure",
+"fixed": 300,
+"approx": true
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+],
+[
+"Fly-away exemption",
+"Texas, Florida, Kansas and others exempt a sale from sales tax when the buyer flies the aircraft out of the state within a set number of days; your home state may then charge use tax."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "IN": {
@@ -546,6 +678,118 @@
 "Recreational craft on rivers, lakes and backwaters register with the state under the 2021 Act; sea-going boats with the Mercantile Marine Department."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Factory list price",
+"sub": "converted to rupees at the ECB rate; before customs duty, GST and delivery"
+},
+"fees": [
+{
+"k": "Delivery and acceptance",
+"sub": "ferry flight or shipping, handover and documentation",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Customs duty",
+"sub": "basic customs duty plus surcharge on aircraft imported for private use; aircraft for scheduled or non-scheduled operators pay less",
+"pct": 0.03,
+"approx": true
+},
+{
+"k": "GST",
+"sub": "28% on aircraft for personal use, 5% for aircraft bought by scheduled or non-scheduled operators",
+"pct": 0.28,
+"withDest": true
+},
+{
+"k": "DGCA registration (VT-)",
+"sub": "registration, certificate of airworthiness and the NSOP or private category paperwork",
+"fixed": 50000,
+"approx": true
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+],
+[
+"NSOP",
+"Non-scheduled operator permit: registering the aircraft under a charter operator cuts GST from 28% to 5%, which is why most Indian business jets are on an NSOP."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "UK": {
@@ -717,6 +961,117 @@
 "No licence is needed in UK waters, but these are the courses insurers, marinas and charter companies look for."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Factory list price",
+"sub": "converted to pounds at the ECB rate; before VAT and delivery"
+},
+"fees": [
+{
+"k": "Delivery and factory acceptance",
+"sub": "ferry flight, handover and documentation",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "VAT 20%",
+"sub": "charged on private purchases and imports; VAT-registered businesses and qualifying airlines reclaim or zero-rate it",
+"pct": 0.2,
+"withDest": true
+},
+{
+"k": "CAA registration (G-INFO)",
+"sub": "registration fee by weight class",
+"fixed": 250,
+"approx": true
+},
+{
+"k": "Import duty",
+"sub": "civil aircraft are duty-free",
+"text": "£0"
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+],
+[
+"Permit vs CofA",
+"Factory-built certified aircraft carry a Certificate of Airworthiness with an annual ARC; microlights and homebuilts fly on a Permit to Fly."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "AU": {
@@ -889,6 +1244,117 @@
 "Welded aluminium plate hulls (Bar Crusher, Yellowfin, Stabicraft) built for offshore fishing, versus pressed-alloy tinnies for estuaries."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Factory list price",
+"sub": "converted to Australian dollars at the ECB rate; before GST and delivery"
+},
+"fees": [
+{
+"k": "Delivery and factory acceptance",
+"sub": "ferry flight (often by ship for light aircraft), handover and documentation",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "GST 10%",
+"sub": "on the aircraft and freight; registered businesses claim it back",
+"pct": 0.1,
+"withDest": true
+},
+{
+"k": "CASA registration",
+"sub": "VH- registration",
+"fixed": 130,
+"approx": true
+},
+{
+"k": "Import duty",
+"sub": "aircraft are duty-free",
+"text": "A$0"
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+],
+[
+"RAAus",
+"Recreational Aviation Australia registers light-sport and ultralight aircraft (Jabiru, Foxbat) outside CASA’s VH- register, with its own cheaper licence."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "CA": {
@@ -1085,6 +1551,113 @@
 "The federal Select Luxury Items Tax on boats over C$250,000, charged on top of GST and provincial tax."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Factory list price",
+"sub": "converted to Canadian dollars at the ECB rate; before GST / HST, PST and delivery"
+},
+"fees": [
+{
+"k": "Delivery and factory acceptance",
+"sub": "ferry flight, handover and documentation",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "GST / HST and PST",
+"sub": "federal GST or HST plus provincial sales tax on the aircraft (BC PST 7% on aircraft)",
+"hook": "caProv",
+"withDest": true,
+"bcRate": 0.12
+},
+{
+"k": "Transport Canada registration",
+"sub": "Certificate of Registration",
+"fixed": 110
+},
+{
+"k": "Import duty",
+"sub": "civil aircraft enter Canada duty-free",
+"text": "C$0"
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "MX": {
@@ -1221,6 +1794,113 @@
 "The open fibreglass fishing boat found on every Mexican coast, usually a 22 to 26 ft hull with a single outboard."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Precio de fábrica",
+"sub": "converted to pesos at the ECB rate; antes de IVA y entrega"
+},
+"fees": [
+{
+"k": "Entrega y aceptación",
+"sub": "ferry flight, handover and documentation",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "IVA 16%",
+"sub": "on the aircraft and delivery",
+"pct": 0.16,
+"withDest": true
+},
+{
+"k": "Matrícula AFAC",
+"sub": "XA/XB registration and certificate of airworthiness fees",
+"fixed": 9000,
+"approx": true
+},
+{
+"k": "Arancel",
+"sub": "most civil aircraft enter duty-free under T-MEC",
+"text": "MX$0"
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "ES": {
@@ -1418,6 +2098,127 @@
 "The Patrón de Embarcaciones de Recreo licence (15 m, 12 miles) and the cheaper one-day licence for boats up to 6 m by day."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Precio de fábrica",
+"sub": "in euros; antes de IVA, impuesto de matriculación y entrega"
+},
+"fees": [
+{
+"k": "Entrega y aceptación",
+"sub": "ferry flight, handover and documentation",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "IVA 21%",
+"sub": "on the aircraft and delivery; Canarias pays IGIC instead",
+"pct": 0.21,
+"withDest": true
+},
+{
+"k": "Impuesto de matriculación (12%)",
+"sub": "12% of the pre-IVA price on private aircraft over 1,550 kg; light aircraft, gliders and gyroplanes are exempt",
+"pct": 0.12,
+"notBody": "LSA",
+"bodies": [
+"Piston twin",
+"Turboprop",
+"Light jet",
+"Midsize jet",
+"Large jet",
+"Helicopter"
+],
+"skipZero": true
+},
+{
+"k": "Matriculación AESA (EC-)",
+"sub": "registration and airworthiness certificate fees",
+"fixed": 400,
+"approx": true
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+],
+[
+"IEDMT en aeronaves",
+"The registration tax applies to private aircraft above 1,550 kg at 12%; business and air-taxi aircraft are exempt."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "TH": {
@@ -1560,6 +2361,113 @@
 "Every motorised pleasure boat registers with the Marine Department; the skipper needs a boat-driving licence course."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Factory list price",
+"sub": "converted to baht at the ECB rate; before VAT, duty and delivery"
+},
+"fees": [
+{
+"k": "Delivery and acceptance",
+"sub": "ferry flight or shipping, handover and documentation",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "VAT 7%",
+"sub": "on the aircraft and delivery",
+"pct": 0.07,
+"withDest": true
+},
+{
+"k": "CAAT registration (HS-)",
+"sub": "registration and certificate fees",
+"fixed": 6000,
+"approx": true
+},
+{
+"k": "Import duty",
+"sub": "civil aircraft enter duty-free",
+"text": "฿0"
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "RU": {
@@ -1733,6 +2641,115 @@
 "The small-craft inspectorate that registers boats and licenses skippers; light boats under 200 kg with motors under 8 kW need no registration."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Factory list price",
+"sub": "converted to rubles; before VAT, duty and delivery. Western types reach Russia only as parallel imports since 2022"
+},
+"fees": [
+{
+"k": "Delivery and acceptance",
+"sub": "ferry flight through a third country for imports",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Import duty",
+"sub": "5% to 20% on imported aircraft by weight class; Russian-built types pay none",
+"pct": 0.1,
+"approx": true,
+"skipZero": true
+},
+{
+"k": "VAT 20%",
+"sub": "on the aircraft, duty and delivery",
+"pct": 0.2,
+"withDest": true
+},
+{
+"k": "Registration (Росавиация, RA-)",
+"sub": "state registration and airworthiness certificate",
+"fixed": 20000,
+"approx": true
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "BR": {
@@ -1911,6 +2928,121 @@
 "The Supreme Court ruled in 2007 that IPVA cannot be charged on boats and aircraft."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Preço de fábrica",
+"sub": "converted to reais at the ECB rate; antes de ICMS, PIS/COFINS e entrega"
+},
+"fees": [
+{
+"k": "Entrega e aceitação",
+"sub": "ferry flight, handover and documentation",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "ICMS",
+"sub": "state tax on aircraft, reduced to 4% in most states for aviation",
+"pct": 0.04,
+"withDest": true,
+"approx": true
+},
+{
+"k": "PIS / COFINS",
+"sub": "federal contributions on the import or sale",
+"pct": 0.0925,
+"withDest": true,
+"approx": true
+},
+{
+"k": "Registro ANAC (RAB)",
+"sub": "matrícula PR-/PS- and certificate fees",
+"fixed": 1500,
+"approx": true
+},
+{
+"k": "Imposto de importação",
+"sub": "civil aircraft and parts enter duty-free",
+"text": "R$0"
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+]
+],
+"typical": "Typical transaction price"
 }
 },
 "CN": {
@@ -2065,6 +3197,123 @@
 "A 10% consumption tax on yachts over 8 m, charged with VAT and duty on imports."
 ]
 ]
+},
+"air": {
+"bands": {
+"hot": [
+1.0,
+1.03
+],
+"steady": [
+0.95,
+1.0
+],
+"deals": [
+0.88,
+0.95
+]
+},
+"basis": {
+"k": "Factory list price",
+"sub": "converted to yuan at the ECB rate; before VAT, duty and delivery"
+},
+"fees": [
+{
+"k": "Delivery and acceptance",
+"sub": "ferry flight or shipping, handover and documentation",
+"fixed": "dest",
+"skipZero": true
+},
+{
+"k": "Import duty",
+"sub": "5% on general-aviation aircraft and helicopters; Chinese-built types pay none",
+"pct": 0.05,
+"approx": true
+},
+{
+"k": "VAT 13%",
+"sub": "on the aircraft, duty and delivery",
+"pct": 0.13,
+"withDest": true
+},
+{
+"k": "CAAC registration (B-)",
+"sub": "nationality registration and airworthiness certificate",
+"fixed": 5000,
+"approx": true
+},
+{
+"k": "Airspace",
+"sub": "general-aviation flights need a flight plan in approved low-altitude airspace; the 2024 low-altitude economy reforms are opening more of it",
+"text": "check your province"
+},
+{
+"k": "Hull and liability insurance, first year",
+"sub": "not compulsory for private flying in most places except third-party cover; 1% to 2% of hull value a year, more for low-time pilots and helicopters",
+"pct": 0.015,
+"info": true,
+"approx": true
+},
+{
+"k": "Delivery flight and acceptance inspection",
+"sub": "ferry to your base and an independent acceptance inspection; the row’s delivery figure covers the factory handover",
+"text": "0.5% – 1% of price"
+},
+{
+"k": "Hangar or tie-down, per year",
+"sub": "T-hangar for a light single, a corporate hangar for a jet",
+"text": "2% – 4% of value"
+},
+{
+"k": "Annual inspection and maintenance, per year",
+"sub": "light single US$3,000–US$8,000; turboprop US$40,000+; jet programmes US$300,000+ plus engine plans",
+"text": "3% – 8% of value"
+},
+{
+"k": "Pilot licence",
+"sub": "private pilot licence from about US$15,000; instrument rating US$10,000+; helicopter PPL US$20,000+; type rating for jets US$30,000–US$60,000, often included with a new jet",
+"text": "US$15,000 – US$60,000"
+}
+],
+"glossary": [
+[
+"Factory list vs typically equipped",
+"Makers quote a base price and a \"typically equipped\" price with the options most buyers take; the row’s range spans both."
+],
+[
+"Delivery position",
+"New aircraft are sold as positions in the production line; a hot type means a wait of one to three years, and positions trade at a premium."
+],
+[
+"Pre-buy / acceptance inspection",
+"An independent inspection before you accept delivery, even on a new aircraft; catches squawks the factory should fix at its cost."
+],
+[
+"Registration",
+"Every aircraft is registered with the national authority (FAA N-number, CAA G-register, EASA state registers, DGCA VT-, CAAC B-); the fee is small, the paperwork is not."
+],
+[
+"Owner-flown",
+"Aircraft a licensed private pilot can fly without a professional crew: pistons, most turboprops and a few single-pilot jets (Vision Jet, Citation M2, Phenom 100)."
+],
+[
+"eVTOL",
+"Electric vertical take-off aircraft; the EHang EH216-S is certified in China and ultralight single-seaters fly in the US, while the air-taxi designs (Joby, Archer, VX4) are still in certification and not sold to individuals."
+],
+[
+"LSA / MOSAIC",
+"Light-sport aircraft: simple two-seaters flown on a sport-pilot licence; the FAA’s 2025 MOSAIC rule lets heavier four-seaters qualify."
+],
+[
+"TBO",
+"Time between overhauls of the engine, 1,500 to 2,200 hours on pistons; an overhaul costs US$30,000 to US$60,000 and is part of the running cost."
+],
+[
+"低空经济",
+"The low-altitude economy policy that is opening airspace below 1,000 m for eVTOLs, drones and general aviation province by province."
+]
+],
+"typical": "Typical transaction price"
 }
 }
 }

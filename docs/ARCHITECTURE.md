@@ -6,16 +6,17 @@ step stitches three source files together and inlines the data.
 ```
 src/head.html    markup + CSS                         ─┐
 src/script.html  all the JavaScript                   ─┼─ node src/build.js ─▶ carfinder.html
-data/*.json      cars, bikes, boats, state tables,    ─┘                     (dist/carfinder-artifact.html with --artifact)
-                 fee rules (vfees), photo index (images)
+data/*.json      cars, bikes, boats, aircraft, state  ─┘                     (dist/carfinder-artifact.html with --artifact)
+                 tables, fee rules (vfees), photo index (images)
 ```
 
 ## The page
-- **Verticals** (`VERTS = ['car','moto','boat']`, the buttons in `#vertTabs`) and **country tabs** (`ORDER`) together
+- **Verticals** (`VERTS = ['car','moto','boat','air']`, the buttons in `#vertTabs`) and **country tabs** (`ORDER`) together
   decide what the page shows: `VT` (the vertical), `CC` (the tab), `C = countryConfig(CC, VT)` (the live config),
   `CARS = DATA[VT][CC]`, `M = MONEY[CC]` and the assumptions `A`. `switchVertical()` / `switchCountry()` call
   `setLive()`, reset the filter state `S`, then `buildChrome()` rebuilds the chips, filter options (sizes, seats or
-  capacity, drivetrain / transmission / propulsion, the efficiency and range-or-length sliders, the sort labels), region
+  capacity, drivetrain / transmission / propulsion / engines, the efficiency and range-or-length sliders, the sort
+  labels), region
   picker, glossary, footer and wizard, and `render()` draws the cards. `?v=moto&cc=IN` on the URL deep-links a view.
 - **Per-vertical config** lives in `VERT[vt]` (bodies, sizes, fuels, labels, wizard questions, price-preset scale,
   loan and distance assumptions, lede). `countryConfig(cc, vt)` lays it over `COUNTRIES[cc]` so every downstream
@@ -31,10 +32,12 @@ data/*.json      cars, bikes, boats, state tables,    ─┘                    
 - **Detail sheet** (`renderDetail`): tags, note, the trim slider, the window-sticker breakdown (`stickerHTML`), payment
   and fuel panels, the efficiency tiles (`effPanel`), the market explanation. Only the price-dependent parts are
   re-rendered while the slider moves (`updateDetailPrice`).
-- **Compare** (`openCompare`): up to four vehicles in a table whose rows follow the vertical (engine / length,
-  seats / capacity, drivetrain / transmission / propulsion); the selection is kept per vertical and country.
+- **Compare** (`openCompare`): up to four vehicles in a table whose rows follow the vertical (engine / length /
+  cruise speed and range, seats / capacity, drivetrain / transmission / propulsion / engines, price per hp or per seat);
+  the selection is kept per vertical and country.
 - **Wizard** (`#wGo`): four answers become filter state (`wizardBudgets`, `wizardUse`, `wizardFuels`, and the fourth
-  question: AWD for cars, learner-friendly sizes for bikes, trailerable lengths for boats).
+  question: AWD for cars, learner-friendly sizes for bikes, trailerable lengths for boats, owner-flown types for
+  aircraft).
 - **Persistence**: vertical, country, region per country, compare list per vertical and country, assumptions per
   vertical and country and the World-tab units, all in localStorage under `cf_*`, every read and write wrapped in
   try/catch.
@@ -43,19 +46,24 @@ data/*.json      cars, bikes, boats, state tables,    ─┘                    
 Everything between `//<<core` and `//core>>` in `src/script.html` is DOM-free so the tests can run it in Node:
 - `normalize(raw, cc, vt)` turns a JSON row into one object shape for every country (`price`, `top`, `fuel`, `fuels`,
   `l100`, `rng`, `kwh`, `hp`, `seats`, `mkt`, `note`, `est`, `isNew`, plus `mpg`/`mpge`/`dest` for the US and
-  `kmpl`/`gst` for India; `ccm` for bikes, `len` and `gph` for boats, `dest` = freight for both).
+  `kmpl`/`gst` for India; `ccm` for bikes, `len` and `gph` for boats, `ktas` (cruise knots), `gph` and `rng` in km
+  for aircraft, `dest` = freight or delivery for all three).
 - `MONEY[cc]` formats money (`money`, short `k`, and `range` with the symbol once), `FX`/`toWorld()` convert for the
   World tab, `BAND[cc]` holds the dealer bands and `MKT_TXT[cc]` their explanations.
 - `bd<CC>(c, price, region, M)` returns `{dlo, dhi, lo, hi, lines, head}`: the dealer band, the on-road range and the
   breakdown lines (`cls`: `est` estimated, `info` shown but not added, `bold`). `breakdown()` dispatches by country for
-  cars and to `bdV()` for bikes and boats.
-- `bdV(cc, c, price, region, M)` is the table-driven engine for motorcycles and boats: `VFEES[cc][vt]` (from
-  `data/vfees.json`) gives the dealer bands, the price basis and a list of fee lines, each a `fixed` amount (or
+  cars and to `bdV()` for bikes, boats and aircraft.
+- `bdV(cc, c, price, region, M)` is the table-driven engine for motorcycles, boats and aircraft: `VFEES[cc][vt]` (from
+  `data/vfees.json`) gives the dealer bands, the price basis (and an optional `typical` label for the dealer-price
+  line) and a list of fee lines, each a `fixed` amount (or
   `"dest"` for the row's freight), a `pct` of the dealer price, `rates` by region, `brackets` on engine size /
   horsepower / length / price, a `hook` into a country rule (`usSales` with caps, `usDoc`, `inRoad`, `caProv`,
   `cnPurchase`, `esMatric`) or a `text` shown as information. `feeAmount()` evaluates one line (modes `pct`, `fixed`,
-  `perhp`; modifiers for fuel, body, EV multiplier, min / max, `withDest`, `plus`, `suffix`).
-- `fuelCost(c, A, cc)`, `monthlyPay(price, A)`, `effShort(c, cc)` and the unit helpers `usMpg()` / `usMi()`.
+  `perhp`; modifiers for fuel, body, EV multiplier, min / max, `withDest`, `plus`, `suffix`); a hook is evaluated before
+  `rates`, so a hook line can carry `rates`, `caps` and `exempt` lists as its parameters.
+- `fuelCost(c, A, cc)`, `monthlyPay(price, A)`, `effShort(c, cc)`, the aircraft text helpers `airSpeedTxt()` /
+  `airRangeTxt()` / `powerLbl()` (knots and nautical miles with their mph, km/h, mile or km twins; horsepower or
+  pounds of thrust) and the unit helpers `usMpg()` / `usMi()`.
 
 ## The World tab
 `DATA[vt].ALL` pools every country's vehicles of that vertical with the vocabulary merged (`Truck` → `Pickup`, `Gas` → `Petrol`, size names
@@ -79,13 +87,15 @@ line on the detail sheet. Nothing is copied into the repository.
    note and the per-country accent colours in `src/head.html`.
 3. `data/cars_<cc>.json` is picked up by `src/build.js` from the country list; add the test tables in
    `test/data.test.mjs`, then `node src/build.js && node --test`.
-4. Bikes and boats for the country: `data/moto_<cc>.json` and `data/boat_<cc>.json` on the 21-field schema, and a
-   `VFEES[cc].moto` / `.boat` entry in `data/vfees.json` (bands, basis, fee lines, glossary); without one the car rules
-   are used as a fallback.
+4. Bikes, boats and aircraft for the country: `data/moto_<cc>.json`, `data/boat_<cc>.json` and `data/air_<cc>.json`
+   on the 21-field schema, and a `VFEES[cc].moto` / `.boat` / `.air` entry in `data/vfees.json` (bands, basis, fee
+   lines, glossary) plus the country's avgas and Jet-A prices in `VERT.air.fuel`; without a fee entry the car rules are
+   used as a fallback.
 
 ## Website
 `index.html` (showcase, the demo video and GIFs, how-to) and `about.html` share the visual language of the author's
 other projects; they are static and hand-written. `brand/tools/shots.py` regenerates the screenshots and the social
-card from the built app; `brand/tools/record.py` records the hero video and the three GIFs in headless Chromium (run
+card from the built app; `brand/tools/record.py` records the hero video and the three GIFs (one walks cars → bikes → boats → aircraft) in
+headless Chromium (run
 by `.github/workflows/record.yml` on the `record-demo` branch, where the Wikimedia photos load).
 `.github/workflows/pages.yml` deploys the repository (minus tests and tools) to GitHub Pages on every push to `main`.

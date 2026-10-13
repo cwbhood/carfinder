@@ -1,5 +1,5 @@
 """Interaction checks on a phone viewport: filters, sort, search, state change, detail sheet and trim slider, compare
-flow, show-more and auto-load, wizard, World-tab currency and units, the cars / motorcycles / boats switch, persistence
+flow, show-more and auto-load, wizard, World-tab currency and units, the cars / motorcycles / boats / aircraft switch, persistence
 across reload, and the data pass (every card, efficiency string, breakdown and detail sheet for every vehicle in every
 vertical renders without NaN/undefined/null).
 
@@ -23,7 +23,8 @@ async def main():
         page = await ctx.new_page()
         errors = []
         page.on('pageerror', lambda e: errors.append('pageerror: '+str(e)))
-        page.on('console', lambda m: errors.append(m.text) if m.type=='error' else None)
+        # photos come from Wikimedia Commons; the audit runs offline and aborts those requests, which is not a page error
+        page.on('console', lambda m: errors.append(m.text) if m.type=='error' and not (m.text.startswith('Failed to load resource') and '127.0.0.1' not in ((m.location or {}).get('url') or '')) else None)
         await page.route('**/*', lambda r: r.continue_() if '127.0.0.1' in r.request.url else r.abort())
         await page.goto(url); await page.wait_for_selector('.card'); await page.evaluate('document.fonts.ready')
 
@@ -39,7 +40,7 @@ async def main():
               const e = effShort(c, CC); if (!e || re.test(e)) out.push(vt+'/'+cc+' eff '+c.make+' '+c.model+': '+e);
               detailCar = c; detailT = 0.5; const p = effPanel(c); if (re.test(p)) out.push(vt+'/'+cc+' effPanel '+c.make+' '+c.model);
               const d = detailDynamic(); if (re.test(d.sticker+d.pay+d.trimVal+d.world)) out.push(vt+'/'+cc+' detail '+c.make+' '+c.model);
-              if (!(c.hp>=0) || !(c.seats>0) || !(c.price>0) || !(c.top>=c.price) || (vt!=='boat' && !(c.hp>0))) out.push(vt+'/'+cc+' fields '+c.make+' '+c.model+' hp='+c.hp+' seats='+c.seats+' price='+c.price+' top='+c.top);
+              if (!(c.hp>=0) || !(c.seats>0) || !(c.price>0) || !(c.top>=c.price) || (vt!=='boat' && vt!=='air' && !(c.hp>0))) out.push(vt+'/'+cc+' fields '+c.make+' '+c.model+' hp='+c.hp+' seats='+c.seats+' price='+c.price+' top='+c.top);
               const o = bd(c, c.price); if (!(o.lo>0 && o.hi>=o.lo && isFinite(o.hi))) out.push(vt+'/'+cc+' breakdown '+c.make+' '+c.model);
             }
             compare = [0, 1]; openCompare(); if (re.test(document.getElementById('cBody').innerHTML)) out.push(vt+'/'+cc+' compare'); document.getElementById('dlgCompare').close(); compare = [];
@@ -47,7 +48,7 @@ async def main():
           setLive('US', 'car'); document.getElementById('countryTabs').innerHTML = countryTabsHTML(); buildChrome(); syncChips(); render(); return out.slice(0,20).concat(['rows:'+n]);
         }""")
         rows = bad.pop()
-        check(f'no NaN/undefined/null in any card, efficiency string, breakdown, compare table or detail sheet ({rows[5:]} vehicles, 3 verticals x 12 tabs)', not bad, bad)
+        check(f'no NaN/undefined/null in any card, efficiency string, breakdown, compare table or detail sheet ({rows[5:]} vehicles, 4 verticals x 12 tabs)', not bad, bad)
 
         # ---- vertical switch: bikes and boats get their own filters, chips, wizard and glossary
         await page.click('.vtab[data-vt="moto"]'); await page.wait_for_timeout(200)
@@ -68,6 +69,21 @@ async def main():
         await page.click('.card [data-detail]'); await page.wait_for_timeout(150)
         check('boats: detail shows on-the-water breakdown with engine hours', await page.evaluate("() => document.getElementById('dlgDetail').open && /on-the-water/i.test(document.getElementById('dBody').textContent) && /hours/i.test(document.getElementById('dBody').textContent)"))
         await page.keyboard.press('Escape'); await page.wait_for_timeout(100)
+        await page.click('.vtab[data-vt="air"]'); await page.wait_for_timeout(200)
+        check('aircraft: seats filter, engines select, no seats group, range and power sort labels', await page.evaluate("() => VT==='air' && CARS.length > 50 && /Planes, jets/.test(document.title) && document.getElementById('sizeLbl').textContent==='Seats' && document.getElementById('driveLbl').textContent==='Engines' && getComputedStyle(document.getElementById('seatsGroup')).display==='none' && document.getElementById('optRng').textContent==='Longest range' && document.getElementById('optPerhp').textContent==='Cheapest per seat' && document.getElementById('rngLbl').textContent==='Minimum range'"))
+        check('aircraft: body chips are aircraft types, fuel chips avgas / Jet-A, price presets in millions', await page.evaluate("() => [...document.querySelectorAll('#bodyChips .chip')].map(b=>b.dataset.body).includes('Helicopter') && [...document.querySelectorAll('#fuelChips .chip')].map(b=>b.textContent).includes('Jet-A') && [...document.querySelectorAll('#pricePresets .opt')].some(b => /M/.test(b.textContent))"))
+        check('aircraft: cards show knots with mph and nautical miles with miles', await page.evaluate("() => / kt \\/ \\d+ mph/.test(document.querySelector('.card .specs').textContent) && / nm \\/ /.test(document.querySelector('.card .specs').textContent)"))
+        await page.evaluate("() => { const r = document.getElementById('rng'); r.value = 1500; r.dispatchEvent(new Event('input', {bubbles:true})); }"); await page.wait_for_timeout(80)
+        check('aircraft: minimum-range slider filters in nautical miles and reads nm/km', await page.evaluate("() => lastList.length > 0 && lastList.every(c => c.rng/1.852 >= 1500)") and 'nm /' in (await page.text_content('#rngOut')))
+        await page.evaluate("() => document.getElementById('resetAll').click()"); await page.wait_for_timeout(50)
+        await page.click('#bodyChips .chip[data-body="Helicopter"]'); await page.wait_for_timeout(50)
+        check('aircraft: helicopter chip filters', await page.evaluate("() => lastList.length > 5 && lastList.every(c => c.body==='Helicopter')"))
+        await page.click('#bodyChips .chip[data-body=""]'); await page.wait_for_timeout(50)
+        await page.click('.card [data-detail]'); await page.wait_for_timeout(150)
+        check('aircraft: detail shows the delivered breakdown with flight hours and avgas or Jet-A', await page.evaluate("() => document.getElementById('dlgDetail').open && /Factory list price/.test(document.getElementById('dBody').textContent) && /flight hours/i.test(document.getElementById('dBody').textContent) && /(avgas|Jet-A|kWh)/.test(document.getElementById('dBody').textContent)"))
+        await page.keyboard.press('Escape'); await page.wait_for_timeout(100)
+        check('aircraft: wizard asks about flying it yourself and the glossary knows knots', await page.evaluate("() => /fly it yourself/.test(document.getElementById('wBody').textContent) && /nautical/.test(document.getElementById('gBody').textContent)"))
+        await page.click('.vtab[data-vt="boat"]'); await page.wait_for_timeout(200)
         await page.reload(); await page.wait_for_selector('.card'); await page.wait_for_timeout(100)
         check('reload restores the vertical', await page.evaluate("() => VT==='boat'"))
         await page.click('.vtab[data-vt="car"]'); await page.wait_for_timeout(200)

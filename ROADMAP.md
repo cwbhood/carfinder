@@ -4,9 +4,11 @@ Tick things off as they ship; add what you learn.
 
 ## Data
 - [x] Motorcycles and scooters (1,444) and boats and jet skis (556) in every country, with their own fee rules (`data/vfees.json`)
-- [x] A photo per vehicle from Wikipedia / Wikimedia Commons with attribution (3,298 so far; silhouettes for the rest)
+- [x] Planes, business jets, helicopters, gyroplanes, gliders and eVTOLs (971) in every country, priced from the factory list with each country's aviation taxes, registration and running costs
+- [x] A photo per vehicle from Wikipedia / Wikimedia Commons with attribution (4,227 so far; silhouettes for the rest)
 - [ ] Confirm the *preliminary* bike and boat prices outside the US against dealer price lists; add trims and more boat builders
-- [ ] Photos for the remaining 1,400 vehicles (mostly boats and small-market bikes without a Wikipedia article)
+- [ ] Photos for the remaining 1,470 vehicles (mostly boats, small-market bikes and new eVTOLs without a Wikipedia article)
+- [ ] Aircraft: pre-owned and demonstrator pricing, the fractional and charter alternatives, and local-currency price lists where makers publish them
 - [ ] Monthly price refresh (incentives and run-out models move fastest; mark the compile date in `ABOUT` and here)
 - [ ] Trim-level rows behind each model (today one row spans base to top; the slider interpolates)
 - [ ] Used-car reference values (Tabela FIPE, Parkers, KBB) next to the new price

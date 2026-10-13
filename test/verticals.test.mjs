@@ -1,5 +1,5 @@
-// Motorcycle and boat datasets: schema checks for every country, the fee-rule file, and the table-driven pricing
-// engine run for every bike and boat in every region. No dependencies: `node --test` runs this.
+// Motorcycle, boat and aircraft datasets: schema checks for every country, the fee-rule file, and the table-driven
+// pricing engine run for every bike, boat and aircraft in every region. No dependencies: `node --test` runs this.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -20,6 +20,12 @@ const B_FUEL = new Set(['Petrol', 'Diesel', 'EV', 'Sail']);
 // cheapest plausible scooter and dearest flagship, in local units (sanity, not policy)
 const M_LIM = { US: [1500, 60000], IN: [40000, 6000000], CN: [2500, 600000], UK: [1500, 60000], AU: [2500, 90000], MX: [12000, 900000], ES: [1500, 60000], TH: [30000, 2500000], RU: [100000, 12000000], BR: [6000, 300000], CA: [2000, 80000] };
 const B_LIM = { US: [2500, 2000000], IN: [500000, 600000000], CN: [10000, 40000000], UK: [3000, 1500000], AU: [4000, 3000000], MX: [100000, 40000000], ES: [3000, 1500000], TH: [200000, 60000000], RU: [30000, 30000000], BR: [10000, 8000000], CA: [3000, 2000000] };
+const A_BODY = new Set(['LSA', 'Piston single', 'Piston twin', 'Turboprop', 'Light jet', 'Midsize jet', 'Large jet', 'Helicopter', 'eVTOL', 'Gyroplane', 'Glider']);
+const A_SIZE = new Set(['Up to 2', '3-4', '5-8', '9-14', 'Over 14']);
+const A_FUEL = new Set(['Avgas', 'Jet-A', 'EV', 'None']);
+// cheapest two-seater and dearest large-cabin jet, in local units (US$50,000 and US$120 M at the ECB rates in the data)
+const A_FX = { US: 1, ES: 0.8807, UK: 0.7549, IN: 95.99, CN: 6.703, AU: 1.4277, MX: 17.897, TH: 33.515, RU: 73.5, BR: 5.2115, CA: 1.418 };
+const A_LIM = Object.fromEntries(Object.entries(A_FX).map(([cc, fx]) => [cc, [50000 * fx, 120e6 * fx]]));
 const between = (x, lo, hi) => typeof x === 'number' && x >= lo && x <= hi;
 
 test('motorcycle datasets follow the 21-field schema in all eleven countries', () => {
@@ -78,10 +84,42 @@ test('boat datasets follow the 21-field schema in all eleven countries', () => {
   assert.ok(total > 450, `${total} boats in all`);
 });
 
-test('fee rules: every country has motorcycle and boat rules, and every fee line is well formed', () => {
+test('aircraft datasets follow the 21-field schema in all eleven countries', () => {
+  let total = 0;
+  for (const cc of CCS) {
+    const rows = load(`data/air_${cc.toLowerCase()}.json`); total += rows.length;
+    assert.ok(rows.length >= 50, `${cc}: ${rows.length} aircraft`);
+    const keys = new Set();
+    rows.forEach((r, i) => {
+      const tag = `air ${cc}#${i} ${r[0]} ${r[1]}`;
+      assert.equal(r.length, 21, `${tag}: 21 fields`);
+      const [mk, md, body, size, cls, fuels, fuel, mn, mx, ktas, gph, rng, kwh, hp, seats, drive, mkt, note, est, isNew, dest] = r;
+      assert.ok(mk && md, `${tag}: names`);
+      assert.ok(A_BODY.has(body) && A_SIZE.has(size) && CLS.has(cls), `${tag}: enums ${body} / ${size} / ${cls}`);
+      assert.ok(fuels.split('/').every(f => A_FUEL.has(f)) && fuels.split('/').includes(fuel), `${tag}: fuels ${fuels} / ${fuel}`);
+      assert.ok(Number.isInteger(mn) && between(mn, ...A_LIM[cc]) && Number.isInteger(mx) && mx >= mn && mx <= A_LIM[cc][1], `${tag}: price ${mn}-${mx}`);
+      assert.ok(between(ktas, 40, 600), `${tag}: cruise ${ktas} kt`);
+      assert.equal(size, seats <= 2 ? 'Up to 2' : seats <= 4 ? '3-4' : seats <= 8 ? '5-8' : seats <= 14 ? '9-14' : 'Over 14', `${tag}: size matches seats`);
+      if (['Turboprop', 'Light jet', 'Midsize jet', 'Large jet'].includes(body)) assert.equal(fuel, 'Jet-A', `${tag}: turbines burn Jet-A`);
+      if (/turbofan/i.test(drive)) assert.ok(['Light jet', 'Midsize jet', 'Large jet'].includes(body), `${tag}: turbofans are jets`);
+      if (fuel === 'EV') { assert.equal(gph, null, `${tag}: electric has no fuel burn`); assert.ok(between(kwh, 5, 400), `${tag}: battery ${kwh}`); assert.ok(/electric/i.test(drive), `${tag}: electric drive`); }
+      else if (fuel === 'None') { assert.equal(hp, 0, `${tag}: no engine means no power`); assert.equal(gph, null, `${tag}: no fuel burn`); assert.equal(rng, null, `${tag}: no fixed range`); assert.equal(body, 'Glider', `${tag}: only gliders fly without an engine`); }
+      else assert.ok(between(gph, 1, 600), `${tag}: gal/h ${gph}`);
+      if (fuel !== 'None') { assert.ok(between(hp, 20, 80000), `${tag}: power ${hp}`); assert.ok(between(rng, 20, 15000), `${tag}: range ${rng} km`); }
+      assert.ok(between(seats, 1, 30) && typeof drive === 'string' && drive && MKT.has(mkt), `${tag}: seats/drive/market`);
+      assert.ok(typeof note === 'string' && note.length <= 240 && !note.includes('"'), `${tag}: note`);
+      assert.ok([0, 1].includes(est) && [0, 1].includes(isNew) && between(dest, 0, 1.2e6 * A_FX[cc]), `${tag}: flags/delivery`);
+      if (cc !== 'US') assert.equal(est, 1, `${tag}: converted prices are preliminary`);
+      const k = mk + '|' + md; assert.ok(!keys.has(k), `${cc}: duplicate ${k}`); keys.add(k);
+    });
+  }
+  assert.ok(total > 900, `${total} aircraft in all`);
+});
+
+test('fee rules: every country has motorcycle, boat and aircraft rules, and every fee line is well formed', () => {
   const V = load('data/vfees.json');
   const KIND = ['fixed', 'pct', 'rates', 'brackets', 'hook', 'text'];
-  for (const cc of CCS) for (const vt of ['moto', 'boat']) {
+  for (const cc of CCS) for (const vt of ['moto', 'boat', 'air']) {
     const F = V[cc] && V[cc][vt]; assert.ok(F, `${cc} ${vt} rules exist`);
     for (const m of ['hot', 'steady', 'deals']) assert.ok(Array.isArray(F.bands[m]) && F.bands[m][0] <= F.bands[m][1] && F.bands[m][0] > 0.6 && F.bands[m][1] < 1.1, `${cc} ${vt} band ${m}`);
     assert.ok(F.basis && F.basis.k && F.basis.sub, `${cc} ${vt} basis`);
@@ -100,32 +138,34 @@ function core() {
   const script = fs.readFileSync(path.join(ROOT, 'src/script.html'), 'utf8');
   const js = script.match(/<script>([\s\S]*)<\/script>/)[1];
   const coreSrc = js.match(/\/\/<<core([\s\S]*)\/\/core>>/)[1];
-  const RAW = { moto: {}, boat: {} };
-  for (const cc of CCS) { RAW.moto[cc] = load(`data/moto_${cc.toLowerCase()}.json`); RAW.boat[cc] = load(`data/boat_${cc.toLowerCase()}.json`); }
+  const RAW = { moto: {}, boat: {}, air: {} };
+  for (const cc of CCS) for (const vt of ['moto', 'boat', 'air']) RAW[vt][cc] = load(`data/${vt}_${cc.toLowerCase()}.json`);
   const STATES_US = load('data/states_us.json'), STATES_IN = load('data/states_in.json'), VFEES = load('data/vfees.json');
-  const X = new Function('STATES_US', 'STATES_IN', 'VFEES', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS};')(STATES_US, STATES_IN, VFEES);
-  const DATA = { moto: {}, boat: {} };
-  for (const vt of ['moto', 'boat']) for (const cc of CCS) DATA[vt][cc] = X.normalize(RAW[vt][cc], cc, vt);
+  const X = new Function('STATES_US', 'STATES_IN', 'VFEES', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS, airSpeedTxt, airRangeTxt, powerLbl};')(STATES_US, STATES_IN, VFEES);
+  const DATA = { moto: {}, boat: {}, air: {} };
+  for (const vt of ['moto', 'boat', 'air']) for (const cc of CCS) DATA[vt][cc] = X.normalize(RAW[vt][cc], cc, vt);
   return { X, DATA, STATES_US, STATES_IN };
 }
+const AVFUEL = { US: [6.95, 6.25], IN: [400, 110], CN: [25, 8], UK: [2.6, 1.2], AU: [3.1, 1.9], MX: [55, 30], ES: [2.9, 1.3], TH: [110, 40], RU: [400, 95], BR: [12, 7.5], CA: [2.9, 2.0] };
 const ASSUME = { US: { gas: 4.45, elec: 0.17, miles: 5000, hours: 75, apr: 8, term: 48, down: 10 }, IN: { petrol: 100, diesel: 90, elec: 8, miles: 4000, hours: 75, apr: 10, term: 48, down: 10 },
   CN: { petrol: 8.6, diesel: 8.3, elec: 0.55, miles: 5000, hours: 75, apr: 4.5, term: 48, down: 10 }, UK: { petrol: 1.741, diesel: 1.992, elec: 0.2632, miles: 3000, hours: 75, apr: 8.9, term: 48, down: 10 },
   AU: { petrol: 2.35, diesel: 2.8, elec: 0.32, miles: 5000, hours: 75, apr: 8.7, term: 48, down: 10 }, MX: { petrol: 23.69, diesel: 27.01, elec: 2.5, miles: 6000, hours: 75, apr: 15, term: 48, down: 10 },
   ES: { petrol: 1.93, diesel: 1.93, elec: 0.15, miles: 5000, hours: 75, apr: 9, term: 48, down: 10 }, TH: { petrol: 34.94, diesel: 41.44, elec: 4.2, miles: 6000, hours: 75, apr: 6.5, term: 48, down: 10 },
   RU: { petrol: 69.98, diesel: 81.25, elec: 8, miles: 7000, hours: 75, apr: 24.6, term: 48, down: 10 }, BR: { petrol: 6.59, diesel: 7.05, elec: 1.0, miles: 5000, hours: 75, apr: 27, term: 48, down: 10 },
   CA: { petrol: 1.89, diesel: 2.64, elec: 0.12, miles: 6000, hours: 75, apr: 8, term: 48, down: 10 } };
+for (const cc of CCS) { ASSUME[cc].avgas = AVFUEL[cc][0]; ASSUME[cc].jeta = AVFUEL[cc][1]; }
 
-test('pricing engine: every bike and boat in every region gets a finite, plausible on-road range with no NaN text', () => {
+test('pricing engine: every bike, boat and aircraft in every region gets a finite, plausible on-road range with no NaN text', () => {
   const { X, DATA, STATES_US, STATES_IN } = core();
   let rows = 0;
-  for (const vt of ['moto', 'boat']) for (const cc of CCS) {
+  for (const vt of ['moto', 'boat', 'air']) for (const cc of CCS) {
     const regions = cc === 'US' ? Object.keys(STATES_US) : cc === 'IN' ? Object.keys(STATES_IN) : Object.keys(X.REGIONS[cc]);
     for (const r of regions) for (const c of DATA[vt][cc]) {
       rows++;
       const o = X.breakdown(cc, c, c.price, r, X.MONEY[cc]);
       assert.ok(o.lo > 0 && o.hi >= o.lo * 0.999 && Number.isFinite(o.hi), `${vt} ${cc} ${r} ${c.make} ${c.model}: total ${o.lo}-${o.hi}`);
       assert.ok(o.lo >= c.price * 0.7 && o.hi <= c.price * 1.9, `${vt} ${cc} ${r} ${c.make} ${c.model}: on-road ${o.lo}-${o.hi} vs list ${c.price} is not plausible`);
-      assert.ok(o.lines.length >= 3 && o.lines.some(l => l.k === 'Typical dealer price'), `${vt} ${cc} ${c.make} ${c.model}: breakdown lines`);
+      assert.ok(o.lines.length >= 3 && o.lines.some(l => /^Typical (dealer|transaction) price$/.test(l.k)), `${vt} ${cc} ${c.make} ${c.model}: breakdown lines`);
       for (const l of o.lines) assert.ok(!/NaN|undefined|null/.test(l.v + l.k + (l.sub || '')), `${vt} ${cc} ${r} ${c.make} ${c.model}: line "${l.k}: ${l.v}"`);
     }
     for (const c of DATA[vt][cc]) {
@@ -136,13 +176,19 @@ test('pricing engine: every bike and boat in every region gets a finite, plausib
       assert.ok(f == null || (f >= 0 && Number.isFinite(f)), `${vt} ${cc} ${c.make} ${c.model}: fuel ${f}`);
       if (vt === 'boat' && c.fuel === 'Petrol' && c.gph) assert.ok(f > 0, `${vt} ${cc} ${c.make} ${c.model}: a petrol boat has a fuel bill`);
       if (c.fuel === 'Sail') assert.equal(f, null, `${vt} ${cc} ${c.make} ${c.model}: sail has no fuel bill`);
+      if (vt === 'air') {
+        if (c.fuel === 'None') assert.equal(f, null, `${vt} ${cc} ${c.make} ${c.model}: a glider has no fuel bill`); else assert.ok(f > 0, `${vt} ${cc} ${c.make} ${c.model}: fuel bill ${f}`);
+        const t = X.airSpeedTxt(c, cc) + ' ' + X.airRangeTxt(c, cc) + ' ' + X.powerLbl(c, 'hp');
+        assert.ok(!/NaN|undefined|null/.test(t) && / kt \/ /.test(t) && (c.fuel === 'None' || / nm \/ /.test(t)), `${vt} ${cc} ${c.make} ${c.model}: "${t}" needs knots and nautical miles with their twins`);
+        if (cc !== 'US' && c.gph) assert.ok(/ L\/h \/ .* gal\/h/.test(e), `${vt} ${cc} ${c.make} ${c.model}: "${e}" carries no gal/h companion`);
+      }
       const p = X.monthlyPay(c.price, ASSUME[cc]); assert.ok(p > 0 && Number.isFinite(p), `${vt} ${cc} ${c.make} ${c.model}: payment`);
     }
   }
-  assert.ok(rows > 30000, `${rows} vehicle-region combinations checked`);
+  assert.ok(rows > 44000, `${rows} vehicle-region combinations checked`);
 });
 
-test('pricing engine: known bike and boat quotes land where dealers do', () => {
+test('pricing engine: known bike, boat and aircraft quotes land where dealers do', () => {
   const { X, DATA } = core();
   const q = (vt, cc, mk, md, region) => { const c = DATA[vt][cc].find(x => x.make === mk && x.model === md); assert.ok(c, `${vt} ${cc} ${mk} ${md} exists`); return X.breakdown(cc, c, c.price, region, X.MONEY[cc]); };
   let o = q('moto', 'US', 'Honda', 'Grom', 'TX');            assert.ok(o.lo > 4100 && o.hi < 4900, `Grom Texas out-the-door ${o.lo}-${o.hi}`);
@@ -151,4 +197,8 @@ test('pricing engine: known bike and boat quotes land where dealers do', () => {
   o = q('boat', 'US', 'Sea-Doo', 'Spark', 'FL');            assert.ok(o.lo > 8000 && o.hi < 11000, `Spark Florida ${o.lo}-${o.hi}`);
   o = q('moto', 'UK', 'Honda', 'PCX125', 'GB');              assert.ok(o.lo > 3600 && o.hi <= 3800, `PCX125 UK OTR ${o.lo}-${o.hi}`);
   o = q('moto', 'CA', 'Royal Enfield', 'Hunter 350', 'ON');  assert.ok(o.lo > 6500 && o.hi < 7800, `Hunter 350 Ontario all-in ${o.lo}-${o.hi}`);
+  o = q('air', 'US', 'Cirrus', 'SR22 / SR22T (G7+)', 'TX');   assert.ok(o.lo > 950000 && o.hi < 1010000, `SR22 Texas delivered with 6.25% sales tax ${o.lo}-${o.hi}`);
+  o = q('air', 'US', 'Cirrus', 'SR22 / SR22T (G7+)', 'OR');   assert.ok(o.lo > 900000 && o.hi < 945000, `SR22 Oregon, no sales tax ${o.lo}-${o.hi}`);
+  o = q('air', 'UK', 'Bombardier', 'Challenger 3500', 'GB');  assert.ok(o.lo / 20760000 > 1.13 && o.hi / 20760000 < 1.21, `Challenger 3500 UK with 20% VAT ${o.lo}-${o.hi}`);
+  o = q('air', 'IN', 'Robinson', 'R44 Raven I / II', 'MH');  assert.ok(o.lo / 43200000 > 1.25 && o.hi / 43200000 < 1.4, `R44 India with 3% duty and 28% GST ${o.lo}-${o.hi}`);
 });
