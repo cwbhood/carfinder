@@ -6,6 +6,7 @@
                                          which supplies its own document skeleton; fonts from Google Fonts)
      node src/build.js --check       -> build to memory and exit 1 if carfinder.html on disk is out of date
 
+   Also writes methodology.html (the "How we calculate" page) from the same data; see src/methodology.js.
    The data is inlined so the page works from a file:// URL and offline once loaded. */
 const fs = require('fs');
 const path = require('path');
@@ -15,6 +16,8 @@ const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const SITE = 'https://destinjones.github.io/carfinder/';
 const DESC = 'Every new car, truck, motorcycle, scooter, boat, plane, jet and helicopter on sale in the USA, India, China, the UK, Australia, Mexico, Spain, Thailand, Russia, Brazil and Canada: list price, what dealers really charge, and the on-road price for your state or city. Photos, filters, compare, fuel economy and EV range. Free, open source, no account.';
 
+const VERSION = '1.0.0';                 // bump with CHANGELOG.md and the git tag
+const crypto = require('crypto');
 const CCS = ['US','IN','CN','UK','AU','MX','ES','TH','RU','BR','CA'];
 const exists = p => fs.existsSync(path.join(ROOT, p));
 
@@ -35,7 +38,8 @@ function assemble(){
   obj('/*__STATES_IN__*/{}', 'data/states_in.json');
   obj('/*__VFEES__*/{}', 'data/vfees.json');
   obj('/*__IMAGES__*/{}', 'data/images.json');
-  const body = read('src/head.html') + script;
+  obj('/*__SOURCES__*/{}', 'data/sources.json');
+  const body = read('src/head.html').replace('/*__VERSION__*/', 'v' + VERSION) + script;
   const js = body.match(/<script>([\s\S]*)<\/script>/)[1];
   new Function(js);                                   // syntax check; throws on a parse error
   return body;
@@ -59,6 +63,7 @@ function page(body){
 <link rel="canonical" href="${SITE}carfinder.html">
 <link rel="icon" href="brand/emblem/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="brand/emblem/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CarFinder 2026">
 <meta property="og:url" content="${SITE}carfinder.html">
@@ -84,6 +89,8 @@ ${body}
 
 const mode = process.argv[2] || '';
 const body = assemble();
+const methodology = () => require('./methodology.js').build(body);
+const serviceWorker = pageHTML => read('src/sw.js').replace('/*__SW_VERSION__*/', VERSION + '-' + crypto.createHash('sha1').update(pageHTML).digest('hex').slice(0, 10));
 if (mode === '--artifact'){
   fs.mkdirSync(path.join(ROOT, 'dist'), {recursive: true});
   const out = '<title>CarFinder 2026</title>\n' + GOOGLE_FONTS + '\n' + body;
@@ -92,9 +99,18 @@ if (mode === '--artifact'){
 } else if (mode === '--check'){
   const fresh = page(body), onDisk = fs.existsSync(path.join(ROOT, 'carfinder.html')) ? read('carfinder.html') : '';
   if (fresh !== onDisk){ console.error('carfinder.html is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
-  console.log('carfinder.html is up to date');
+  const m = methodology(), mDisk = fs.existsSync(path.join(ROOT, 'methodology.html')) ? read('methodology.html') : '';
+  if (m !== mDisk){ console.error('methodology.html is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
+  const sw = serviceWorker(fresh), swDisk = fs.existsSync(path.join(ROOT, 'sw.js')) ? read('sw.js') : '';
+  if (sw !== swDisk){ console.error('sw.js is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
+  console.log('carfinder.html, methodology.html and sw.js are up to date');
 } else {
   const out = page(body);
   fs.writeFileSync(path.join(ROOT, 'carfinder.html'), out);
   console.log('wrote carfinder.html', (out.length/1024).toFixed(0), 'KB');
+  const m = methodology();
+  fs.writeFileSync(path.join(ROOT, 'methodology.html'), m);
+  console.log('wrote methodology.html', (m.length/1024).toFixed(0), 'KB');
+  fs.writeFileSync(path.join(ROOT, 'sw.js'), serviceWorker(out));
+  console.log('wrote sw.js');
 }

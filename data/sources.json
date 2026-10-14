@@ -1,0 +1,995 @@
+{
+ "note": "Provenance for every price shown in the app: when each dataset was compiled, the exchange rates used, the sources each dataset was compiled from, and the makers' own sites. Rendered in the detail sheet and on methodology.html.",
+ "compiled": {
+  "car": "2026-09-29",
+  "moto": "2026-10-10",
+  "boat": "2026-10-10",
+  "air": "2026-10-12"
+ },
+ "rulesAsOf": {
+  "car": "2026-09-29",
+  "moto": "2026-10-10",
+  "boat": "2026-10-10",
+  "air": "2026-10-12"
+ },
+ "fx": {
+  "date": "2026-09-29",
+  "name": "ECB euro foreign exchange reference rates (rubles at the market rate)",
+  "url": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html"
+ },
+ "sets": {
+  "car/US": {
+   "basis": "Manufacturer's suggested retail price (MSRP) by trim, 2026 model year",
+   "sources": [
+    [
+     "Manufacturer build-and-price pages",
+     null
+    ],
+    [
+     "EPA fuel-economy ratings (fueleconomy.gov)",
+     "https://www.fueleconomy.gov"
+    ],
+    [
+     "Cox Automotive / Kelley Blue Book incentive reports (dealer bands)",
+     "https://www.coxautoinc.com"
+    ]
+   ],
+   "rules": "State and average local sales-tax rate, typical dealer documentation fee, title and plates per state (data/states_us.json)"
+  },
+  "car/IN": {
+   "basis": "Ex-showroom price by variant, GST included",
+   "sources": [
+    [
+     "Manufacturer price lists",
+     null
+    ],
+    [
+     "CarDekho",
+     "https://www.cardekho.com"
+    ],
+    [
+     "CarWale",
+     "https://www.carwale.com"
+    ],
+    [
+     "ARAI figures from brand brochures",
+     null
+    ]
+   ],
+   "rules": "State RTO road-tax slabs by price and fuel, registration, HSRP and FASTag, first-year insurance, 1% TCS above ₹10 lakh (data/states_in.json); GST slabs of 22 September 2025"
+  },
+  "car/CN": {
+   "basis": "Manufacturer guide price (厂商指导价) by trim, VAT included",
+   "sources": [
+    [
+     "Autohome brand price pages",
+     "https://car.autohome.com.cn"
+    ],
+    [
+     "CPCA monthly retail data (market bands)",
+     "http://www.cpcaauto.com"
+    ]
+   ],
+   "rules": "Purchase tax, compulsory and commercial insurance, registration and the plate cost per city (docs/tax-notes/cn.md)"
+  },
+  "car/UK": {
+   "basis": "Manufacturer on-the-road (OTR) price by trim",
+   "sources": [
+    [
+     "Manufacturer price lists",
+     null
+    ],
+    [
+     "Carwow",
+     "https://www.carwow.co.uk"
+    ],
+    [
+     "What Car?",
+     "https://www.whatcar.com"
+    ],
+    [
+     "gov.uk vehicle tax rate tables",
+     "https://www.gov.uk/vehicle-tax-rate-tables"
+    ]
+   ],
+   "rules": "VED inside the OTR, Electric Car Grant eligibility, insurance by region (docs/tax-notes/uk.md)"
+  },
+  "car/AU": {
+   "basis": "Manufacturer RRP before on-road costs",
+   "sources": [
+    [
+     "carsguide price pages",
+     "https://www.carsguide.com.au"
+    ],
+    [
+     "CarExpert",
+     "https://www.carexpert.com.au"
+    ],
+    [
+     "Drive",
+     "https://www.drive.com.au"
+    ],
+    [
+     "ATO luxury car tax thresholds",
+     "https://www.ato.gov.au/tax-rates-and-codes/luxury-car-tax-rate-and-thresholds"
+    ]
+   ],
+   "rules": "Stamp duty, registration, CTP, plates and dealer delivery per state (docs/tax-notes/au.md)"
+  },
+  "car/MX": {
+   "basis": "Precio de lista, IVA and ISAN included",
+   "sources": [
+    [
+     "Autocosmos catálogo",
+     "https://www.autocosmos.com.mx"
+    ],
+    [
+     "Manufacturer sites",
+     null
+    ],
+    [
+     "SAT, Anexo 15 RMF 2026 (ISAN)",
+     "https://www.sat.gob.mx"
+    ]
+   ],
+   "rules": "Alta de placas, holograma, tenencia and refrendo per estado (docs/tax-notes/mx.md)"
+  },
+  "car/ES": {
+   "basis": "PVP recomendado with IVA and impuesto de matriculación",
+   "sources": [
+    [
+     "km77 tariff pages",
+     "https://www.km77.com"
+    ],
+    [
+     "Manufacturer tariffs",
+     null
+    ],
+    [
+     "DGT fee catalogue",
+     "https://sedeclave.dgt.gob.es/WEB_Tasas/jsp/tasas/download/catalogoPrecioTasas.pdf"
+    ]
+   ],
+   "rules": "Matriculación costs, IVTM, IGIC/IPSI recomputation, Plan Auto+ (docs/tax-notes/es.md)"
+  },
+  "car/TH": {
+   "basis": "Retail price (ราคาป้าย) with excise, interior tax and VAT",
+   "sources": [
+    [
+     "Manufacturer sites",
+     null
+    ],
+    [
+     "car250.com",
+     "https://www.car250.com"
+    ],
+    [
+     "AutoLifeThailand",
+     "https://autolifethailand.tv"
+    ],
+    [
+     "9carthai",
+     "https://www.9carthai.com"
+    ]
+   ],
+   "rules": "DLT registration, annual tax, พ.ร.บ. and dealer processing (docs/tax-notes/th.md)"
+  },
+  "car/RU": {
+   "basis": "Maximum recommended retail price (РРЦ / МЦП) with VAT",
+   "sources": [
+    [
+     "Official price lists (brand sites)",
+     null
+    ],
+    [
+     "Avtogermes trim tables",
+     "https://www.avtogermes.ru"
+    ],
+    [
+     "Drom catalogue",
+     "https://www.drom.ru"
+    ],
+    [
+     "Autostat market data",
+     "https://www.autostat.ru"
+    ]
+   ],
+   "rules": "Add-on packages, registration duty, ОСАГО by region, transport tax (docs/tax-notes/ru.md)"
+  },
+  "car/BR": {
+   "basis": "Preço público sugerido (tabela) with taxes and frete",
+   "sources": [
+    [
+     "Webmotors 0 km catalogue",
+     "https://www.webmotors.com.br"
+    ],
+    [
+     "Manufacturer offer pages",
+     null
+    ],
+    [
+     "Fenabrave sales data",
+     "https://www.fenabrave.org.br"
+    ]
+   ],
+   "rules": "Emplacamento and first-year IPVA per state (docs/tax-notes/br.md)"
+  },
+  "car/CA": {
+   "basis": "MSRP before freight and PDI",
+   "sources": [
+    [
+     "Manufacturer newsroom price releases",
+     null
+    ],
+    [
+     "Unhaggle",
+     "https://unhaggle.com"
+    ],
+    [
+     "AutoTrader.ca research pages",
+     "https://www.autotrader.ca/research/"
+    ],
+    [
+     "Le Guide de l'auto",
+     "https://www.guideautoweb.com"
+    ],
+    [
+     "NRCan fuel-consumption ratings",
+     "https://natural-resources.canada.ca/energy-efficiency/transportation-alternative-fuels/fuel-consumption-guide"
+    ]
+   ],
+   "rules": "Freight & PDI, federal levies, provincial sales tax, registration and EV rebates (docs/tax-notes/ca.md)"
+  },
+  "moto/US": {
+   "basis": "MSRP before freight and setup, 2026 and early 2027 model years",
+   "sources": [
+    [
+     "Manufacturer sites and dealer showroom listings",
+     null
+    ],
+    [
+     "State DMV fee schedules (docs/tax-notes/us-bikes-boats.md)",
+     null
+    ]
+   ],
+   "rules": "Freight and setup, doc fee, sales tax, title, plates and compulsory insurance per state"
+  },
+  "boat/US": {
+   "basis": "MSRP for the standard package (boat, motor and trailer where sold that way)",
+   "sources": [
+    [
+     "Manufacturer sites and dealer listings",
+     null
+    ],
+    [
+     "State boat sales-tax caps and registration fees (docs/tax-notes/us-bikes-boats.md)",
+     null
+    ]
+   ],
+   "rules": "Freight and prep, doc fee, sales tax with the boat caps, registration by length, trailer plates per state"
+  },
+  "air/ALL": {
+   "basis": "Manufacturer factory list price, base to typically equipped, 2026",
+   "sources": [
+    [
+     "Manufacturer price lists and type announcements",
+     null
+    ],
+    [
+     "GAMA shipment and billing reports",
+     "https://gama.aero"
+    ],
+    [
+     "AIN (Aviation International News)",
+     "https://www.ainonline.com"
+    ],
+    [
+     "Flying Magazine",
+     "https://www.flyingmag.com"
+    ]
+   ],
+   "rules": "Sales tax, VAT or GST with the aircraft exemptions and caps, duty, registration with the national authority (data/vfees.json)"
+  }
+ },
+ "setsDefault": {
+  "moto": {
+   "basis": "Maker's published price for each variant, on the basis used locally",
+   "sources": [
+    [
+     "Maker price lists and dealer listings in this market",
+     null
+    ]
+   ],
+   "rules": "Freight and setup, tax, registration, plates and compulsory insurance for the region (data/vfees.json)"
+  },
+  "boat": {
+   "basis": "Maker's published price for the standard package",
+   "sources": [
+    [
+     "Maker price lists and dealer listings in this market",
+     null
+    ]
+   ],
+   "rules": "Freight and commissioning, tax, registration and fees for the region (data/vfees.json)"
+  }
+ },
+ "brands": {
+  "Toyota": "https://www.toyota.com",
+  "Honda": "https://www.honda.com",
+  "Hyundai": "https://www.hyundai.com",
+  "Kia": "https://www.kia.com",
+  "Ford": "https://www.ford.com",
+  "Chevrolet": "https://www.chevrolet.com",
+  "GMC": "https://www.gmc.com",
+  "Buick": "https://www.buick.com",
+  "Cadillac": "https://www.cadillac.com",
+  "Ram": "https://www.ramtrucks.com",
+  "Jeep": "https://www.jeep.com",
+  "Dodge": "https://www.dodge.com",
+  "Chrysler": "https://www.chrysler.com",
+  "Nissan": "https://www.nissan-global.com",
+  "Mazda": "https://www.mazda.com",
+  "Subaru": "https://www.subaru.com",
+  "Volkswagen": "https://www.vw.com",
+  "Audi": "https://www.audi.com",
+  "BMW": "https://www.bmw.com",
+  "Mercedes-Benz": "https://www.mercedes-benz.com",
+  "Mercedes-AMG": "https://www.mercedes-amg.com",
+  "Tesla": "https://www.tesla.com",
+  "Lexus": "https://www.lexus.com",
+  "Acura": "https://www.acura.com",
+  "Infiniti": "https://www.infinitiusa.com",
+  "INFINITI": "https://www.infinitiusa.com",
+  "Genesis": "https://www.genesis.com",
+  "Porsche": "https://www.porsche.com",
+  "Volvo": "https://www.volvocars.com",
+  "Polestar": "https://www.polestar.com",
+  "Land Rover": "https://www.landrover.com",
+  "Jaguar": "https://www.jaguar.com",
+  "MINI": "https://www.mini.com",
+  "Mini": "https://www.mini.com",
+  "Mitsubishi": "https://www.mitsubishi-motors.com",
+  "Suzuki": "https://www.globalsuzuki.com",
+  "Maruti Suzuki": "https://www.marutisuzuki.com",
+  "Tata": "https://cars.tatamotors.com",
+  "Mahindra": "https://auto.mahindra.com",
+  "MG": "https://www.mgmotor.co.uk",
+  "BYD": "https://www.byd.com",
+  "Skoda": "https://www.skoda-auto.com",
+  "SEAT": "https://www.seat.com",
+  "Seat": "https://www.seat.com",
+  "Cupra": "https://www.cupraofficial.com",
+  "Renault": "https://www.renault.com",
+  "Dacia": "https://www.dacia.com",
+  "Peugeot": "https://www.peugeot.com",
+  "Citroën": "https://www.citroen.com",
+  "Citroen": "https://www.citroen.com",
+  "DS": "https://www.dsautomobiles.com",
+  "Opel": "https://www.opel.com",
+  "Vauxhall": "https://www.vauxhall.co.uk",
+  "Fiat": "https://www.fiat.com",
+  "FIAT": "https://www.fiat.com",
+  "Alfa Romeo": "https://www.alfaromeo.com",
+  "Abarth": "https://www.abarth.com",
+  "Lancia": "https://www.lancia.com",
+  "Maserati": "https://www.maserati.com",
+  "Ferrari": "https://www.ferrari.com",
+  "Lamborghini": "https://www.lamborghini.com",
+  "Bentley": "https://www.bentleymotors.com",
+  "Rolls-Royce": "https://www.rolls-roycemotorcars.com",
+  "Aston Martin": "https://www.astonmartin.com",
+  "McLaren": "https://cars.mclaren.com",
+  "Lotus": "https://www.lotuscars.com",
+  "Alpine": "https://www.alpinecars.com",
+  "Smart": "https://www.smart.com",
+  "Lucid": "https://www.lucidmotors.com",
+  "Rivian": "https://www.rivian.com",
+  "VinFast": "https://vinfastauto.com",
+  "Geely": "https://global.geely.com",
+  "Zeekr": "https://www.zeekrlife.com",
+  "NIO": "https://www.nio.com",
+  "Xpeng": "https://www.xpeng.com",
+  "Li Auto": "https://www.lixiang.com",
+  "Xiaomi": "https://www.xiaomiev.com",
+  "GWM": "https://www.gwm-global.com",
+  "Haval": "https://www.haval-global.com",
+  "Leapmotor": "https://www.leapmotor.com",
+  "Denza": "https://www.denza.com",
+  "Avatr": "https://www.avatr.com",
+  "AITO": "https://www.aitoauto.com",
+  "JAC": "https://www.jac.com.cn",
+  "Lynk & Co": "https://www.lynkco.com",
+  "GAC": "https://www.gac-motor.com",
+  "Lada": "https://www.lada.ru",
+  "UAZ": "https://uaz.ru",
+  "GAZ": "https://azgaz.ru",
+  "Tank": "https://tank.ru",
+  "Aurus": "https://aurusmotors.com",
+  "Evolute": "https://evolute.ru",
+  "Sollers": "https://sollers-auto.ru",
+  "Hongqi": "https://www.hongqi.ru",
+  "Force": "https://www.forcemotors.com",
+  "Isuzu": "https://www.isuzu.co.jp",
+  "KGM": "https://www.kgm-motors.co.uk",
+  "INEOS": "https://ineosgrenadier.com",
+  "Ineos": "https://ineosgrenadier.com",
+  "LDV": "https://www.ldvautomotive.com.au",
+  "Omoda": "https://www.omodajaecoo.com",
+  "Jaecoo": "https://www.omodajaecoo.com",
+  "Chery": "https://www.cheryinternational.com",
+  "Chirey": "https://www.chirey.mx",
+  "Changan": "https://www.changaninternational.com",
+  "Deepal": "https://www.changaninternational.com",
+  "Wuling": "https://www.sgmw.com.cn",
+  "Lincoln": "https://www.lincoln.com",
+  "Harley-Davidson": "https://www.harley-davidson.com",
+  "Indian": "https://www.indianmotorcycle.com",
+  "Ducati": "https://www.ducati.com",
+  "KTM": "https://www.ktm.com",
+  "Husqvarna": "https://www.husqvarna-motorcycles.com",
+  "Triumph": "https://www.triumphmotorcycles.com",
+  "Royal Enfield": "https://www.royalenfield.com",
+  "Aprilia": "https://www.aprilia.com",
+  "Moto Guzzi": "https://www.motoguzzi.com",
+  "Vespa": "https://www.vespa.com",
+  "Piaggio": "https://www.piaggio.com",
+  "MV Agusta": "https://www.mvagusta.com",
+  "Benelli": "https://www.benelli.com",
+  "CFMoto": "https://www.cfmoto.com",
+  "QJ Motor": "https://www.qjmotor.com",
+  "Kymco": "https://www.kymco.com",
+  "SYM": "https://www.sym-global.com",
+  "Zero": "https://www.zeromotorcycles.com",
+  "LiveWire": "https://www.livewire.com",
+  "Energica": "https://www.energicamotor.com",
+  "Can-Am": "https://can-am.brp.com",
+  "Polaris": "https://www.polaris.com",
+  "Polaris Slingshot": "https://slingshot.polaris.com",
+  "Hero": "https://www.heromotocorp.com",
+  "TVS": "https://www.tvsmotor.com",
+  "Bajaj": "https://www.bajajauto.com",
+  "Jawa": "https://www.jawamotorcycles.com",
+  "Yezdi": "https://www.yezdi.com",
+  "Ola": "https://www.olaelectric.com",
+  "Ather": "https://www.atherenergy.com",
+  "Vida": "https://www.vidaworld.com",
+  "Ultraviolette": "https://www.ultraviolette.com",
+  "Revolt": "https://www.revoltmotors.com",
+  "Matter": "https://www.matter.in",
+  "Simple Energy": "https://www.simpleenergy.in",
+  "Kinetic Green": "https://www.kineticgreen.com",
+  "BGauss": "https://www.bgauss.com",
+  "Italika": "https://www.italika.mx",
+  "NIU": "https://www.niu.com",
+  "Yadea": "https://www.yadea.com",
+  "Lexmoto": "https://www.lexmoto.co.uk",
+  "Sinnis": "https://www.sinnis.co.uk",
+  "Keeway": "https://www.keeway.com",
+  "Mutt": "https://www.muttmotorcycles.com",
+  "Maeving": "https://www.maeving.com",
+  "Lambretta": "https://www.lambretta.com",
+  "Silence": "https://www.silence.eco",
+  "Rieju": "https://www.rieju.es",
+  "Dafra": "https://www.dafra.com.br",
+  "Shineray": "https://www.shineray.com.br",
+  "Ural": "https://www.imz-ural.com",
+  "Kawasaki": "https://www.kawasaki.com",
+  "Yamaha": "https://global.yamaha-motor.com",
+  "Taiga": "https://taigamotors.com",
+  "Sea-Doo": "https://www.sea-doo.com",
+  "Segway": "https://www.segway.com",
+  "Tracker": "https://www.trackerboats.com",
+  "Sun Tracker": "https://www.suntrackerboats.com",
+  "Nitro": "https://www.nitro.com",
+  "Tahoe": "https://www.tahoeboats.com",
+  "Mako": "https://www.makoboats.com",
+  "Lund": "https://www.lundboats.com",
+  "Crestliner": "https://www.crestliner.com",
+  "Lowe": "https://www.loweboats.com",
+  "Alumacraft": "https://www.alumacraft.com",
+  "G3": "https://www.g3boats.com",
+  "Sea Ray": "https://www.searay.com",
+  "Bayliner": "https://www.bayliner.com",
+  "Boston Whaler": "https://www.bostonwhaler.com",
+  "Grady-White": "https://www.gradywhite.com",
+  "Robalo": "https://www.robalo.com",
+  "Chaparral": "https://www.chaparralboats.com",
+  "Cobalt": "https://www.cobaltboats.com",
+  "Four Winns": "https://www.fourwinns.com",
+  "Regal": "https://www.regalboats.com",
+  "Scout": "https://www.scoutboats.com",
+  "Sea Hunt": "https://www.seahuntboats.com",
+  "Key West": "https://www.keywestboatsinc.com",
+  "Pursuit": "https://www.pursuitboats.com",
+  "Bennington": "https://www.benningtonmarine.com",
+  "Harris": "https://www.harrisboats.com",
+  "Manitou": "https://www.manitoupontoonboats.com",
+  "Avalon": "https://www.avalonpontoons.com",
+  "Barletta": "https://www.barlettapontoonboats.com",
+  "Godfrey": "https://www.godfreypontoonboats.com",
+  "Sylvan": "https://www.sylvanmarine.com",
+  "Starcraft": "https://www.starcraftmarine.com",
+  "Smoker Craft": "https://www.smokercraft.com",
+  "Princecraft": "https://www.princecraft.com",
+  "Legend": "https://www.legendboats.com",
+  "Malibu": "https://www.malibuboats.com",
+  "MasterCraft": "https://www.mastercraft.com",
+  "Nautique": "https://www.nautique.com",
+  "Centurion": "https://www.centurionboats.com",
+  "Supra": "https://www.supraboats.com",
+  "Moomba": "https://www.moomba.com",
+  "Axis": "https://www.axiswake.com",
+  "Ranger": "https://www.rangerboats.com",
+  "Triton": "https://www.tritonboats.com",
+  "Skeeter": "https://www.skeeterboats.com",
+  "Bass Cat": "https://www.basscat.com",
+  "Phoenix": "https://www.phoenixbassboats.com",
+  "Hewescraft": "https://www.hewescraft.com",
+  "Kingfisher": "https://www.kingfisherboats.com",
+  "Zodiac": "https://www.zodiac-nautic.com",
+  "Highfield": "https://www.highfieldboats.com",
+  "AB Inflatables": "https://www.abinflatables.com",
+  "Williams": "https://www.williamsjettenders.com",
+  "Ribeye": "https://www.ribeye.co.uk",
+  "Beneteau": "https://www.beneteau.com",
+  "Jeanneau": "https://www.jeanneau.com",
+  "Bavaria": "https://www.bavariayachts.com",
+  "Hanse": "https://www.hanseyachts.com",
+  "Dufour": "https://www.dufour-yachts.com",
+  "Lagoon": "https://www.cata-lagoon.com",
+  "Fountaine Pajot": "https://www.fountaine-pajot.com",
+  "Excess": "https://www.excess-catamarans.com",
+  "Leopard": "https://www.leopardcatamarans.com",
+  "Catalina": "https://www.catalinayachts.com",
+  "Marlow-Hunter": "https://www.marlow-hunter.com",
+  "Seawind": "https://www.seawindcats.com",
+  "Hobie": "https://www.hobie.com",
+  "Laser": "https://www.laserperformance.com",
+  "RS Sailing": "https://www.rssailing.com",
+  "Topper": "https://www.toppersailboats.com",
+  "Princess": "https://www.princessyachts.com",
+  "Sunseeker": "https://www.sunseeker.com",
+  "Fairline": "https://www.fairline.com",
+  "Azimut": "https://www.azimutyachts.com",
+  "Ferretti": "https://www.ferretti-yachts.com",
+  "Quicksilver": "https://www.quicksilver-boats.com",
+  "Axopar": "https://www.axopar.com",
+  "Rodman": "https://www.rodman.es",
+  "Astondoa": "https://www.astondoa.com",
+  "De Antonio": "https://www.deantonioyachts.com",
+  "Sasga": "https://www.sasgayachts.com",
+  "Joker Boat": "https://www.jokerboat.it",
+  "Quintrex": "https://www.quintrex.com.au",
+  "Stacer": "https://www.stacer.com.au",
+  "Haines Hunter": "https://www.haineshunter.com.au",
+  "Haines Signature": "https://www.hainessignature.com.au",
+  "Stabicraft": "https://www.stabicraft.com",
+  "Bar Crusher": "https://www.barcrusher.com.au",
+  "Riviera": "https://www.rivieraaustralia.com.au",
+  "Maritimo": "https://www.maritimo.com.au",
+  "Whittley": "https://www.whittleymarinegroup.com.au",
+  "Cruise Craft": "https://www.cruisecraft.com.au",
+  "Polycraft": "https://www.polycraft.com.au",
+  "Sea Jay": "https://www.seajayboats.com.au",
+  "Fibrafort": "https://www.fibrafort.com.br",
+  "Schaefer Yachts": "https://www.schaeferyachts.com.br",
+  "Intermarine": "https://www.intermarine.com.br",
+  "FS Yachts": "https://www.fsyachts.com.br",
+  "Levefort": "https://www.levefort.com.br",
+  "Flexboat": "https://www.flexboat.com.br",
+  "NX Boats": "https://www.nxboats.com.br",
+  "Triton Yachts": "https://www.tritonyachts.com.br",
+  "Candela": "https://candela.com",
+  "X Shore": "https://xshore.com",
+  "Vision Marine": "https://visionmarinetechnologies.com",
+  "Terhi": "https://www.terhi.fi",
+  "Linder": "https://www.linder.se",
+  "Orkney": "https://www.orkneyboats.co.uk",
+  "Cheetah Marine": "https://www.cheetahmarine.co.uk",
+  "Fletcher": "https://www.fletcher-boats.co.uk",
+  "Gulf Craft": "https://www.gulfcraftinc.com",
+  "Scarab": "https://www.scarabjetboats.com",
+  "Cessna": "https://cessna.txtav.com",
+  "Cessna Citation": "https://cessna.txtav.com",
+  "Beechcraft": "https://beechcraft.txtav.com",
+  "Piper": "https://www.piper.com",
+  "Cirrus": "https://cirrusaircraft.com",
+  "Diamond": "https://www.diamondaircraft.com",
+  "Mooney": "https://www.mooney.com",
+  "Pipistrel": "https://www.pipistrel-aircraft.com",
+  "Tecnam": "https://www.tecnam.com",
+  "Vulcanair": "https://www.vulcanair.com",
+  "Van’s": "https://www.vansaircraft.com",
+  "CubCrafters": "https://cubcrafters.com",
+  "Bristell": "https://www.bristell.com",
+  "Flight Design": "https://flightdesign.com",
+  "Aeroprakt": "https://www.aeroprakt.kiev.ua",
+  "Jabiru": "https://jabiru.net.au",
+  "American Champion": "https://www.americanchampionaircraft.com",
+  "Extra": "https://www.extraaircraft.com",
+  "Game Composites": "https://www.gamecomposites.com",
+  "Waco": "https://www.wacoaircraft.com",
+  "Icon": "https://www.iconaircraft.com",
+  "Seamax": "https://www.seamaxaircraft.com",
+  "GippsAero": "https://www.gippsaero.com",
+  "Quest": "https://kodiak.aero",
+  "Daher": "https://www.tbm.aero",
+  "Pilatus": "https://www.pilatus-aircraft.com",
+  "Epic": "https://www.epicaircraft.com",
+  "Embraer": "https://executive.embraer.com",
+  "HondaJet": "https://www.hondajet.com",
+  "Bombardier": "https://businessaircraft.bombardier.com",
+  "Gulfstream": "https://www.gulfstream.com",
+  "Dassault": "https://www.dassaultfalcon.com",
+  "Robinson": "https://robinsonheli.com",
+  "Guimbal": "https://www.helicopteres-guimbal.com",
+  "Enstrom": "https://www.enstromhelicopter.com",
+  "Schweizer": "https://www.schweizer.aero",
+  "Bell": "https://www.bellflight.com",
+  "Airbus Helicopters": "https://www.airbus.com/en/products-services/helicopters",
+  "Leonardo": "https://helicopters.leonardo.com",
+  "MD Helicopters": "https://www.mdhelicopters.com",
+  "Sikorsky": "https://www.lockheedmartin.com/en-us/capabilities/sikorsky.html",
+  "Pivotal": "https://pivotal.aero",
+  "Jetson": "https://www.jetsonaero.com",
+  "AIR": "https://www.airev.aero",
+  "Joby": "https://www.jobyaviation.com",
+  "Archer": "https://www.archer.com",
+  "Vertical Aerospace": "https://vertical-aerospace.com",
+  "Beta": "https://www.beta.team",
+  "AutoGyro": "https://www.auto-gyro.com",
+  "Magni": "https://www.magnigyro.it",
+  "Stemme": "https://www.stemme.com",
+  "Schempp-Hirth": "https://www.schempp-hirth.com",
+  "Alexander Schleicher": "https://www.alexander-schleicher.de",
+  "Viking": "https://www.vikingair.com",
+  "Britten-Norman": "https://www.britten-norman.com",
+  "Russian Helicopters": "https://www.russianhelicopters.aero",
+  "HAL": "https://hal-india.co.in",
+  "EHang": "https://www.ehang.com",
+  "UZGA": "https://uzga.ru",
+  "Helibras": "https://www.helibras.com.br"
+ },
+ "brandsByCC": {
+  "Toyota": {
+   "UK": "https://www.toyota.co.uk",
+   "IN": "https://www.toyotabharat.com",
+   "AU": "https://www.toyota.com.au",
+   "CA": "https://www.toyota.ca",
+   "MX": "https://www.toyota.mx",
+   "ES": "https://www.toyota.es",
+   "TH": "https://www.toyota.co.th",
+   "BR": "https://www.toyota.com.br",
+   "CN": "https://www.toyota.com.cn"
+  },
+  "Honda": {
+   "US": "https://automobiles.honda.com",
+   "UK": "https://www.honda.co.uk",
+   "IN": "https://www.hondacarindia.com",
+   "AU": "https://www.honda.com.au",
+   "CA": "https://www.honda.ca",
+   "MX": "https://www.honda.mx",
+   "ES": "https://www.honda.es",
+   "TH": "https://www.honda.co.th",
+   "BR": "https://www.honda.com.br"
+  },
+  "Hyundai": {
+   "US": "https://www.hyundaiusa.com",
+   "UK": "https://www.hyundai.com/uk",
+   "IN": "https://www.hyundai.com/in",
+   "AU": "https://www.hyundai.com/au",
+   "CA": "https://www.hyundaicanada.com",
+   "MX": "https://www.hyundai.com/mx",
+   "ES": "https://www.hyundai.com/es",
+   "BR": "https://www.hyundai.com.br"
+  },
+  "Kia": {
+   "US": "https://www.kia.com/us",
+   "UK": "https://www.kia.com/uk",
+   "IN": "https://www.kia.com/in",
+   "AU": "https://www.kia.com/au",
+   "CA": "https://www.kia.ca",
+   "MX": "https://www.kia.com/mx",
+   "ES": "https://www.kia.com/es",
+   "TH": "https://www.kia.com/th",
+   "BR": "https://www.kia.com.br",
+   "CN": "https://www.kia.com/cn"
+  },
+  "Ford": {
+   "UK": "https://www.ford.co.uk",
+   "AU": "https://www.ford.com.au",
+   "CA": "https://www.ford.ca",
+   "MX": "https://www.ford.mx",
+   "ES": "https://www.ford.es",
+   "TH": "https://www.ford.co.th",
+   "BR": "https://www.ford.com.br",
+   "CN": "https://www.ford.com.cn"
+  },
+  "Chevrolet": {
+   "CA": "https://www.chevrolet.ca",
+   "MX": "https://www.chevrolet.com.mx",
+   "BR": "https://www.chevrolet.com.br",
+   "CN": "https://www.chevrolet.com.cn"
+  },
+  "Nissan": {
+   "US": "https://www.nissanusa.com",
+   "UK": "https://www.nissan.co.uk",
+   "IN": "https://www.nissan.in",
+   "AU": "https://www.nissan.com.au",
+   "CA": "https://www.nissan.ca",
+   "MX": "https://www.nissan.com.mx",
+   "ES": "https://www.nissan.es",
+   "TH": "https://www.nissan.co.th",
+   "BR": "https://www.nissan.com.br",
+   "CN": "https://www.nissan.com.cn"
+  },
+  "Mazda": {
+   "US": "https://www.mazdausa.com",
+   "UK": "https://www.mazda.co.uk",
+   "AU": "https://www.mazda.com.au",
+   "CA": "https://www.mazda.ca",
+   "MX": "https://www.mazda.mx",
+   "ES": "https://www.mazda.es",
+   "TH": "https://www.mazda.co.th"
+  },
+  "Subaru": {
+   "UK": "https://www.subaru.co.uk",
+   "AU": "https://www.subaru.com.au",
+   "CA": "https://www.subaru.ca",
+   "ES": "https://www.subaru.es"
+  },
+  "Volkswagen": {
+   "UK": "https://www.volkswagen.co.uk",
+   "IN": "https://www.volkswagen.co.in",
+   "AU": "https://www.volkswagen.com.au",
+   "CA": "https://www.vw.ca",
+   "MX": "https://www.vw.com.mx",
+   "ES": "https://www.volkswagen.es",
+   "BR": "https://www.vw.com.br",
+   "CN": "https://www.vw.com.cn"
+  },
+  "Audi": {
+   "US": "https://www.audiusa.com",
+   "UK": "https://www.audi.co.uk",
+   "IN": "https://www.audi.in",
+   "AU": "https://www.audi.com.au",
+   "CA": "https://www.audi.ca",
+   "MX": "https://www.audi.com.mx",
+   "ES": "https://www.audi.es",
+   "BR": "https://www.audi.com.br",
+   "CN": "https://www.audi.cn",
+   "TH": "https://www.audi.co.th"
+  },
+  "BMW": {
+   "US": "https://www.bmwusa.com",
+   "UK": "https://www.bmw.co.uk",
+   "IN": "https://www.bmw.in",
+   "AU": "https://www.bmw.com.au",
+   "CA": "https://www.bmw.ca",
+   "MX": "https://www.bmw.com.mx",
+   "ES": "https://www.bmw.es",
+   "BR": "https://www.bmw.com.br",
+   "CN": "https://www.bmw.com.cn",
+   "TH": "https://www.bmw.co.th"
+  },
+  "Mercedes-Benz": {
+   "US": "https://www.mbusa.com",
+   "UK": "https://www.mercedes-benz.co.uk",
+   "IN": "https://www.mercedes-benz.co.in",
+   "AU": "https://www.mercedes-benz.com.au",
+   "CA": "https://www.mercedes-benz.ca",
+   "MX": "https://www.mercedes-benz.com.mx",
+   "ES": "https://www.mercedes-benz.es",
+   "BR": "https://www.mercedes-benz.com.br",
+   "CN": "https://www.mercedes-benz.com.cn",
+   "TH": "https://www.mercedes-benz.co.th"
+  },
+  "Lexus": {
+   "UK": "https://www.lexus.co.uk",
+   "IN": "https://www.lexusindia.co.in",
+   "AU": "https://www.lexus.com.au",
+   "CA": "https://www.lexus.ca",
+   "MX": "https://www.lexus.mx",
+   "ES": "https://www.lexusauto.es",
+   "BR": "https://www.lexus.com.br",
+   "CN": "https://www.lexus.com.cn",
+   "TH": "https://www.lexus.co.th"
+  },
+  "MG": {
+   "IN": "https://www.mgmotor.co.in",
+   "AU": "https://www.mgmotor.com.au",
+   "MX": "https://www.mgmotor.com.mx",
+   "TH": "https://www.mgcars.com",
+   "ES": "https://www.mgmotor.es"
+  },
+  "Skoda": {
+   "UK": "https://www.skoda.co.uk",
+   "IN": "https://www.skoda-auto.co.in",
+   "AU": "https://www.skoda.com.au",
+   "ES": "https://www.skoda.es"
+  },
+  "Renault": {
+   "UK": "https://www.renault.co.uk",
+   "IN": "https://www.renault.co.in",
+   "AU": "https://www.renault.com.au",
+   "MX": "https://www.renault.com.mx",
+   "ES": "https://www.renault.es",
+   "BR": "https://www.renault.com.br"
+  },
+  "Dacia": {
+   "UK": "https://www.dacia.co.uk",
+   "ES": "https://www.dacia.es"
+  },
+  "Peugeot": {
+   "UK": "https://www.peugeot.co.uk",
+   "AU": "https://www.peugeot.com.au",
+   "MX": "https://www.peugeot.com.mx",
+   "ES": "https://www.peugeot.es",
+   "BR": "https://www.peugeot.com.br"
+  },
+  "Citroën": {
+   "UK": "https://www.citroen.co.uk",
+   "IN": "https://www.citroen.in",
+   "ES": "https://www.citroen.es",
+   "BR": "https://www.citroen.com.br"
+  },
+  "Fiat": {
+   "US": "https://www.fiatusa.com",
+   "UK": "https://www.fiat.co.uk",
+   "MX": "https://www.fiat.com.mx",
+   "ES": "https://www.fiat.es",
+   "BR": "https://www.fiat.com.br"
+  },
+  "FIAT": {
+   "BR": "https://www.fiat.com.br",
+   "MX": "https://www.fiat.com.mx"
+  },
+  "Jeep": {
+   "IN": "https://www.jeep-india.com",
+   "AU": "https://www.jeep.com.au",
+   "MX": "https://www.jeep.com.mx",
+   "BR": "https://www.jeep.com.br",
+   "ES": "https://www.jeep.es",
+   "UK": "https://www.jeep.co.uk",
+   "CA": "https://www.jeep.ca"
+  },
+  "BYD": {
+   "IN": "https://www.bydautoindia.com",
+   "AU": "https://www.byd.com/au",
+   "MX": "https://www.byd.com/mx",
+   "BR": "https://www.byd.com/br",
+   "UK": "https://www.byd.com/uk",
+   "ES": "https://www.byd.com/es",
+   "TH": "https://www.byd.com/th"
+  },
+  "Tesla": {
+   "UK": "https://www.tesla.com/en_gb",
+   "CA": "https://www.tesla.com/en_ca",
+   "MX": "https://www.tesla.com/es_mx",
+   "ES": "https://www.tesla.com/es_es",
+   "TH": "https://www.tesla.com/th_th",
+   "AU": "https://www.tesla.com/en_au",
+   "CN": "https://www.tesla.cn",
+   "IN": "https://www.tesla.com/en_in"
+  },
+  "Volvo": {
+   "UK": "https://www.volvocars.com/uk",
+   "IN": "https://www.volvocars.com/in",
+   "AU": "https://www.volvocars.com/au",
+   "CA": "https://www.volvocars.com/en-ca",
+   "MX": "https://www.volvocars.com/mx",
+   "ES": "https://www.volvocars.com/es",
+   "BR": "https://www.volvocars.com/br",
+   "TH": "https://www.volvocars.com/th"
+  },
+  "Land Rover": {
+   "UK": "https://www.landrover.co.uk",
+   "IN": "https://www.landrover.in",
+   "AU": "https://www.landrover.com.au",
+   "CA": "https://www.landrover.ca"
+  },
+  "Suzuki": {
+   "UK": "https://cars.suzuki.co.uk",
+   "AU": "https://www.suzuki.com.au",
+   "MX": "https://www.suzuki.com.mx",
+   "ES": "https://auto.suzuki.es",
+   "TH": "https://www.suzuki.co.th",
+   "BR": "https://www.suzukiveiculos.com.br"
+  },
+  "Mitsubishi": {
+   "US": "https://www.mitsubishicars.com",
+   "UK": "https://www.mitsubishi-motors.co.uk",
+   "AU": "https://www.mitsubishi-motors.com.au",
+   "CA": "https://www.mitsubishi-motors.ca",
+   "MX": "https://www.mitsubishi-motors.mx",
+   "ES": "https://www.mitsubishi-motors.es",
+   "TH": "https://www.mitsubishi-motors.co.th",
+   "BR": "https://www.mitsubishimotors.com.br"
+  },
+  "Isuzu": {
+   "AU": "https://www.isuzuute.com.au",
+   "TH": "https://www.isuzu-tis.com",
+   "MX": "https://www.isuzu.com.mx",
+   "IN": "https://www.isuzu.in",
+   "UK": "https://www.isuzu.co.uk"
+  },
+  "Geely": {
+   "RU": "https://www.geely-motors.com"
+  },
+  "Haval": {
+   "RU": "https://haval.ru",
+   "AU": "https://www.gwmhaval.com.au",
+   "MX": "https://www.gwmmexico.mx",
+   "BR": "https://www.gwmmotors.com.br",
+   "TH": "https://www.gwm.co.th",
+   "UK": "https://www.gwm.co.uk",
+   "ES": "https://www.gwm-ora.es"
+  },
+  "GWM": {
+   "AU": "https://www.gwmanz.com.au",
+   "MX": "https://www.gwmmexico.mx",
+   "BR": "https://www.gwmmotors.com.br",
+   "TH": "https://www.gwm.co.th",
+   "UK": "https://www.gwm.co.uk"
+  },
+  "Chery": {
+   "RU": "https://www.chery.ru",
+   "AU": "https://www.chery.com.au",
+   "BR": "https://www.caoachery.com.br",
+   "ES": "https://www.cheryauto.es",
+   "MX": "https://www.chirey.mx"
+  },
+  "Changan": {
+   "RU": "https://changanauto.ru",
+   "MX": "https://www.changan.mx",
+   "TH": "https://www.changanauto.co.th",
+   "AU": "https://www.changanauto.com.au",
+   "UK": "https://www.changanuk.com"
+  },
+  "Omoda": {
+   "RU": "https://omoda.ru",
+   "UK": "https://www.omodajaecoo.co.uk",
+   "AU": "https://www.omodajaecoo.com.au",
+   "MX": "https://www.omoda.mx",
+   "ES": "https://www.omodajaecoo.es",
+   "BR": "https://www.omodajaecoo.com.br",
+   "TH": "https://www.omodajaecoo.co.th"
+  },
+  "Jaecoo": {
+   "UK": "https://www.omodajaecoo.co.uk",
+   "AU": "https://www.omodajaecoo.com.au",
+   "MX": "https://www.jaecoo.mx",
+   "ES": "https://www.omodajaecoo.es",
+   "BR": "https://www.omodajaecoo.com.br",
+   "TH": "https://www.omodajaecoo.co.th"
+  },
+  "Kawasaki": {
+   "UK": "https://www.kawasaki.co.uk",
+   "AU": "https://www.kawasaki.com.au",
+   "IN": "https://www.kawasaki-india.com",
+   "CA": "https://www.kawasaki.ca",
+   "BR": "https://www.kawasakimotos.com.br",
+   "ES": "https://www.kawasaki.es",
+   "MX": "https://www.kawasaki.mx",
+   "TH": "https://www.kawasaki.co.th"
+  },
+  "Yamaha": {
+   "US": "https://www.yamahamotorsports.com",
+   "UK": "https://www.yamaha-motor.eu/gb",
+   "AU": "https://www.yamaha-motor.com.au",
+   "IN": "https://www.yamaha-motor-india.com",
+   "CA": "https://www.yamaha-motor.ca",
+   "BR": "https://www.yamaha-motor.com.br",
+   "ES": "https://www.yamaha-motor.eu/es",
+   "MX": "https://www.yamaha-motor.com.mx",
+   "TH": "https://www.yamaha-motor.co.th",
+   "CN": "https://www.yamaha-motor.com.cn"
+  },
+  "Royal Enfield": {
+   "IN": "https://www.royalenfield.com/in",
+   "UK": "https://www.royalenfield.com/uk",
+   "US": "https://www.royalenfield.com/us",
+   "AU": "https://www.royalenfield.com/au"
+  }
+ }
+}

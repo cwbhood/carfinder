@@ -41,6 +41,17 @@ data/*.json      cars, bikes, boats, aircraft, state  ─┘                    
 - **Persistence**: vertical, country, region per country, compare list per vertical and country, assumptions per
   vertical and country and the World-tab units, all in localStorage under `cf_*`, every read and write wrapped in
   try/catch.
+- **Permalinks** (`viewHash`, `syncHash`, `applyHash`): the whole view lives in the URL hash, `#v=air&cc=UK&r=GB&b=
+  Helicopter&rng=300&sort=perhp&cmp=…&d=…`: vertical, country, region or currency, World units, search, every filter
+  set, price range, seats, drive, sliders, sort, model years, launch and preliminary toggles, the comparison set and
+  the open sheet. Vehicles are named by a slug (`slugOf`: make-model, plus the country on the World tab and the year
+  for US leftovers and early arrivals). `render()` and the detail sheet rewrite the hash with `replaceState`; a pasted
+  hash on load, or a `hashchange`, rebuilds the view from it; the `?v=&cc=` query form still works. `shareLink()`
+  copies the permalink or opens the share sheet on phones.
+- **Provenance** (`provenance(c, cc)` in the core, `provHTML` in the sheet, `data/sources.json`): compile dates per
+  vertical, the exchange-rate date, per-dataset price sources with links, the makers' sites by brand (and by brand and
+  country for the big ones), and the confirmed-or-estimate status with its reason. `issueURL()` builds the prefilled
+  "Wrong price? Tell us" issue link; the masthead's `#asof` line shows the data-as-of date for the tab.
 
 ## The pricing core
 Everything between `//<<core` and `//core>>` in `src/script.html` is DOM-free so the tests can run it in Node:
@@ -91,6 +102,13 @@ line on the detail sheet. Nothing is copied into the repository.
    on the 21-field schema, and a `VFEES[cc].moto` / `.boat` / `.air` entry in `data/vfees.json` (bands, basis, fee
    lines, glossary) plus the country's avgas and Jet-A prices in `VERT.air.fuel`; without a fee entry the car rules are
    used as a fallback.
+
+## Methodology page and the service worker
+`node src/build.js` also writes `methodology.html` through `src/methodology.js`: it evaluates the assembled script up
+to the state marker to get the app's own constants (exchange rates, bands, market texts, regions, the state tables,
+the fee rules, the about texts), renders the per-country research notes from `docs/tax-notes/*.md` with a small
+Markdown renderer, and fills the `src/methodology.html` shell. It writes `sw.js` from `src/sw.js` with a version
+stamp (the page's content hash), so every deploy invalidates the old cache; `--check` covers all three files.
 
 ## Website
 `index.html` (showcase, the demo video and GIFs, how-to) and `about.html` share the visual language of the author's

@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use or write about CarFinder, please cite it like this."
 title: "CarFinder 2026"
-abstract: "A free, open source car finder for 11 countries: every new car and truck on sale with its list price, the price dealers really charge, and the on-road price for the buyer's state or city, with filters, comparison and running-cost estimates. One self-contained web page."
+abstract: "A free, open source vehicle finder for 11 countries: every new car, motorcycle, boat and aircraft on sale with its list price, the price dealers really charge, and the on-road price for the buyer's state or city, with the source of every price, filters, comparison and running-cost estimates. One self-contained web page."
 type: software
 authors:
   - family-names: Jones
@@ -10,7 +10,8 @@ authors:
 repository-code: "https://github.com/destinjones/carfinder"
 url: "https://destinjones.github.io/carfinder/"
 license: MIT
-date-released: 2026-10-05
+version: 1.0.0
+date-released: 2026-10-14
 keywords:
   - cars
   - car prices

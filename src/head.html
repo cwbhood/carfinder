@@ -100,6 +100,15 @@ body.no-scroll,body:has(dialog[open]){overflow:hidden}
 .masthead h1{font-size:30px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
 .masthead h1 span{color:var(--accent)}
 .masthead .lede{font-size:14px;color:var(--muted);max-width:60ch;margin-top:4px}
+.masthead .asof{font-size:12px;color:var(--muted);margin-top:6px}
+.masthead .asof a{color:var(--fg)}
+.prov-l{margin:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.prov-l > div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px}
+.prov-l dt{color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:11px;padding-top:2px}
+.prov-l dd{margin:0;overflow-wrap:anywhere}
+.prov-l a{color:var(--fg)}
+.prov b.ok{color:var(--deal)} .prov b.est{color:var(--hot)}
+@media (max-width:420px){ .prov-l > div{grid-template-columns:1fr;gap:1px} }
 .mast-actions{display:flex;flex-wrap:wrap;gap:8px;width:100%}
 .mast-actions .btn{flex:1 1 auto;font-size:14px;padding-inline:10px;white-space:normal;line-height:1.2}
 .toolbar{position:sticky;top:var(--sat);z-index:20;background:var(--bg);padding-block:8px 8px;display:flex;flex-wrap:wrap;gap:8px;margin-inline:calc(-1 * var(--gutter));padding-inline:var(--gutter);box-shadow:0 1px 0 var(--line)}
@@ -256,6 +265,20 @@ details.assume summary{cursor:pointer;font-weight:700;font-size:14px;min-height:
   .ctab{font-size:16px;padding:8px 12px}
 }
 @media (prefers-reduced-motion:reduce){ .filters,.filters.open,dialog{transition:none !important;animation:none !important} button:active{transform:none} }
+/* print: the list as a clean two-column sheet, or an open detail sheet on its own */
+@media print{
+  body{background:#fff;color:#000}
+  .verts,.country,.mast-actions,.toolbar,.state-row,.chips,.filters,.cmpbar,.totop,.more-row,.card .cmp,.card .more,.btn-filters,.photo .credit{display:none !important}
+  .layout{grid-template-columns:1fr !important;display:block}
+  .grid{grid-template-columns:1fr 1fr;gap:10px}
+  .card{box-shadow:none;break-inside:avoid;border-color:#bbb}
+  .masthead .asof a::after,.site-links a::after{content:" (" attr(href) ")";font-weight:400}
+  body:has(dialog[open]) .wrap{display:none}
+  dialog[open]{position:static;width:100%;max-width:none;max-height:none;box-shadow:none;border:0;overflow:visible}
+  dialog[open] .dlg-body{max-height:none;overflow:visible}
+  dialog::backdrop{display:none}
+  .dlg-actions,.x{display:none !important}
+}
 
 /* ---------- dialogs ---------- */
 dialog{border:0;border-radius:16px;padding:0;background:var(--surface);color:var(--fg);width:min(760px,calc(100vw - 32px));max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);box-shadow:var(--shadow);overflow:hidden}
@@ -387,10 +410,12 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
     <div>
       <h1 id="pageTitle">CarFinder <span>USA</span> 2026</h1>
       <p class="lede" id="lede"></p>
+      <p class="asof" id="asof"></p>
     </div>
     <div class="mast-actions">
       <button class="btn primary" id="btnWizard" type="button">Help me choose</button>
       <button class="btn" id="btnGloss" type="button">What the terms mean</button>
+      <button class="btn" id="btnShare" type="button" title="Copy a link to this exact view">Share view</button>
     </div>
   </header>
 
@@ -525,7 +550,7 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
       <div class="more-row" id="moreRow" hidden><button class="btn" id="btnMore" type="button">Show more</button></div>
       <div class="empty" id="empty" hidden>Nothing matches those filters. Loosen the price range or clear a filter.</div>
       <footer class="about" id="about"></footer>
-      <p class="site-links">CarFinder is free and open source. <a href="./">Project site</a> · <a href="https://github.com/destinjones/carfinder">Source on GitHub</a> · <a href="about.html">About the creator</a> · <a href="https://github.com/destinjones/carfinder/issues">Report a wrong price</a></p>
+      <p class="site-links">CarFinder <span id="appVersion">/*__VERSION__*/</span> is free and open source. <a href="./">Project site</a> · <a href="methodology.html">How we calculate</a> · <a href="https://github.com/destinjones/carfinder">Source on GitHub</a> · <a href="https://github.com/destinjones/carfinder/blob/main/CHANGELOG.md">Changelog</a> · <a href="about.html">About the creator</a> · <a href="https://github.com/destinjones/carfinder/issues/new?template=wrong-price.yml">Report a wrong price</a></p>
     </main>
   </div>
 </div>

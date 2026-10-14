@@ -189,7 +189,7 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
 <nav aria-label="Main">
   <div class="wrap">
     <a class="brand" href="./"><img src="brand/emblem/emblem-256.png" alt="">CarFinder</a>
-    <div class="links"><a href="#action">See it</a><a href="#trick">The trick</a><a href="#proof">Try it</a><a href="#trust">Trust</a><a href="about.html">About</a><a href="https://github.com/destinjones/carfinder">GitHub</a><a class="go" href="carfinder.html">Open CarFinder</a></div>
+    <div class="links"><a href="#action">See it</a><a href="#trick">The trick</a><a href="#proof">Try it</a><a href="#trust">Trust</a><a href="methodology.html">Method</a><a href="about.html">About</a><a href="https://github.com/destinjones/carfinder">GitHub</a><a class="go" href="carfinder.html">Open CarFinder</a></div>
   </div>
 </nav>
 
@@ -336,11 +336,11 @@ h3.sub-h{font-size:clamp(26px,3.4vw,38px);margin:clamp(48px,7vw,80px) 0 12px}
     <h2 id="trust-h">Many car sites want your phone number. <span>This one wants nothing.</span></h2>
     <p class="intro">Fill in a form on many car sites and your details go to dealers who will call you about it. CarFinder has no form to fill in.</p>
     <div class="trust">
-      <div><b>No account</b><p>No sign-up, no email, no phone number. Open the page and use it.</p></div>
-      <div><b>No ads, no cookies, no trackers</b><p>Nobody is paying to put a car in front of you. Your state choice is saved in your own browser and goes nowhere else.</p></div>
+      <div><b>No account, no ads, no trackers</b><p>No sign-up, no email, no phone number, no cookies. Nobody is paying to put a car in front of you; your state choice is saved in your own browser and goes nowhere else.</p></div>
       <div><b>One file</b><p>Markup, CSS, plain JavaScript and the data in one self-contained HTML page. It keeps working offline once loaded.</p></div>
       <div><b>Open data</b><p>Each country's cars, bikes, boats and aircraft are JSON files with a documented row schema; each country's car taxes are one function and its bike, boat and aircraft fees one table each. MIT licence. A wrong rate is a one-line fix and a pull request.</p></div>
       <div><b>Tested before it ships</b><p><code>node --test</code> checks every row of every dataset, then runs the pricing engines for all 97,000 vehicle-and-region combinations and checks known quotes. A headless Chromium pass drives every tab and control of all four verticals at phone and desktop widths.</p></div>
+      <div><b>Every price shows its source</b><p>Each detail sheet says where the price list came from, when it was verified, whether it is confirmed or an estimate, and which region's rules were applied, with a one-click <em>Wrong price? Tell us</em> that opens a prefilled issue. <a href="methodology.html">How we calculate</a> publishes every tax table, dealer band, exchange rate and source, generated from the same data the app ships with.</p></div>
       <div><b>Estimates, labelled as estimates</b><p>Dealer prices are bands by demand level, not quotes. Taxes follow the published rules on the compile date. Every tab ends with a plain note on what was assumed, and provisional prices carry a <em>Preliminary</em> tag.</p></div>
     </div>
     <pre class="code" tabindex="0">git clone https://github.com/destinjones/carfinder
@@ -386,8 +386,8 @@ python3 -m http.server   # then open http://localhost:8000/</pre>
       <p>A free, open source project by <a href="about.html">Destin Jones</a>, vibe coded with Claude. Estimates for awareness while car shopping, not quotes, offers or financial advice. No accounts, no ads, no tracking.</p>
     </div>
     <div>
-      <p><a href="carfinder.html">Open CarFinder</a> · <a href="#action">See it in action</a> · <a href="#proof">How to use</a> · <a href="#countries">Countries</a> · <a href="#verticals">Bikes, boats and aircraft</a> · <a href="about.html">About</a></p>
-      <p><a href="https://github.com/destinjones/carfinder">Source on GitHub</a> · <a href="https://github.com/destinjones/carfinder/issues">Report a wrong price</a> · <a href="https://github.com/destinjones/carfinder/blob/main/LICENSE">MIT licence</a></p>
+      <p><a href="carfinder.html">Open CarFinder</a> · <a href="#action">See it in action</a> · <a href="#proof">How to use</a> · <a href="#countries">Countries</a> · <a href="#verticals">Bikes, boats and aircraft</a> · <a href="methodology.html">How we calculate</a> · <a href="about.html">About</a></p>
+      <p><a href="https://github.com/destinjones/carfinder">Source on GitHub</a> · <a href="https://github.com/destinjones/carfinder/issues/new?template=wrong-price.yml">Report a wrong price</a> · <a href="https://github.com/destinjones/carfinder/releases">Releases</a> · <a href="https://github.com/destinjones/carfinder/blob/main/CHANGELOG.md">Changelog</a> · <a href="https://github.com/destinjones/carfinder/blob/main/LICENSE">MIT licence</a></p>
       <p>Also by me: <a href="https://destinjones.github.io/open-overwatch/">Open Overwatch</a> and <a href="https://destinjones.github.io/godot-open-rts/">Ironbound</a>.</p>
     </div>
   </div>

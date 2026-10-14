@@ -89,6 +89,24 @@ async def main():
         await page.click('.vtab[data-vt="car"]'); await page.wait_for_timeout(200)
         check('back to cars restores car filters', await page.evaluate("() => VT==='car' && document.getElementById('sizeLbl').textContent==='Size' && document.getElementById('driveLbl').textContent==='Drivetrain'"))
 
+        # ---- provenance panel, corrections link and permalinks
+        await page.evaluate("() => { S.q = 'rav4'; render(); }"); await page.wait_for_timeout(100)
+        await page.click('.card [data-detail]'); await page.wait_for_timeout(150)
+        check('detail sheet shows where the price comes from, with a verification date, a status and a prefilled issue link', await page.evaluate("() => { const p = document.querySelector('#dBody .prov'); return !!p && /Price list/.test(p.textContent) && /Verified/.test(p.textContent) && /(Confirmed|Estimate)/.test(p.textContent) && /Sept 2026/.test(p.textContent) && /issues\\/new\\?template=wrong-price/.test(p.querySelector('a[href*=issues]').href) && /vehicle=Toyota/.test(p.querySelector('a[href*=issues]').href); }"))
+        check('masthead shows the data-as-of date and links to the methodology page', await page.evaluate("() => /as of/.test(document.getElementById('asof').textContent) && !!document.querySelector('#asof a[href^=\"methodology.html\"]')"))
+        check('hash carries the open sheet, the search and the tab', await page.evaluate("() => /^#v=car&cc=US&/.test(location.hash) && /q=rav4/.test(location.hash) && /d=toyota-rav4/.test(location.hash)"))
+        await page.keyboard.press('Escape'); await page.wait_for_timeout(100)
+        check('closing the sheet drops it from the hash', await page.evaluate("() => !/d=/.test(location.hash)"))
+        await page.evaluate("() => { S.q = ''; S.body.add('SUV'); S.fuel.add('Hybrid'); S.sort = 'fuel'; compare = [lastList[0].id, lastList[1].id]; render(); }"); await page.wait_for_timeout(100)
+        link = await page.evaluate("() => permalink()")
+        await page.goto('about:blank'); await page.goto(link); await page.wait_for_selector('.card'); await page.wait_for_timeout(300)   # a genuinely fresh load (a hash-only goto would not reload)
+        check('a permalink restores filters, sort and the comparison set on a fresh load', await page.evaluate("() => S.body.has('SUV') && S.fuel.has('Hybrid') && S.sort === 'fuel' && compare.length === 2 && document.getElementById('sort').value === 'fuel' && document.querySelector('#bodyChips .chip[data-body=\"SUV\"]').getAttribute('aria-pressed') === 'true' && lastList.every(c => c.body === 'SUV')"))
+        await page.evaluate("() => { location.hash = '#v=boat&cc=AU&r=QLD&b=PWC&est=0'; }"); await page.wait_for_timeout(400)
+        check('changing the hash in place switches vertical, country, region and filters', await page.evaluate("() => VT === 'boat' && CC === 'AU' && S.state === 'QLD' && S.body.has('PWC') && S.est === false && lastList.every(c => c.body === 'PWC' && !c.est)"))
+        # back to a clean cars/USA page for the rest (a hash-only goto would not reload, and the permalink stored a comparison)
+        await page.evaluate("() => { localStorage.removeItem('cf_cmp_US'); localStorage.removeItem('cf_cmp_boat_AU'); localStorage.setItem('cf_vt', JSON.stringify('car')); localStorage.setItem('cf_country', JSON.stringify('US')); }")
+        await page.goto('about:blank'); await page.goto(url); await page.wait_for_selector('.card'); await page.wait_for_timeout(200)
+
         # ---- compare bar hidden with nothing selected
         check('compare bar hidden at start', await page.evaluate("() => getComputedStyle(document.getElementById('cmpbar')).display === 'none'"))
         check('hidden filter groups really hidden (country/units on US tab)', await page.evaluate("() => ['countryGroup','unitsGroup','newGroup'].every(id => getComputedStyle(document.getElementById(id)).display==='none')"))

@@ -170,6 +170,13 @@ country). A fee line is `{k, sub}` plus one of `fixed` (a number, or `"dest"` fo
 by state, Spain's registration tax applies through `bodies`, and the insurance, hangar, annual and licence lines are
 `info` or `text`.
 
+## Provenance: `sources.json`
+`compiled` and `rulesAsOf` give the compile date per vertical (`car`, `moto`, `boat`, `air`); `fx` the exchange-rate
+date, name and URL; `sets["<vt>/<CC>"]` the price basis, the sources the dataset was compiled from (`[name, url]`,
+`url` null when it is a brand's own price list rather than one site) and the rules applied; `setsDefault` the fallback
+for verticals without a per-country entry; `brands` the makers' sites and `brandsByCC` the country-specific ones. The
+app shows all of it in the detail sheet; `methodology.html` lists it per country.
+
 ## Photo index: `images.json`
 `files` lists each Wikimedia Commons file once as `[name, host, md5 prefix, author, licence, "o"?]` and `map` goes from
 `"vt/cc"` to `"make|model"` to `[file index, approx]` (approx = the photo may show an earlier generation or another

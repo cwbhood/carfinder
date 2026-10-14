@@ -1,0 +1,21 @@
+name: Bug
+description: Something in the page that does not work, renders wrong or shows the wrong thing.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you saw, and what you expected.
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link to the view
+      description: Use "Share view" in the app, or paste the address bar; the hash carries the tab, region, filters and open sheet.
+  - type: input
+    id: device
+    attributes:
+      label: Browser and device
+      placeholder: Safari on iPhone 15, Chrome 130 on Windows…

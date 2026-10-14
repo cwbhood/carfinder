@@ -2,6 +2,12 @@
 
 # CarFinder 2026
 
+[![CI](https://github.com/destinjones/carfinder/actions/workflows/ci.yml/badge.svg)](https://github.com/destinjones/carfinder/actions/workflows/ci.yml)
+[![Website](https://github.com/destinjones/carfinder/actions/workflows/pages.yml/badge.svg)](https://destinjones.github.io/carfinder/)
+[![Release](https://img.shields.io/github/v/release/destinjones/carfinder?label=release)](https://github.com/destinjones/carfinder/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![No dependencies](https://img.shields.io/badge/dependencies-none-success.svg)](src/build.js)
+
 **Every new car, motorcycle, boat and aircraft on sale, and what it really costs.** The list price, what dealers
 actually charge for that model right now, and the drive-off (ride-away, on-the-water, delivered) price for your state or
 city once taxes and fees are added, for 2,729 cars and trucks, 1,444 motorcycles and scooters, 556 boats and jet skis
@@ -44,6 +50,15 @@ Thailand, Russia, Brazil and Canada, most with a photo. It runs in your browser
   country filter and a cheapest-per-horsepower sort.
 - **Plain English.** Each country has a glossary (MSRP, OTR, ex-showroom, RTO, 落地价, tenencia, IPVA, ОСАГО…) and a
   "How these numbers work" note that says exactly what is estimated and how.
+- **Every price shows its source.** The detail sheet says where the price list came from (linked), what the dataset
+  was compiled from, when it was verified, whether the row is confirmed or an estimate and why, and which region's
+  rules were applied; the masthead shows the data-as-of date. [How we calculate](https://destinjones.github.io/carfinder/methodology.html)
+  publishes every tax table, dealer band, exchange rate and source, generated from the same data the app ships with.
+- **Share any view.** The vertical, country, region, filters, sort, comparison set and open sheet live in the URL, so
+  "Share view" or the share button on a sheet gives a link that opens exactly what you see.
+- **Wrong price? Tell us.** Every sheet opens a prefilled GitHub issue with the vehicle, region, figures and link.
+- **Installable and offline.** Add it to a home screen; the page and fonts are cached, and a deploy shows up on the
+  next online visit.
 
 ## How it's built
 ```mermaid
@@ -77,7 +92,9 @@ the trade press; outside the US they are the maker's dollar or euro list convert
 GST and duty (the breakdown adds them), so every one of them is *preliminary*. The tests assert known real-world quotes (a RAV4 in Texas, a Creta in Maharashtra, a
 RAV4 in Ontario, a Sandero in the UK, a Seagull in China, a Grom in Texas, a Splendor in Delhi, a Spark in Florida, an SR22 in Texas and Oregon, a Challenger in the UK, an R44 in India) and
 run the pricing engines for all 97,000 vehicle-and-region combinations. Treat every number as a
-range to bargain within and get the out-the-door price in writing from two or three dealers.
+range to bargain within and get the out-the-door price in writing from two or three dealers. The full method, every
+table and every source are on [How we calculate](https://destinjones.github.io/carfinder/methodology.html); the
+provenance of each row (source, verification date, confirmed or estimate) is in its detail sheet.
 
 ## Run it
 - **Online:** use the links above.
@@ -92,10 +109,10 @@ range to bargain within and get the out-the-door price in writing from two or th
 
 | Path | What |
 |---|---|
-| `carfinder.html` | the app, built; `index.html` and `about.html` are the website |
-| `src/` | `head.html` (markup + CSS), `script.html` (all code), `build.js` |
-| `data/` | `cars_<cc>.json`, `moto_<cc>.json`, `boat_<cc>.json`, `air_<cc>.json` per country, `states_us.json`, `states_in.json`, `vfees.json` (bike, boat and aircraft fee rules), `images.json` (photo index) |
-| `docs/` | [data schema](docs/DATA.md), [architecture](docs/ARCHITECTURE.md), [testing](docs/TESTING.md), [tax research notes](docs/tax-notes/) per country |
+| `carfinder.html` | the app, built; `methodology.html` (how we calculate) and `sw.js` are built too; `index.html` and `about.html` are the website |
+| `src/` | `head.html` (markup + CSS), `script.html` (all code), `build.js`, `methodology.js` + `methodology.html` (the generated methodology page), `sw.js` (service worker template) |
+| `data/` | `cars_<cc>.json`, `moto_<cc>.json`, `boat_<cc>.json`, `air_<cc>.json` per country, `states_us.json`, `states_in.json`, `vfees.json` (bike, boat and aircraft fee rules), `images.json` (photo index), `sources.json` (compile dates, exchange-rate date, price sources, makers' sites) |
+| `docs/` | [data schema](docs/DATA.md), [architecture](docs/ARCHITECTURE.md), [testing](docs/TESTING.md), [tax research notes](docs/tax-notes/) per country, for US bikes and boats, and for aircraft |
 | `test/` | Node tests (`*.test.mjs`) and the Playwright browser checks (`browser/`) |
 | `brand/` | emblem, screenshots, social card, fonts, the portrait, the demo video and GIFs (`video/`), and `tools/` to regenerate them (`shots.py`, `record.py`) |
 

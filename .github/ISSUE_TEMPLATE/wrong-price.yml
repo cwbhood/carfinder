@@ -1,0 +1,43 @@
+name: Wrong price or fee
+description: A list price, dealer band, tax or fee that does not match what a buyer sees. The app's "Wrong price? Tell us" link fills this in.
+title: "Wrong price: "
+labels: ["wrong price"]
+body:
+  - type: input
+    id: vehicle
+    attributes:
+      label: Vehicle
+      description: Make, model, year and the tab (cars, motorcycles, boats, aircraft · country).
+      placeholder: Toyota RAV4 2026 · Cars & trucks · USA
+    validations:
+      required: true
+  - type: input
+    id: region
+    attributes:
+      label: Region
+      description: The state, province, city or currency selected when you saw the figure.
+      placeholder: Texas
+  - type: textarea
+    id: shown
+    attributes:
+      label: What CarFinder shows
+      description: The figures as displayed (list price, dealer band, on-road total or a fee line).
+  - type: textarea
+    id: correct
+    attributes:
+      label: What it should be
+      description: The correct figure and, if you know it, why (a new price list, a rate change, a cap that applies).
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: Where the correct figure comes from (a brand price list, a government rate page, a dealer quote). A link is best.
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link to the view
+      description: The CarFinder permalink (the app fills this in when you report from a detail sheet).

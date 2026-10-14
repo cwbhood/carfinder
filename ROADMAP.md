@@ -16,14 +16,19 @@ Tick things off as they ship; add what you learn.
 - [ ] Dealer doc-fee and registration tables for every US state from state sources rather than typical values
 
 ## Features
-- [ ] Shareable URLs: encode the tab, region and filters in the hash
+- [x] Shareable URLs: the tab, region, filters, sort, comparison set and open sheet in the hash, with Share buttons
+- [x] Provenance on every price (source, verification date, confirmed or estimate) and a prefilled "Wrong price? Tell us" issue
+- [x] "How we calculate": every table, band, rate and source on one generated page (`methodology.html`)
+- [x] Installable and offline (web app manifest + service worker); print stylesheet
 - [ ] A "total cost of ownership over 5 years" column (depreciation + fuel + insurance + tax)
 - [ ] Lease and PCP estimates where that is how most people buy (UK, Spain, Canada)
 - [ ] Monthly budget mode: show cars whose payment fits a number
 - [ ] Insurance estimates by driver profile where public rate tables exist
-- [ ] Print / save the window sticker as a PDF
+- [ ] Save the window sticker as a PDF (the print stylesheet handles the browser's own print-to-PDF today)
 
 ## Site and project
 - [x] Walkthrough video and GIFs on the website (recorded by `brand/tools/record.py`; re-record with the `record-demo` branch)
 - [ ] Translate the glossary and the app chrome (Spanish, Portuguese, Hindi, Chinese, Thai, Russian)
-- [ ] Versioned releases with a changelog once the data refresh cadence is set
+- [x] Versioned releases with a changelog (`CHANGELOG.md`, GitHub Releases from v1.0.0)
+- [ ] A build check that flags prices older than a set number of days
+- [ ] Lighthouse and axe runs in CI with published numbers

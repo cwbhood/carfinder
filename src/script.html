@@ -10,6 +10,7 @@ const STATES_US = /*__STATES_US__*/{};
 const STATES_IN = /*__STATES_IN__*/{};
 const VFEES = /*__VFEES__*/{};          // motorcycle, boat and aircraft fee rules per country (data/vfees.json)
 const IMAGES = /*__IMAGES__*/{};        // Wikipedia lead photos: {files:[[name, host, md5 prefix, author, licence]], map:{'vt/cc':{'make|model':[fileIndex, approx]}}} (data/images.json)
+const SOURCES = /*__SOURCES__*/{};      // provenance: compile dates, exchange-rate date, per-dataset price sources, makers' sites (data/sources.json)
 //<<core
 /* ---------- normalisation into one schema ---------- */
 const US_FIELDS = ['make','model','year','body','size','cls','fuel','price','top','dest','city','hwy','mpg','rngMi','mpge','hp','seats','drive','mkt','note','est'];
@@ -45,6 +46,21 @@ function normalize(raw, cc, vt){
     }
     return o;
   });
+}
+/* ---------- provenance: where a price comes from (data/sources.json) ---------- */
+const fmtDate = iso => { if (!iso) return ''; const d = new Date(iso + 'T00:00:00Z'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric', timeZone:'UTC'}); };
+function provenance(c, cc){
+  const vt = c.vt || 'car'; const S = SOURCES || {}; const sets = S.sets || {};
+  const set = sets[vt+'/'+cc] || sets[vt+'/ALL'] || (S.setsDefault||{})[vt] || {basis:'Published list price', sources:[], rules:''};
+  const bcc = (S.brandsByCC||{})[c.make]; const url = (bcc && bcc[cc]) || (S.brands||{})[c.make] || null;
+  const compiled = (S.compiled||{})[vt] || null, rulesAsOf = (S.rulesAsOf||{})[vt] || compiled;
+  let why = '';
+  if (c.est){
+    if (vt==='air' && cc!=='US') why = 'the maker\u2019s dollar or euro list converted at ECB rates of ' + fmtDate((S.fx||{}).date) + '; the invoice follows the exchange rate';
+    else if (vt==='air') why = 'announced or typically-equipped pricing that the maker can still change';
+    else why = 'announced, converted or partly confirmed pricing; confirm the figure with a dealer';
+  }
+  return {basis:set.basis, sources:set.sources||[], rules:set.rules||'', compiled, rulesAsOf, fx:S.fx||null, maker:{name:c.make, url}, confirmed:!c.est, why};
 }
 /* ---------- money ---------- */
 const en = (n,d=0) => Math.round(n).toLocaleString('en-US',{maximumFractionDigits:d});
@@ -1002,6 +1018,30 @@ function silKey(c){
   if (c.vt==='air') return ({'Light jet':'jet','Midsize jet':'jet','Large jet':'jet',Helicopter:'heli',eVTOL:'evtol',Gyroplane:'gyro',Glider:'glider'})[c.body] || 'plane';
   return ({SUV:'suv',Truck:'truck',Pickup:'truck',Van:'van',Minivan:'van',MPV:'van',Hatch:'hatch',Wagon:'wagon',Coupe:'coupe',Conv:'conv',Sports:'coupe'})[c.body] || 'sedan';
 }
+const REPO = 'https://github.com/destinjones/carfinder';
+function permalink(opts){ return location.origin.replace(/^null$/, 'file://') + location.pathname + location.search + '#' + viewHash(opts); }
+function issueURL(c){
+  const o = bd(c, c.price); const hcc = CC==='ALL' ? c.cc : CC;
+  const p = new URLSearchParams({template:'wrong-price.yml', labels:'wrong price', title:`Wrong price: ${c.make} ${c.model} (${hcc})`,
+    vehicle:`${c.make} ${c.model} ${c.year} · ${VT_LABEL[VT]} · ${CC_NAME[hcc]||hcc}`, region:regionName(CC, S.state),
+    shown:`${C.cardPriceLabel}: ${money(P(c))}${TOP(c)>P(c)?' – '+money(TOP(c)):''} · ${C.otdLabel}: ${M.range(o.lo, o.hi)}`, link:permalink({detail:c})});
+  return REPO + '/issues/new?' + p.toString();
+}
+/* the provenance panel in the detail sheet: price list, cross-checks, verification date and status, the rules applied */
+function provHTML(c){
+  const hcc = CC==='ALL' ? c.cc : CC; const pv = provenance(c.home || c, hcc);
+  const link = (name, url) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(name)}</a>` : esc(name);
+  const maker = pv.maker.url ? `${link(pv.maker.name, pv.maker.url)} <span class="muted">(${esc(pv.maker.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, ''))})</span>` : esc(pv.maker.name);
+  const srcs = pv.sources.map(([n,u]) => link(n, u)).join(' · ');
+  const status = pv.confirmed ? `<b class="ok">Confirmed</b> from the published price list` : `<b class="est">Estimate</b>: ${esc(pv.why)}`;
+  const rulesWhere = CC==='ALL' ? `${CC_NAME[hcc]} rules for ${esc(regionName(hcc, regionDefault(hcc)))}` : `${esc(regionName(CC, S.state))} rules`;
+  return `<div class="panel prov"><h4>Where this price comes from</h4><dl class="prov-l">
+    <div><dt>Price list</dt><dd>${maker} · ${esc(pv.basis)}</dd></div>
+    ${srcs ? `<div><dt>Compiled from</dt><dd>${srcs}</dd></div>` : ''}
+    <div><dt>Verified</dt><dd>${fmtDate(pv.compiled)} · ${status}</dd></div>
+    <div><dt>Taxes and fees</dt><dd>${rulesWhere} as of ${fmtDate(pv.rulesAsOf)}${CC==='ALL' && pv.fx ? `; converted at ${link('ECB rates of '+fmtDate(pv.fx.date), pv.fx.url)}` : ''} · <a href="methodology.html#${hcc.toLowerCase()}" target="_blank" rel="noopener">how we calculate</a></dd></div>
+  </dl><p class="fine"><a href="${esc(issueURL(c))}" target="_blank" rel="noopener">Wrong price? Tell us</a> · opens a GitHub issue with this vehicle, your region and the figures shown filled in.</p></div>`;
+}
 function creditHTML(c){ const r = imgRec(c); if (!r) return ''; return `<p class="fine credit-line">Photo: ${esc(r.artist||'unknown author')}${r.license ? ', '+esc(r.license) : ''}, via <a href="https://commons.wikimedia.org/wiki/File:${encodeURIComponent(r.file)}" target="_blank" rel="noopener">Wikimedia Commons</a>${r.approx ? ' · may show an earlier generation or another market’s version' : ''}</p>`; }
 function cardHTML(c){
   const o = CC==='ALL' ? {lo:c.wlo, hi:c.whi} : bd(c, c.price);
@@ -1051,7 +1091,7 @@ function render(){
   $('resTitle').textContent = parts.length ? parts.join(' · ') : (S.q ? `Results for “${S.q}”` : 'All ' + VERT[VT].noun);
   const n = activeCount(); $('fcount').hidden = !n; $('fcount').textContent = n;
   $('applyCount').textContent = lastList.length.toLocaleString('en-US');
-  updateCmpBar();
+  updateCmpBar(); syncHash();
 }
 function renderMore(){                       // append the next page instead of rebuilding the whole list
   const start = (page-1)*PAGE;
@@ -1078,6 +1118,7 @@ function openDetail(id){
   renderDetail();
   $('dBody').scrollTop = 0;
   if (!$('dlgDetail').open) $('dlgDetail').showModal();
+  syncHash();
 }
 const wbr = s => s.replace(/ – /g, ' –<wbr> ');   // let long price ranges wrap after the dash on narrow screens
 function stickerHTML(o, totalLabel, ML){
@@ -1193,8 +1234,10 @@ function renderDetail(){
     </div>
     <div class="panel"><h4>${c.vt==='boat'?'Size, power and fuel burn':c.vt==='air'?'Speed, range and fuel burn':c.vt==='moto'?'Engine and economy':HCC==='US'?'EPA efficiency':'Efficiency'}</h4>${effPanel(c)}${c.vt==='car' && evNote?`<p class="fine">${evNote}</p>`:''}</div>
     <div class="panel"><h4>Why this price band</h4><p class="sm">${mktTxt(HCC, c)[1]}</p><p class="fine">${industry} Current offers are on ${esc(c.make)}’s website.</p></div>
-    <div class="dlg-actions"><button class="btn primary" type="button" id="dCmpBtn">Add to compare</button><button class="btn" type="button" data-close>Close</button></div>`;
+    ${provHTML(c)}
+    <div class="dlg-actions"><button class="btn primary" type="button" id="dCmpBtn">Add to compare</button><button class="btn" type="button" id="dShareBtn">Share</button><button class="btn" type="button" data-close>Close</button></div>`;
   updateDetailCmpBtn();
+  $('dShareBtn').addEventListener('click', () => shareLink(`${c.make} ${c.model} · CarFinder 2026`, {detail:c}));
   const tr = $('trimRange');
   if (tr) tr.addEventListener('input', e => { detailT = +e.target.value/100; updateDetailPrice(); });
   $('dCmpBtn').addEventListener('click', () => { toggleCompare(c.id); updateDetailCmpBtn(); });
@@ -1238,7 +1281,8 @@ function openCompare(){
     ${row('Market', c=>mktTxt(CC==='ALL'?c.cc:CC, c)[0])}
     ${row('Notes', c=>esc(c.note))}
     ${row('', c=>`<button class="rm" type="button" data-rm="${c.id}">Remove</button>`)}
-    </tbody></table></div>`;
+    </tbody></table></div><div class="dlg-actions"><button class="btn" type="button" id="cShareBtn">Share this comparison</button><button class="btn" type="button" data-close>Close</button></div>`;
+  $('cShareBtn').addEventListener('click', () => shareLink(`Compare ${cs.length} · CarFinder 2026`));
   $('cBody').querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click', ()=>{ toggleCompare(+b.dataset.rm); if (compare.length<2){ $('dlgCompare').close(); } else openCompare(); render(); }));
   $('cBody').scrollTop = 0;
   if (!$('dlgCompare').open) $('dlgCompare').showModal();
@@ -1276,6 +1320,8 @@ function buildChrome(){
   $('pageTitle').innerHTML = `CarFinder <span>${C.title}</span> 2026${VT==='car' ? '' : ` <em>${V.name}</em>`}`;
   document.title = `CarFinder 2026 · ${V.name} · ${CC==='ALL' ? 'World' : C.name}`;
   $('lede').textContent = C.lede;
+  const asof = provenance({vt:VT, make:'', est:0}, CC==='ALL' ? 'US' : CC);
+  $('asof').innerHTML = `Prices and tax rules as of <b>${fmtDate(asof.compiled)}</b>${CC==='ALL' && asof.fx ? ` · converted at ECB rates of ${fmtDate(asof.fx.date)}` : ''} · <a href="methodology.html#${CC==='ALL' ? 'world' : CC.toLowerCase()}">How we calculate</a> · <a href="${REPO}/issues/new?template=wrong-price.yml" target="_blank" rel="noopener">Report a wrong price</a>`;
   $('optSeats').textContent = VT==='boat' ? 'Biggest capacity' : 'Most seats'; $('optSeats').hidden = VT==='moto';
   const bodies = C.bodyOrder.filter(b => CARS.some(c => c.body===b));
   $('bodyChips').innerHTML = `<button class="chip" type="button" data-body="" aria-pressed="true">All types</button>` + bodies.map(b=>`<button class="chip" type="button" data-body="${b}" aria-pressed="false">${C.bodyPlural[b]||b}</button>`).join('');
@@ -1359,6 +1405,63 @@ function syncChips(){
   if (CC==='ALL') setPressed($('countryOpts'), b => S.countries.has(b.dataset.v));
   $('y2025').checked = S.years[2025]; $('y2026').checked = S.years[2026]; $('y2027').checked = S.years[2027]; $('onlyNew').checked = S.onlyNew; $('showEst').checked = S.est;
 }
+/* ===== permalinks: the whole view (vertical, country, region, filters, sort, compare set, open sheet) lives in the URL hash ===== */
+const slugify = s => String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+function slugOf(c){ return (CC==='ALL' ? c.cc.toLowerCase() + '-' : '') + slugify(c.make + ' ' + c.model) + (c.year && c.year !== 2026 ? '-' + c.year : ''); }
+function bySlug(s){ for (let i = 0; i < CARS.length; i++) if (slugOf(CARS[i]) === s) return CARS[i]; return null; }
+const SORTS = ['price-asc','price-desc','fuel','mpg','range','hp','perhp','seats','name'];
+function viewHash(opts){
+  const p = new URLSearchParams(); p.set('v', VT); p.set('cc', CC);
+  if (S.state !== regionDefault(CC)) p.set('r', S.state);
+  if (CC==='ALL' && WUNIT !== 'l100') p.set('u', WUNIT);
+  if (S.q) p.set('q', S.q);
+  const list = (k, set) => { if (set.size) p.set(k, [...set].join(',')); };
+  list('b', S.body); list('f', S.fuel); list('s', S.size); list('t', S.cls); list('m', S.make); list('k', S.countries);
+  if (S.pmin) p.set('pmin', S.pmin); if (S.pmax) p.set('pmax', S.pmax);
+  if (S.seats) p.set('seats', S.seats); if (S.drive !== 'any') p.set('drive', S.drive);
+  if (S.eff) p.set('eff', S.eff); if (S.rng) p.set('rng', S.rng);
+  if (S.sort !== 'price-asc') p.set('sort', S.sort);
+  const ys = [2025, 2026, 2027].filter(y => S.years[y]); if (ys.length < 3) p.set('y', ys.join(','));
+  if (S.onlyNew) p.set('new', '1'); if (!S.est) p.set('est', '0');
+  if (compare.length) p.set('cmp', compare.map(i => slugOf(CARS[i])).join(','));
+  const d = opts && opts.detail !== undefined ? opts.detail : (detailCar && $('dlgDetail').open ? detailCar : null);
+  if (d) p.set('d', slugOf(d));
+  return p.toString();
+}
+let HASH_WRITTEN = '';
+function syncHash(){ const h = viewHash(); if (h === HASH_WRITTEN) return; HASH_WRITTEN = h; try { history.replaceState(null, '', location.pathname + location.search + '#' + h); } catch (e) {} }
+function readHash(){ const h = location.hash.slice(1); return h && h.includes('=') ? new URLSearchParams(h) : null; }
+/* apply a hash after buildChrome(): filters into S, then the sheet or comparison it names */
+function applyHashFilters(p){
+  const sets = (k, set) => { const v = p.get(k); if (v) v.split(',').forEach(x => { if (x) set.add(x); }); };
+  const r = p.get('r'); if (r && [...$('state').options].some(o => o.value === r)) { S.state = r; $('state').value = r; if (CC==='ALL'){ WCUR = r; worldPrices(); worldPresets(); refreshPriceUI(); } }
+  const u = p.get('u'); if (CC==='ALL' && u && WORLD_UNITS[u]) { WUNIT = u; $('wunit').value = u; applyWorldUnits(); applySliders(); }
+  S.q = (p.get('q') || '').trim().toLowerCase(); $('q').value = S.q;
+  sets('b', S.body); sets('f', S.fuel); sets('s', S.size); sets('t', S.cls); sets('m', S.make); sets('k', S.countries);
+  const num = k => Math.max(0, parseFloat(p.get(k)) || 0);
+  S.pmin = num('pmin'); S.pmax = num('pmax'); S.seats = num('seats'); S.eff = num('eff'); S.rng = num('rng');
+  const dr = p.get('drive'); if (dr && C.driveOpts.some(([v]) => v === dr)) S.drive = dr;
+  const so = p.get('sort'); if (SORTS.includes(so)) S.sort = so;
+  const y = p.get('y'); if (y) { const on = new Set(y.split(',').map(Number)); [2025, 2026, 2027].forEach(yy => S.years[yy] = on.has(yy)); if (![2025, 2026, 2027].some(yy => S.years[yy])) S.years[2026] = true; }
+  if (p.get('new') === '1') S.onlyNew = true; if (p.get('est') === '0') S.est = false;
+  const cmp = p.get('cmp'); if (cmp) { compare = cmp.split(',').map(sl => bySlug(sl)).filter(Boolean).map(c => c.id).slice(0, 4); store(cmpKey(), compare); }
+  return p.get('d') ? bySlug(p.get('d')) : null;
+}
+function applyHash(p){                                 // a pasted or changed hash: rebuild the whole view from it
+  const v = p.get('v'), cc = (p.get('cc') || '').toUpperCase();
+  if (VERT[v] || COUNTRIES[cc]) setLive(COUNTRIES[cc] ? cc : CC, VERT[v] ? v : VT);
+  $('countryTabs').innerHTML = countryTabsHTML();
+  resetS(); page = 1; detailCar = null; if ($('dlgDetail').open) $('dlgDetail').close();
+  buildChrome(); const d = applyHashFilters(p); syncChips(); render();
+  if (d) openDetail(d.id);
+}
+function shareLink(title, opts){
+  const url = permalink(opts);
+  const done = () => toast('Link copied. It opens this exact view.');
+  if (navigator.share && matchMedia('(pointer:coarse)').matches) { navigator.share({title, url}).catch(() => {}); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, () => toast('Copy the link from the address bar.'));
+  else toast('Copy the link from the address bar.');
+}
 function setLive(cc, vt){ VT = vt; CC = cc; C = countryConfig(cc, vt); CARS = DATA[vt][cc]; M = MONEY[cc]; }
 function countryTabsHTML(){ return ORDER.map(cc => `<button class="ctab" type="button" role="tab" data-country="${cc}" aria-selected="false">${COUNTRIES[cc].name} <small>${DATA[VT][cc].length.toLocaleString('en-US')}</small></button>`).join(''); }
 function switchCountry(cc){
@@ -1431,11 +1534,18 @@ function init(){
   document.querySelectorAll('dialog').forEach(d => { d.addEventListener('click', e => { if (e.target.closest('[data-close]')) d.close(); else if (e.target === d) d.close(); }); });
   $('btnGloss').addEventListener('click', () => $('dlgGloss').showModal());
   $('btnWizard').addEventListener('click', () => $('dlgWizard').showModal());
-  // ?v=moto&cc=IN deep links (the site's demo buttons use them)
+  $('btnShare').addEventListener('click', () => shareLink(document.title));
+  $('dlgDetail').addEventListener('close', syncHash);
+  addEventListener('hashchange', () => { if (location.hash.slice(1) === HASH_WRITTEN) return; const p = readHash(); if (p) applyHash(p); });
+  // ?v=moto&cc=IN deep links (the site's demo buttons use them); a #v=…&cc=…&… permalink carries the whole view and wins
   const qs = new URLSearchParams(location.search); const qv = qs.get('v'), qc = (qs.get('cc')||'').toUpperCase();
   if (VERT[qv] || COUNTRIES[qc]) setLive(COUNTRIES[qc] ? qc : CC, VERT[qv] ? qv : VT);
+  const hp = readHash();
+  if (hp) { applyHash(hp); return; }
   $('countryTabs').innerHTML = countryTabsHTML();
   buildChrome(); syncChips(); render();
 }
 init();
+// installable and offline on the website (the page is self-contained, so the worker only has to keep it and the fonts); not from file://
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 </script>
