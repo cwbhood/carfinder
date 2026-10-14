@@ -361,6 +361,110 @@
    "Lucid": "https://lucidmotors.com/design-yours",
    "INEOS": "https://ineosgrenadier.com/en/us/the-vehicle/vehicle-configurator",
    "Fiat": "https://www.fiatusa.com/shopping-tools/vehicle-selector.bmo"
+  },
+  "car/CA": {
+   "Toyota": "https://www.toyota.ca/en/build-price/",
+   "Chevrolet": "https://www.chevrolet.ca/en/build-and-price",
+   "Mercedes-Benz": "https://www.mercedes-benz.ca/en/vehicles/build",
+   "Mercedes-AMG": "https://www.mercedes-benz.ca/en/vehicles/build",
+   "Hyundai": "https://www.hyundaicanada.com/en/shopping-tools/buildandprice",
+   "Ford": "https://shop.ford.ca/showroom/",
+   "Nissan": "https://www.nissan.ca/shopping-tools/build-price",
+   "Kia": "https://www.kia.ca/en/shopping-tools/build-and-price",
+   "BMW": "https://www.bmw.ca/en/configurator.html",
+   "Honda": "https://www.honda.ca/en/buildyourhonda",
+   "Lexus": "https://www.lexus.ca/en/build-price/",
+   "Subaru": "https://www.subaru.ca/WebPage.aspx?WebSiteID=282&WebPageID=16564",
+   "Jeep": "https://www.jeep.ca/en/build-and-price",
+   "Volkswagen": "https://www.vw.ca/en/configurator.html"
+  },
+  "car/UK": {
+   "BMW": "https://www.bmw.co.uk/en/configurator.html",
+   "Volkswagen": "https://www.volkswagen.co.uk/en/configurator.html",
+   "Mercedes-Benz": "https://www.mercedes-benz.co.uk/passengercars/configurator.html",
+   "Mercedes-AMG": "https://www.mercedes-benz.co.uk/passengercars/configurator.html",
+   "Kia": "https://www.kia.com/uk/utility/build-your-kia/",
+   "Hyundai": "https://www.hyundai.com/uk/en/configurator.html",
+   "Skoda": "https://www.skoda.co.uk/buy/build-and-order-car-online",
+   "Renault": "https://www.renault.co.uk/model-picker-configurator.html",
+   "Peugeot": "https://store.peugeot.co.uk/configurable",
+   "Mazda": "https://www.mazda.co.uk/configurator/",
+   "Honda": "https://www.honda.co.uk/cars/configurator.html",
+   "Volvo": "https://www.volvocars.com/uk/build/",
+   "Nissan": "https://www.nissan.co.uk/vehicles/car-configurator.html",
+   "Toyota": "https://www.toyota.co.uk/new-cars",
+   "BYD": "https://www.byd.com/uk/configurator"
+  },
+  "car/AU": {
+   "BMW": "https://www.bmw.com.au/en/configurator.html",
+   "Kia": "https://www.kia.com/au/shopping-tools/build-and-price.html",
+   "Volkswagen": "https://www.volkswagen.com.au/en/configurator.html",
+   "BYD": "https://bydautomotive.com.au/configurator",
+   "Mercedes-Benz": "https://www.mercedes-benz.com.au/passengercars/buy/new-car.html",
+   "Mercedes-AMG": "https://www.mercedes-benz.com.au/passengercars/buy/new-car.html",
+   "Mazda": "https://www.mazda.com.au/build/",
+   "Audi": "https://www.audi.com.au/en/build-your-audi/",
+   "Ford": "https://www.ford.com.au/build-and-price/select-a-vehicle/",
+   "MG": "https://mgmotor.com.au/configurator/mg3"
+  },
+  "car/IN": {
+   "Maruti Suzuki": "https://www.marutisuzuki.com/arena/configurator",
+   "Tata": "https://cars.tatamotors.com/configurator/build-budget.html",
+   "BMW": "https://www.bmw.in/en/configurator.html",
+   "Hyundai": "https://www.hyundai.com/in/en/click-to-buy/prices",
+   "Kia": "https://www.kia.com/in/buy/configure/configurator.html",
+   "Mercedes-Benz": "https://www.mercedes-benz.co.in/passengercars/buy/new-car.html",
+   "Mercedes-AMG": "https://www.mercedes-benz.co.in/passengercars/buy/new-car.html"
+  },
+  "car/MX": {
+   "Toyota": "https://www.toyota.mx/configura-cotiza/modelo",
+   "Nissan": "https://www.nissan.com.mx/comprar-un-nissan/cotizador.html",
+   "BMW": "https://www.bmw.com.mx/es/configurador.html",
+   "Mercedes-Benz": "https://www.mercedes-benz.com.mx/es/passengercars/configurator.html",
+   "Mercedes-AMG": "https://www.mercedes-benz.com.mx/es/passengercars/configurator.html",
+   "Volkswagen": "https://www.vw.com.mx/es/configurador.html",
+   "Ford": "https://www.ford.mx/compra-en-linea/",
+   "Mazda": "https://www.mazda.mx/compra-un-mazda/herramientas-de-compra/configura-tu-mazda",
+   "Kia": "https://www.kia.com/mx/shopping-tools/build-your-own.html"
+  },
+  "car/BR": {
+   "Chevrolet": "https://www.chevrolet.com.br/monte-o-seu",
+   "Mercedes-Benz": "https://www2.mercedes-benz.com.br/passengercars/buy/new-car.html",
+   "Mercedes-AMG": "https://www2.mercedes-benz.com.br/passengercars/buy/new-car.html",
+   "Volkswagen": "https://www.vw.com.br/pt/configurador.html",
+   "BMW": "https://www.bmw.com.br/pt/configurador.html",
+   "Toyota": "https://www.toyota.com.br/monte-o-seu",
+   "Hyundai": "https://www.hyundai.com.br/monte-o-seu.html"
+  },
+  "car/ES": {
+   "Volkswagen": "https://www.volkswagen.es/es/configurador.html",
+   "Renault": "https://www.renault.es/configurador.html",
+   "Hyundai": "https://www.hyundai.com/es/es/configurador-de-modelos.html",
+   "Ford": "https://www.ford.es/compra/configura-tu-ford/ice",
+   "Peugeot": "https://www.peugeot.es/herramientas/configurador.html",
+   "Mazda": "https://www.mazda.es/configurador/",
+   "Toyota": "https://www.toyota.es/comprar-coche-online",
+   "Kia": "https://www.kia.com/es/quiero-un-kia/configurador/"
+  },
+  "car/TH": {
+   "Toyota": "https://www.toyota.co.th/en/quotation/",
+   "MG": "https://www.mgcars.com/th/Calculator",
+   "BMW": "https://www.bmw.co.th/en/configurator.html",
+   "Mercedes-Benz": "https://www.mercedes-benz.co.th/en/passengercars/configurator.html",
+   "Mercedes-AMG": "https://www.mercedes-benz.co.th/en/passengercars/configurator.html",
+   "Nissan": "https://en.nissan.co.th/vehicles/configurator.html",
+   "Lexus": "https://www.lexus.co.th/en/configurator.html"
+  },
+  "car/CN": {
+   "BYD": "https://www.byd.com/cn/order-optional",
+   "Volkswagen": "https://www.vw.com.cn/BrandCarModel.html",
+   "Toyota": "https://www.gac-toyota.com.cn/vehicles"
+  },
+  "car/RU": {
+   "Changan": "https://changanauto.ru/buy/configurator/",
+   "Haval": "https://haval.ru/configurator/",
+   "Hongqi": "https://hongqi.ru/configurator-models",
+   "Lada": "https://www.lada.ru/configurator?step=0"
   }
  },
  "brands": {

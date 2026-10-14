@@ -51,11 +51,12 @@ Thailand, Russia, Brazil and Canada, most with a photo. It runs in your browser
   list was compiled.
 - **Plain English.** Each country has a glossary (MSRP, OTR, ex-showroom, RTO, 落地价, tenencia, IPVA, ОСАГО…) and a
   "How these numbers work" note that says exactly what is estimated and how.
-- **Every price shows its source.** The detail sheet links the maker's build-and-price page (or site), says what the
-  dataset was compiled from (sources without a page are marked *not linked* rather than dressed up as citations), when
-  it was compiled, whether the row is confirmed or an estimate and why, and which region's rules were applied, with the
-  state revenue-department or transport-department page behind them in the US and India; the masthead shows the
-  data-as-of date, the version and how many rows are estimates. [How we calculate](https://destinjones.github.io/carfinder/methodology.html)
+- **Every price shows its source.** The detail sheet links the maker's build-and-price page for that market (or its
+  site), says what the dataset was compiled from (sources without a page are marked *not linked* rather than dressed up
+  as citations), when it was compiled, which of four states the row is in (*checked*, *listed*, *converted* or
+  *estimated*) and why, and which region's rules were applied, with the state revenue-department or
+  transport-department page behind them in the US and India; the masthead shows the data-as-of date, the version and
+  how many rows are converted or estimated. [How we calculate](https://destinjones.github.io/carfinder/methodology.html)
   publishes every tax table with a source column, the dealer bands, every exchange-rate table the data has used and
   the measured [data-quality scorecard](docs/DATA-QUALITY.md), all generated from the same data the app ships with.
 - **Share any view.** The vertical, country, region, filters, sort, comparison set and open sheet live in the URL, so
@@ -97,8 +98,10 @@ prices were compiled on **12 October 2026** from manufacturer price lists and th
 the maker's dollar or euro list converted at the ECB rates of that day and shown before VAT, GST and duty (the
 breakdown adds them), so every one of them is *preliminary*. The World tab converts at the ECB rates of **14 October
 2026** (rubles at the Bank of Russia rate) and says how far a currency has moved since the row's list was compiled.
-Across all 5,700 rows, 44% are confirmed against a published list and 56% are estimates; the exact figures per dataset
-are in the measured [data-quality scorecard](docs/DATA-QUALITY.md), which CI keeps from regressing. The tests assert known real-world quotes (a RAV4 in Texas, a Creta in Maharashtra, a
+Across all 5,700 rows, 2,517 are *listed* (the maker's published price on the compile date), 865 are *converted*
+(a published list in another currency at a dated rate) and 2,318 are *estimated*; none is *checked* by a person yet.
+The exact figures per dataset, with per-vertical floors that CI holds, are in the measured
+[data-quality scorecard](docs/DATA-QUALITY.md) and its [history](docs/data-quality-history.csv). The tests assert known real-world quotes (a RAV4 in Texas, a Creta in Maharashtra, a
 RAV4 in Ontario, a Sandero in the UK, a Seagull in China, a Grom in Texas, a Splendor in Delhi, a Spark in Florida, an SR22 in Texas and Oregon, a Challenger in the UK, an R44 in India) and
 run the pricing engines for all 97,000 vehicle-and-region combinations. Treat every number as a
 range to bargain within and get the out-the-door price in writing from two or three dealers. The full method, every
@@ -110,7 +113,7 @@ provenance of each row (source, compile date, confirmed or estimate) is in its d
 - **Locally:** clone, then `python3 -m http.server` (or any static server) and open http://localhost:8000/. Opening
   `carfinder.html` straight from disk works too.
 - **After editing `src/`, `data/` or `docs/tax-notes/`:** `node src/build.js` rebuilds `carfinder.html`,
-  `methodology.html`, `sw.js` and `docs/DATA-QUALITY.md`; commit them all (CI checks they are current).
+  `methodology.html`, `sw.js`, `docs/DATA-QUALITY.md` and `docs/data-quality-history.csv`; commit them all (CI checks they are current).
 - **Tests:** `node --test` (schema checks, pricing core, known quotes, build in sync). Browser checks (every tab and
   control at phone and desktop widths) need Python with Playwright: `pip install playwright pillow && playwright
   install chromium`, then `python3 test/browser/audit.py` and `python3 test/browser/interact.py`.
@@ -123,7 +126,7 @@ provenance of each row (source, compile date, confirmed or estimate) is in its d
 | `src/` | `head.html` (markup + CSS), `script.html` (all code), `build.js`, `methodology.js` + `methodology.html` (the generated methodology page), `quality.js` (the scorecard), `sw.js` (service worker template) |
 | `data/` | `cars_<cc>.json`, `moto_<cc>.json`, `boat_<cc>.json`, `air_<cc>.json` per country, `states_us.json` and `states_in.json` (with a citation per row), `vfees.json` (bike, boat and aircraft fee rules), `images.json` (photo index), `sources.json` (compile dates, dated exchange-rate tables, price sources, makers' sites and build-and-price pages), `quality-floor.json` (the scorecard's floors) |
 | `tools/` | `air.py` (regenerates the aircraft rows from the dollar master list at the recorded rates), `fx.mjs` (pulls an ECB and Bank of Russia rate table for a compile date) |
-| `docs/` | [data schema](docs/DATA.md), [architecture](docs/ARCHITECTURE.md), [testing](docs/TESTING.md), [data quality](docs/DATA-QUALITY.md) (generated), [tax research notes](docs/tax-notes/) per country, for US bikes and boats, and for aircraft |
+| `docs/` | [data schema](docs/DATA.md), [architecture](docs/ARCHITECTURE.md), [testing](docs/TESTING.md), [data quality](docs/DATA-QUALITY.md) and its [history](docs/data-quality-history.csv) (both generated), [tax research notes](docs/tax-notes/) per country, for US bikes and boats, and for aircraft |
 | `test/` | Node tests (`*.test.mjs`) and the Playwright browser checks (`browser/`) |
 | `brand/` | emblem, screenshots, social card, fonts, the portrait, the demo video and GIFs (`video/`), and `tools/` to regenerate them (`shots.py`, `record.py`) |
 

@@ -107,12 +107,16 @@ body.no-scroll,body:has(dialog[open]){overflow:hidden}
 .prov-l dt{color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:11px;padding-top:2px}
 .prov-l dd{margin:0;overflow-wrap:anywhere}
 .prov-l a{color:var(--fg)}
-.prov b.ok{color:var(--deal)} .prov b.est{color:var(--hot)}
+.prov b.ok{color:var(--deal)} .prov b.est{color:var(--hot)} .prov b.cv{color:var(--steady)}
 .nolink{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;vertical-align:middle}
 .prov-act{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px} .prov-act .btn{text-decoration:none}
 .print-only{display:none}
 .masthead .asof .estcount{color:var(--hot);font-weight:600}
-.masthead .asof .fxmove{color:var(--hot);font-weight:600;cursor:help;border-bottom:1px dotted currentColor}
+.masthead .asof{position:relative}
+.masthead .asof .fxmove{display:inline-flex;align-items:center;min-height:var(--tap);margin:-12px 0;padding:0;background:none;border:0;font:inherit;color:var(--hot);font-weight:600;cursor:help;border-bottom:1px dotted currentColor;border-radius:0}
+.masthead .asof .tip{display:none;position:absolute;left:0;right:0;top:100%;z-index:30;margin-top:6px;padding:10px 12px;background:var(--fg);color:var(--bg);border-radius:10px;font-size:13px;font-weight:500;line-height:1.4;box-shadow:var(--shadow)}
+.masthead .asof .fxmove:hover + .tip,.masthead .asof .fxmove:focus-visible + .tip,.masthead .asof .fxmove[aria-expanded="true"] + .tip{display:block}
+.masthead .asof .estcount a{color:inherit}
 @media (max-width:420px){ .prov-l > div{grid-template-columns:1fr;gap:1px} }
 .mast-actions{display:flex;flex-wrap:wrap;gap:8px;width:100%}
 .mast-actions .btn{flex:1 1 auto;font-size:14px;padding-inline:10px;white-space:normal;line-height:1.2}
@@ -164,7 +168,8 @@ body.no-scroll,body:has(dialog[open]){overflow:hidden}
 .tag{font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);letter-spacing:.02em}
 .tag.f-EV,.tag.f-Hydrogen{background:var(--ev-soft);color:var(--ev);border-color:transparent}
 .tag.f-Hybrid,.tag.f-PHEV,.tag.f-CNG{background:var(--hyb-soft);color:var(--hyb);border-color:transparent}
-.tag.est{background:var(--steady-soft);color:var(--steady);border-color:transparent}
+.tag.est{background:var(--hot-soft);color:var(--hot);border-color:transparent}
+.tag.cv{background:var(--steady-soft);color:var(--steady);border-color:transparent}
 .tag.left{background:var(--deal-soft);color:var(--deal);border-color:transparent}
 .tag.new{background:var(--accent-soft);color:var(--accent);border-color:transparent}
 .tag.cc{background:var(--fg);color:var(--bg);border-color:var(--fg);letter-spacing:.06em;text-transform:uppercase;font-size:11px}
@@ -366,7 +371,8 @@ table.cmp-t{border-collapse:collapse;min-width:100%;font-size:14px}
 dl.gloss{margin:0;display:flex;flex-direction:column;gap:12px}
 dl.gloss dt{font-weight:700;font-family:var(--font-display);font-size:19px}
 dl.gloss dd{margin:0;color:var(--muted);font-size:14px;max-width:65ch}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--sab));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:70;box-shadow:var(--shadow);max-width:calc(100vw - 32px);text-align:center}
+.toast{position:fixed;transition:opacity .2s;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--sab));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:70;box-shadow:var(--shadow);max-width:calc(100vw - 32px);text-align:center}
+.toast.off{opacity:0;pointer-events:none}
 .totop{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(16px + var(--sab));z-index:30;width:var(--tap);height:var(--tap);border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);box-shadow:var(--shadow);display:inline-flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .totop.show{opacity:1;pointer-events:auto}
 body.has-cmp .totop{bottom:calc(84px + var(--sab))}

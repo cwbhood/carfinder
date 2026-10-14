@@ -15,13 +15,14 @@ Tick things off as they ship; add what you learn.
 - [ ] More countries: Germany, France, Italy, Japan, South Korea, Indonesia, South Africa, Turkey, Saudi Arabia
 - [x] A citation per state row: US sales-tax rows cite the state revenue department or DMV page, Indian rows the transport department or the Act (`data/states_us.json`, `data/states_in.json`)
 - [ ] Dealer doc-fee and registration tables for every US state from state sources rather than typical values (doc fees are the least certain number in each row)
-- [ ] Per-row verification dates (today a row's date is its dataset's compile date)
+- [ ] Per-row verification: a `checked` date on rows a person has compared to the maker's page (the *checked* state exists and is empty)
+- [ ] Boats: confirm the estimated prices against maker price lists and find photos (11% listed, 4% with a photo: the weakest vertical)
 
 ## Features
 - [x] Shareable URLs: the tab, region, filters, sort, comparison set and open sheet in the hash, with Share buttons
 - [x] Provenance on every price (build-and-price link, compile date, confirmed or estimate, the citation behind the region's rules), a prefilled "Wrong price? Tell us" issue and a "Copy the details" report that needs no account
 - [x] Dated exchange-rate tables with a "rates moved since compile" flag; aircraft rows converted at their own compile-day rates
-- [x] A measured data-quality scorecard (`docs/DATA-QUALITY.md`) with CI floors
+- [x] A measured data-quality scorecard (`docs/DATA-QUALITY.md`) with per-vertical CI floors and a per-release history (`docs/data-quality-history.csv`)
 - [x] "How we calculate": every table, band, rate and source on one generated page (`methodology.html`), with a Source column on the state tables
 - [x] Installable and offline (web app manifest + service worker); print stylesheet
 - [ ] A "total cost of ownership over 5 years" column (depreciation + fuel + insurance + tax)

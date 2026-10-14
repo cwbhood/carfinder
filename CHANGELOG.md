@@ -4,6 +4,35 @@ All notable changes to CarFinder. The format follows [Keep a Changelog](https://
 follow [Semantic Versioning](https://semver.org/) (data corrections are patches, new countries or verticals are minors,
 a schema change is a major).
 
+## [1.2.0] - 2026-10-14
+
+Four honest states instead of one vague one, floors that cannot be tripped by adding data, and build-and-price
+links in every car market.
+
+### Added
+- **Four row states.** Every row is exactly one of *checked* (a person compared it to the maker's page after
+  compile; none yet, this is where per-row verification goes), *listed* (the maker's published price on the compile
+  date), *converted* (a published list in another currency at a dated rate: aircraft outside the US) or *estimated*
+  (modelled from announcements, trade press or dealer quotes). Cards, the sheet's new Status line, the copied report,
+  the masthead count and the filter label all use them; "preliminary" is gone. Aircraft are now 89% from a published
+  list (865 converted, 1 listed) instead of "99.9% estimates".
+- **Per-vertical floors with margin** in `data/quality-floor.json`: rows from a published list (cars 68%, bikes 32%,
+  boats 10%, aircraft 86%) and photos (cars 84%, bikes 62%, boats 3%, aircraft 93%), plus a ceiling on makers without
+  a linked page (159) and a floor on build-and-price coverage for all car rows (42%). Adding boats can no longer break
+  cars, and a vertical that stands still is visible.
+- **Build-and-price links in all eleven car markets**: 1,215 of 2,729 car rows (44.5%, from 337) link the maker's
+  configurator or price page for that market, each one found through a search result or a fetch of the page.
+- **A quality history.** `docs/data-quality-history.csv` keeps one row per release (v1.0.0 and v1.1.0 measured from
+  their commits with the same script), so the trajectory survives rebuilds; the build upserts the current version.
+- The World tab's "rates have moved" flag is a button with a real tooltip (`aria-describedby`, shown on hover, focus
+  or tap); the toast that confirms "Copy the details" and "Share" is a polite live region that exists before anything
+  is announced into it.
+
+### Changed
+- `docs/DATA-QUALITY.md` and the methodology page's "What is measured" table show the four states, the per-vertical
+  floors and the build-and-price coverage per market.
+- The masthead reads "of 414 prices, 49 estimated" (or "93 converted") with a link to what the states mean.
+
 ## [1.1.0] - 2026-10-14
 
 The trust layer, measured instead of asserted: citations behind every tax row, dated exchange rates, honest wording,
@@ -111,6 +140,7 @@ The first tagged release: four verticals, eleven countries, 5,700 vehicles, and 
   Russia, Brazil and Canada with list, dealer and on-road prices per state, province or city (compiled 29 September
   2026), the World tab, compare, the wizard, glossaries, and the tests that run every vehicle through every region.
 
+[1.2.0]: https://github.com/destinjones/carfinder/releases/tag/v1.2.0
 [1.1.0]: https://github.com/destinjones/carfinder/releases/tag/v1.1.0
 [1.0.0]: https://github.com/destinjones/carfinder/releases/tag/v1.0.0
 [0.3.0]: https://github.com/destinjones/carfinder/compare/c85aa56...3f5b682

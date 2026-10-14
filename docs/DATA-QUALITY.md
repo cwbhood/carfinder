@@ -2,21 +2,50 @@
 
 Measured by `src/quality.js` at build time from the data files; `node src/build.js` rewrites this page and
 `test/quality.test.mjs` fails the build when a number drops below its floor in `data/quality-floor.json`.
+One row per release is kept in `data-quality-history.csv`, so the trajectory survives rebuilds.
 Data as of **12 Oct 2026** (the newest compile date); exchange rates of **14 Oct 2026**.
+
+## Four states
+
+Every row is in exactly one state, each true of the row and nothing more:
+
+- **checked**: a person compared the row to the maker’s page after compile (the row carries a `checked` date). None yet; this is where per-row verification goes.
+- **listed**: the maker’s published list price for this market on the dataset’s compile date, not individually re-checked since.
+- **converted**: a published list in another currency, converted at a dated exchange rate (aircraft outside the US).
+- **estimated**: modelled from announcements, trade press or dealer quotes (most boats, and bikes outside the US).
+
+"From a published list" below is checked + listed + converted; the floors are per vertical, so adding boats cannot break cars and a vertical that stands still is visible.
 
 ## Headline
 
 | Measure | Value | Floor |
 |---|---:|---:|
 | Rows | 5,700 | |
-| Confirmed from a published list (not an estimate) | 2,517 (44.2%) | 44.0% |
-| Rows whose maker page is linked | 5,407 (94.9%) | 94.0% |
-| US car rows with a build-and-price link | 337 (81.4%) | 80.0% |
-| Rows with a photo | 4,228 (74.2%) | 74.0% |
+| Checked by a person | 0 (0.0%) | |
+| Listed (maker’s published price) | 2,517 (44.2%) | |
+| Converted (published list at a dated rate) | 865 (15.2%) | |
+| Estimated | 2,318 (40.7%) | |
+| From a published list, all rows | 3,382 (59.3%) | per vertical, below |
+| Rows whose maker page is linked | 5,407 (94.9%) | 92% |
+| Makers without a linked page | 159 | at most 159 |
+| US car rows with a build-and-price link | 337 of 414 (81.4%) | 78% |
+| Car rows with a build-and-price link, all markets | 1,215 of 2,729 (44.5%) | 42% |
+| Rows with a photo | 4,228 (74.2%) | per vertical, below |
 | Price sources that cite a page | 34 of 49 | at most 15 unlinked |
 | US state rows with a citation | 52 of 52 | all |
 | Indian state rows with a citation | 27 of 27 | all |
-| Duplicate brand keys (case- and accent-insensitive) | 0 | 0 |
+| Makers spelled two ways (case- and accent-insensitive) | 0 | 0 |
+
+## Per vertical, with floors
+
+| Vertical | Rows | From a published list | Floor | Photos | Floor |
+|---|---:|---:|---:|---:|---:|
+| Cars & trucks | 2,729 | 71.1% | 68% | 86.2% | 84% |
+| Motorcycles | 1,444 | 35.6% | 32% | 64.2% | 62% |
+| Boats | 556 | 11.3% | 10% | 3.6% | 3% |
+| Aircraft | 971 | 89.2% | 86% | 95.7% | 93% |
+
+Raise a floor when a vertical improves; a change that lowers one is the regression the test exists to catch.
 
 ## Dates
 
@@ -27,60 +56,78 @@ Data as of **12 Oct 2026** (the newest compile date); exchange rates of **14 Oct
 | Boats | 10 Oct 2026 | 10 Oct 2026 | 9 Oct 2026 | home-currency list, not converted |
 | Aircraft | 12 Oct 2026 | 12 Oct 2026 | 12 Oct 2026 | 12 Oct 2026 (from the maker’s dollar or euro list) |
 
-The World tab converts at the ECB rates of 14 Oct 2026; the rate tables in `data/sources.json` hold 29 Sept 2026, 9 Oct 2026, 12 Oct 2026, 14 Oct 2026. There are no per-row verification dates yet: "compiled" is the date of the whole dataset, "confirmed" means the row matches the maker’s published list on that date.
+The World tab converts at the ECB rates of 14 Oct 2026; the rate tables in `data/sources.json` hold 29 Sept 2026, 9 Oct 2026, 12 Oct 2026, 14 Oct 2026. There are no per-row verification dates yet: "compiled" is the date of the whole dataset.
 
 ## Per dataset
 
-| Dataset | Rows | Confirmed | Estimates | Maker linked | Build & price | Photos |
-|---|---:|---:|---:|---:|---:|---:|
-| **Cars & trucks** | **2,729** | **71.1%** | **790** | **95.6%** | **12.3%** | **86.2%** |
-| USA | 414 | 88.2% | 49 | 100.0% | 81.4% | 93.5% |
-| India | 208 | 79.3% | 43 | 100.0% | – | 82.7% |
-| China | 188 | 98.4% | 3 | 82.4% | – | 88.8% |
-| United Kingdom | 280 | 79.3% | 58 | 100.0% | – | 86.1% |
-| Australia | 302 | 58.3% | 126 | 100.0% | – | 86.8% |
-| Mexico | 324 | 41.7% | 189 | 96.9% | – | 82.4% |
-| Spain | 164 | 77.4% | 37 | 99.4% | – | 90.9% |
-| Thailand | 211 | 38.9% | 129 | 96.2% | – | 88.6% |
-| Russia | 159 | 52.8% | 75 | 62.3% | – | 58.5% |
-| Brazil | 233 | 91.8% | 19 | 97.0% | – | 83.7% |
-| Canada | 246 | 74.8% | 62 | 100.0% | – | 94.3% |
-| **Motorcycles** | **1,444** | **35.6%** | **930** | **93.1%** | **–** | **64.2%** |
-| USA | 270 | 81.5% | 50 | 98.5% | – | 61.9% |
-| India | 175 | 81.1% | 33 | 97.7% | – | 53.1% |
-| China | 102 | 0.0% | 102 | 78.4% | – | 52.9% |
-| United Kingdom | 175 | 32.0% | 119 | 96.0% | – | 67.4% |
-| Australia | 121 | 6.6% | 113 | 95.9% | – | 73.6% |
-| Mexico | 107 | 7.5% | 99 | 95.3% | – | 63.6% |
-| Spain | 127 | 29.1% | 90 | 95.3% | – | 74.8% |
-| Thailand | 97 | 25.8% | 72 | 91.8% | – | 74.2% |
-| Russia | 54 | 0.0% | 54 | 44.4% | – | 24.1% |
-| Brazil | 88 | 13.6% | 76 | 90.9% | – | 69.3% |
-| Canada | 128 | 4.7% | 122 | 99.2% | – | 75.8% |
-| **Boats** | **556** | **11.3%** | **493** | **87.8%** | **–** | **3.6%** |
-| USA | 162 | 31.5% | 111 | 99.4% | – | 1.9% |
-| India | 24 | 0.0% | 24 | 87.5% | – | 0.0% |
-| China | 25 | 0.0% | 25 | 80.0% | – | 8.0% |
-| United Kingdom | 54 | 0.0% | 54 | 88.9% | – | 3.7% |
-| Australia | 53 | 0.0% | 53 | 88.7% | – | 3.8% |
-| Mexico | 32 | 0.0% | 32 | 93.8% | – | 6.3% |
-| Spain | 54 | 0.0% | 54 | 85.2% | – | 3.7% |
-| Thailand | 26 | 0.0% | 26 | 96.2% | – | 7.7% |
-| Russia | 24 | 0.0% | 24 | 20.8% | – | 4.2% |
-| Brazil | 45 | 15.6% | 38 | 68.9% | – | 4.4% |
-| Canada | 57 | 8.8% | 52 | 94.7% | – | 3.5% |
-| **Aircraft** | **971** | **0.1%** | **970** | **99.4%** | **–** | **95.7%** |
-| USA | 106 | 0.9% | 105 | 100.0% | – | 94.3% |
-| India | 90 | 0.0% | 90 | 100.0% | – | 95.6% |
-| China | 77 | 0.0% | 77 | 94.8% | – | 96.1% |
-| United Kingdom | 93 | 0.0% | 93 | 100.0% | – | 95.7% |
-| Australia | 103 | 0.0% | 103 | 100.0% | – | 95.1% |
-| Mexico | 82 | 0.0% | 82 | 100.0% | – | 96.3% |
-| Spain | 91 | 0.0% | 91 | 100.0% | – | 95.6% |
-| Thailand | 80 | 0.0% | 80 | 98.8% | – | 96.3% |
-| Russia | 56 | 0.0% | 56 | 98.2% | – | 98.2% |
-| Brazil | 93 | 0.0% | 93 | 100.0% | – | 96.8% |
-| Canada | 100 | 0.0% | 100 | 100.0% | – | 94.0% |
+| Dataset | Rows | Checked | Listed | Converted | Estimated | Maker linked | Build & price | Photos |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Cars & trucks** | **2,729** | **0** | **1,939 (71.1%)** | **0** | **790 (28.9%)** | **95.6%** | **44.5%** | **86.2%** |
+| USA | 414 | 0 | 365 (88.2%) | 0 | 49 (11.8%) | 100.0% | 81.4% | 93.5% |
+| India | 208 | 0 | 165 (79.3%) | 0 | 43 (20.7%) | 100.0% | 41.3% | 82.7% |
+| China | 188 | 0 | 185 (98.4%) | 0 | 3 (1.6%) | 82.4% | 21.3% | 88.8% |
+| United Kingdom | 280 | 0 | 222 (79.3%) | 0 | 58 (20.7%) | 100.0% | 51.4% | 86.1% |
+| Australia | 302 | 0 | 176 (58.3%) | 0 | 126 (41.7%) | 100.0% | 35.4% | 86.8% |
+| Mexico | 324 | 0 | 135 (41.7%) | 0 | 189 (58.3%) | 96.9% | 32.7% | 82.4% |
+| Spain | 164 | 0 | 127 (77.4%) | 0 | 37 (22.6%) | 99.4% | 40.2% | 90.9% |
+| Thailand | 211 | 0 | 82 (38.9%) | 0 | 129 (61.1%) | 96.2% | 33.6% | 88.6% |
+| Russia | 159 | 0 | 84 (52.8%) | 0 | 75 (47.2%) | 62.3% | 26.4% | 58.5% |
+| Brazil | 233 | 0 | 214 (91.8%) | 0 | 19 (8.2%) | 97.0% | 28.8% | 83.7% |
+| Canada | 246 | 0 | 184 (74.8%) | 0 | 62 (25.2%) | 100.0% | 60.6% | 94.3% |
+| **Motorcycles** | **1,444** | **0** | **514 (35.6%)** | **0** | **930 (64.4%)** | **93.1%** | **–** | **64.2%** |
+| USA | 270 | 0 | 220 (81.5%) | 0 | 50 (18.5%) | 98.5% | – | 61.9% |
+| India | 175 | 0 | 142 (81.1%) | 0 | 33 (18.9%) | 97.7% | – | 53.1% |
+| China | 102 | 0 | 0 (0.0%) | 0 | 102 (100.0%) | 78.4% | – | 52.9% |
+| United Kingdom | 175 | 0 | 56 (32.0%) | 0 | 119 (68.0%) | 96.0% | – | 67.4% |
+| Australia | 121 | 0 | 8 (6.6%) | 0 | 113 (93.4%) | 95.9% | – | 73.6% |
+| Mexico | 107 | 0 | 8 (7.5%) | 0 | 99 (92.5%) | 95.3% | – | 63.6% |
+| Spain | 127 | 0 | 37 (29.1%) | 0 | 90 (70.9%) | 95.3% | – | 74.8% |
+| Thailand | 97 | 0 | 25 (25.8%) | 0 | 72 (74.2%) | 91.8% | – | 74.2% |
+| Russia | 54 | 0 | 0 (0.0%) | 0 | 54 (100.0%) | 44.4% | – | 24.1% |
+| Brazil | 88 | 0 | 12 (13.6%) | 0 | 76 (86.4%) | 90.9% | – | 69.3% |
+| Canada | 128 | 0 | 6 (4.7%) | 0 | 122 (95.3%) | 99.2% | – | 75.8% |
+| **Boats** | **556** | **0** | **63 (11.3%)** | **0** | **493 (88.7%)** | **87.8%** | **–** | **3.6%** |
+| USA | 162 | 0 | 51 (31.5%) | 0 | 111 (68.5%) | 99.4% | – | 1.9% |
+| India | 24 | 0 | 0 (0.0%) | 0 | 24 (100.0%) | 87.5% | – | 0.0% |
+| China | 25 | 0 | 0 (0.0%) | 0 | 25 (100.0%) | 80.0% | – | 8.0% |
+| United Kingdom | 54 | 0 | 0 (0.0%) | 0 | 54 (100.0%) | 88.9% | – | 3.7% |
+| Australia | 53 | 0 | 0 (0.0%) | 0 | 53 (100.0%) | 88.7% | – | 3.8% |
+| Mexico | 32 | 0 | 0 (0.0%) | 0 | 32 (100.0%) | 93.8% | – | 6.3% |
+| Spain | 54 | 0 | 0 (0.0%) | 0 | 54 (100.0%) | 85.2% | – | 3.7% |
+| Thailand | 26 | 0 | 0 (0.0%) | 0 | 26 (100.0%) | 96.2% | – | 7.7% |
+| Russia | 24 | 0 | 0 (0.0%) | 0 | 24 (100.0%) | 20.8% | – | 4.2% |
+| Brazil | 45 | 0 | 7 (15.6%) | 0 | 38 (84.4%) | 68.9% | – | 4.4% |
+| Canada | 57 | 0 | 5 (8.8%) | 0 | 52 (91.2%) | 94.7% | – | 3.5% |
+| **Aircraft** | **971** | **0** | **1 (0.1%)** | **865** | **105 (10.8%)** | **99.4%** | **–** | **95.7%** |
+| USA | 106 | 0 | 1 (0.9%) | 0 | 105 (99.1%) | 100.0% | – | 94.3% |
+| India | 90 | 0 | 0 (0.0%) | 90 | 0 (0.0%) | 100.0% | – | 95.6% |
+| China | 77 | 0 | 0 (0.0%) | 77 | 0 (0.0%) | 94.8% | – | 96.1% |
+| United Kingdom | 93 | 0 | 0 (0.0%) | 93 | 0 (0.0%) | 100.0% | – | 95.7% |
+| Australia | 103 | 0 | 0 (0.0%) | 103 | 0 (0.0%) | 100.0% | – | 95.1% |
+| Mexico | 82 | 0 | 0 (0.0%) | 82 | 0 (0.0%) | 100.0% | – | 96.3% |
+| Spain | 91 | 0 | 0 (0.0%) | 91 | 0 (0.0%) | 100.0% | – | 95.6% |
+| Thailand | 80 | 0 | 0 (0.0%) | 80 | 0 (0.0%) | 98.8% | – | 96.3% |
+| Russia | 56 | 0 | 0 (0.0%) | 56 | 0 (0.0%) | 98.2% | – | 98.2% |
+| Brazil | 93 | 0 | 0 (0.0%) | 93 | 0 (0.0%) | 100.0% | – | 96.8% |
+| Canada | 100 | 0 | 0 (0.0%) | 100 | 0 (0.0%) | 100.0% | – | 94.0% |
+
+## Build-and-price links per car market
+
+| Market | Rows | Linked to a build-and-price page |
+|---|---:|---:|
+| USA | 414 | 337 (81.4%) |
+| India | 208 | 86 (41.3%) |
+| China | 188 | 40 (21.3%) |
+| United Kingdom | 280 | 144 (51.4%) |
+| Australia | 302 | 107 (35.4%) |
+| Mexico | 324 | 106 (32.7%) |
+| Spain | 164 | 66 (40.2%) |
+| Thailand | 211 | 71 (33.6%) |
+| Russia | 159 | 42 (26.4%) |
+| Brazil | 233 | 67 (28.8%) |
+| Canada | 246 | 149 (60.6%) |
+
+Rows without one link the maker’s site for that market (`brandsByCC`) or its global site (`brands`).
 
 ## Sources without a link
 
@@ -104,7 +151,7 @@ Price sources recorded as a name only (print lists, dealer quotes, maker price l
 
 ## Makers without a linked page
 
-Rows whose maker has no entry in `brands` or `brandsByCC` in `data/sources.json`.
+159 makers (floor: at most 159); rows whose maker has no entry in `brands` or `brandsByCC` in `data/sources.json`.
 
 - Voge: 12 rows (moto/AU, moto/CN, moto/ES, moto/RU, moto/UK)
 - Jetour: 11 rows (car/CN, car/MX, car/RU)

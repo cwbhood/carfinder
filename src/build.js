@@ -17,7 +17,7 @@ const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const SITE = 'https://destinjones.github.io/carfinder/';
 const DESC = 'Every new car, truck, motorcycle, scooter, boat, plane, jet and helicopter on sale in the USA, India, China, the UK, Australia, Mexico, Spain, Thailand, Russia, Brazil and Canada: list price, what dealers really charge, and the on-road price for your state or city. Photos, filters, compare, fuel economy and EV range. Free, open source, no account.';
 
-const VERSION = '1.1.0';                 // bump with CHANGELOG.md and the git tag
+const VERSION = '1.2.0';                 // bump with CHANGELOG.md and the git tag
 const crypto = require('crypto');
 const CCS = ['US','IN','CN','UK','AU','MX','ES','TH','RU','BR','CA'];
 const exists = p => fs.existsSync(path.join(ROOT, p));
@@ -93,7 +93,7 @@ ${body}
 const mode = process.argv[2] || '';
 const body = assemble();
 const methodology = () => require('./methodology.js').build(body);
-const quality = () => { const Q = require('./quality.js'); return Q.markdown(Q.measure(), JSON.parse(read('data/quality-floor.json'))); };
+const quality = () => { const Q = require('./quality.js'); const m = Q.measure(); const hist = exists('docs/data-quality-history.csv') ? read('docs/data-quality-history.csv') : ''; return {md:Q.markdown(m, JSON.parse(read('data/quality-floor.json'))), csv:Q.historyCsv(hist, m, VERSION)}; };
 const serviceWorker = pageHTML => read('src/sw.js').replace('/*__SW_VERSION__*/', VERSION + '-' + crypto.createHash('sha1').update(pageHTML).digest('hex').slice(0, 10));
 if (mode === '--artifact'){
   fs.mkdirSync(path.join(ROOT, 'dist'), {recursive: true});
@@ -111,8 +111,10 @@ if (mode === '--artifact'){
   const sw = serviceWorker(fresh), swDisk = fs.existsSync(path.join(ROOT, 'sw.js')) ? read('sw.js') : '';
   if (sw !== swDisk){ console.error('sw.js is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
   const q = quality(), qDisk = fs.existsSync(path.join(ROOT, 'docs/DATA-QUALITY.md')) ? read('docs/DATA-QUALITY.md') : '';
-  if (q !== qDisk){ console.error('docs/DATA-QUALITY.md is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
-  console.log('carfinder.html, methodology.html, sw.js and docs/DATA-QUALITY.md are up to date');
+  if (q.md !== qDisk){ console.error('docs/DATA-QUALITY.md is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
+  const hDisk = exists('docs/data-quality-history.csv') ? read('docs/data-quality-history.csv') : '';
+  if (q.csv !== hDisk){ console.error('docs/data-quality-history.csv is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
+  console.log('carfinder.html, methodology.html, sw.js, docs/DATA-QUALITY.md and docs/data-quality-history.csv are up to date');
 } else {
   const out = page(body);
   fs.writeFileSync(path.join(ROOT, 'carfinder.html'), out);
@@ -122,6 +124,8 @@ if (mode === '--artifact'){
   console.log('wrote methodology.html', (m.length/1024).toFixed(0), 'KB');
   fs.writeFileSync(path.join(ROOT, 'sw.js'), serviceWorker(out));
   console.log('wrote sw.js');
-  fs.writeFileSync(path.join(ROOT, 'docs/DATA-QUALITY.md'), quality());
-  console.log('wrote docs/DATA-QUALITY.md');
+  const q = quality();
+  fs.writeFileSync(path.join(ROOT, 'docs/DATA-QUALITY.md'), q.md);
+  fs.writeFileSync(path.join(ROOT, 'docs/data-quality-history.csv'), q.csv);
+  console.log('wrote docs/DATA-QUALITY.md and docs/data-quality-history.csv');
 }
