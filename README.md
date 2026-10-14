@@ -35,7 +35,7 @@ Thailand, Russia, Brazil and Canada, most with a photo. It runs in your browser
   filters and a delivered price (factory list before tax, the sales tax, VAT or GST with the aircraft exemptions and
   caps, duty, registration, plus insurance, hangar and annual costs as information). Deep links:
   `carfinder.html?v=moto&cc=IN`, `?v=air&cc=UK`.
-- **A photo of each.** 4,227 vehicles show their Wikipedia lead photo from Wikimedia Commons, credited to the
+- **A photo of each.** 4,228 vehicles show their Wikipedia lead photo from Wikimedia Commons, credited to the
   photographer with its licence; the rest show a silhouette of their body type until a photo is found.
 - **Filter like a buyer.** Body type, fuel, price range, size, brand tier, seats, drivetrain, minimum MPG, minimum
   electric range, brand, model year. Or answer four questions ("Help me choose") and let it set the filters for you.
@@ -93,10 +93,10 @@ flowchart LR
 Dealer prices are **bands by demand level**, not quotes: at or above sticker for waiting-list models, a few percent off
 for most, 10–35% off where a model is being cleared (the band and the reason are on every card). Taxes and fees follow
 the published rules on the compile date, **29 September 2026**. Motorcycle and boat prices were compiled on
-**10 October 2026**; outside the US most are marked *preliminary* until a dealer price list confirms them. Aircraft
+**10 October 2026**; outside the US most are *estimated* until a published price list is found. Aircraft
 prices were compiled on **12 October 2026** from manufacturer price lists and the trade press; outside the US they are
 the maker's dollar or euro list converted at the ECB rates of that day and shown before VAT, GST and duty (the
-breakdown adds them), so every one of them is *preliminary*. The World tab converts at the ECB rates of **14 October
+breakdown adds them), so every one of them is *converted*. The World tab converts at the ECB rates of **14 October
 2026** (rubles at the Bank of Russia rate) and says how far a currency has moved since the row's list was compiled.
 Across all 5,700 rows, 2,517 are *listed* (the maker's published price on the compile date), 865 are *converted*
 (a published list in another currency at a dated rate) and 2,318 are *estimated*; none is *checked* by a person yet.
@@ -106,7 +106,7 @@ RAV4 in Ontario, a Sandero in the UK, a Seagull in China, a Grom in Texas, a Spl
 run the pricing engines for all 97,000 vehicle-and-region combinations. Treat every number as a
 range to bargain within and get the out-the-door price in writing from two or three dealers. The full method, every
 table and every source are on [How we calculate](https://destinjones.github.io/carfinder/methodology.html); the
-provenance of each row (source, compile date, confirmed or estimate) is in its detail sheet.
+provenance of each row (source, compile date, state and why) is in its detail sheet.
 
 ## Run it
 - **Online:** use the links above.
