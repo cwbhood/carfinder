@@ -93,7 +93,10 @@ const methodology = () => require('./methodology.js').build(body);
 const serviceWorker = pageHTML => read('src/sw.js').replace('/*__SW_VERSION__*/', VERSION + '-' + crypto.createHash('sha1').update(pageHTML).digest('hex').slice(0, 10));
 if (mode === '--artifact'){
   fs.mkdirSync(path.join(ROOT, 'dist'), {recursive: true});
-  const out = '<title>CarFinder 2026</title>\n' + GOOGLE_FONTS + '\n' + body;
+  // the artifact lives on another host: site links go absolute and there is no service worker to register
+  const out = '<title>CarFinder 2026</title>\n' + GOOGLE_FONTS + '\n' + body
+    .replace(/href="(methodology\.html|about\.html|\.\/)/g, (m, f) => `href="${SITE}${f === './' ? '' : f}`)
+    .replace(/if \('serviceWorker' in navigator[^\n]*\n/, '');
   fs.writeFileSync(path.join(ROOT, 'dist/carfinder-artifact.html'), out);
   console.log('wrote dist/carfinder-artifact.html', (out.length/1024).toFixed(0), 'KB');
 } else if (mode === '--check'){
