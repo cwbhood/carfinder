@@ -4,6 +4,64 @@ All notable changes to CarFinder. The format follows [Keep a Changelog](https://
 follow [Semantic Versioning](https://semver.org/) (data corrections are patches, new countries or verticals are minors,
 a schema change is a major).
 
+## [1.1.0] - 2026-10-14
+
+The trust layer, measured instead of asserted: citations behind every tax row, dated exchange rates, honest wording,
+and a scorecard that CI keeps from regressing.
+
+### Added
+- **A citation on every state row.** `data/states_us.json` carries the state revenue-department, DMV or statute page
+  each rate was read from (52 of 52; the nationwide average cites the Tax Foundation's midyear table), and
+  `data/states_in.json` the transport department's tax page or the state's Motor Vehicles Taxation Act on India Code
+  (27 of 27). The methodology page prints them as a Source column and the detail sheet links the one behind the
+  region you picked, so the tables point outward instead of at themselves.
+- **Build-and-price links.** `sources.json → buildPrice["car/US"]` holds the verified configurator entry point for
+  36 US brands (337 of 414 US car rows); the detail sheet links it in preference to the homepage. Sources recorded as
+  a name only now show a **not linked** badge in the app and on the methodology page rather than reading like
+  citations.
+- **Dated exchange-rate tables.** `sources.json → fx` keeps every ECB table the data has used (29 Sept, 9 Oct, 12 Oct
+  and 14 Oct 2026) with the Bank of Russia ruble rate for each day, which table each dataset was compiled or
+  converted at, and which the World tab converts at. The World tab's masthead flags the largest currency move since
+  the lists were compiled and the detail sheet states the row's own; aircraft rows say the rate they were converted
+  at and how far the dollar has moved since. `tools/fx.mjs` pulls a table for a date; `tools/air.py` regenerates
+  the aircraft rows from the dollar master list at the recorded rates.
+- **Estimates in the open.** The masthead counts the estimates on every tab ("49 of 414 are estimates"), the filter
+  box says how many rows it toggles, and the methodology page has a per-dataset table of confirmed rows and
+  estimates.
+- **"Copy the details."** Next to "Wrong price? Tell us" (a prefilled GitHub issue) the detail sheet now copies the
+  same report (vehicle, region, figures, source, compile date, status, permalink) to the clipboard, so a correction
+  can be sent by e-mail or message without an account; an "E-mail it" button appears when `sources.json` names a
+  `contact.email`.
+- **Data-quality scorecard.** `src/quality.js` measures the data at every build into `docs/DATA-QUALITY.md`: rows
+  confirmed vs estimated, maker-link, build-and-price and photo coverage, linked sources, state citations, duplicate
+  brand keys, the dates. `test/quality.test.mjs` fails CI when a measure drops below its floor in
+  `data/quality-floor.json`, and the methodology page shows the same numbers under "What is measured".
+- The app shows its version next to the data-as-of date, linked to the release; printed detail sheets carry the
+  provenance block with its links written out and the permalink they were printed from.
+
+### Changed
+- **"Verified" is now "Compiled".** The date in the provenance panel is the dataset's compile date, which is what it
+  always was; the panel says so, and "Confirmed" is defined as matching the maker's published list on that date.
+  There are no per-row verification dates yet.
+- **One spelling per maker.** Fiat/FIAT, Seat/SEAT, Mini/MINI, Infiniti/INFINITI, Ineos/INEOS and Citroen/Citroën
+  were each two keys in `sources.json` and two spellings in the data; the rows, the photo index and the source maps
+  now use the maker's own spelling (Fiat, SEAT, MINI, INFINITI, INEOS, Citroën) and the quality test fails on a
+  second one. Mercedes-Benz and Mercedes-AMG stay separate on purpose.
+- **Rubles at the Bank of Russia official rate** (84.41 ₽/$ on 29 Sept 2026, 83.87 on 14 Oct) instead of an
+  unsourced "market rate" of 73.5: Russian aircraft prices converted from the dollar list rise about 15%, and
+  Russian rows on the World tab convert at the official rate.
+- **Aircraft rows re-converted** at the ECB rates of their compile day (12 Oct 2026) instead of the car list's
+  29 Sept rates; prices outside the US move by about 1–2%.
+- **Permalink history hygiene.** Filters and typing rewrite the current history entry (`replaceState`); opening a
+  detail or compare sheet adds one (`pushState`), so Back closes the sheet and Forward reopens it, and closing a
+  sheet with its button or Escape goes back over the entry it added instead of leaving a dead one. No history write
+  touches the title or focus, so screen readers hear nothing from them.
+- The "Wrong price? Tell us" and "Copy the details" actions are full-size buttons (44 px) in the sheet.
+
+### Fixed
+- The compare and detail sheets no longer hold a stale comparison set in the address after rows are removed inside
+  the sheet.
+
 ## [1.0.0] - 2026-10-14
 
 The first tagged release: four verticals, eleven countries, 5,700 vehicles, and every price traceable to its source.
@@ -53,6 +111,7 @@ The first tagged release: four verticals, eleven countries, 5,700 vehicles, and 
   Russia, Brazil and Canada with list, dealer and on-road prices per state, province or city (compiled 29 September
   2026), the World tab, compare, the wizard, glossaries, and the tests that run every vehicle through every region.
 
+[1.1.0]: https://github.com/destinjones/carfinder/releases/tag/v1.1.0
 [1.0.0]: https://github.com/destinjones/carfinder/releases/tag/v1.0.0
 [0.3.0]: https://github.com/destinjones/carfinder/compare/c85aa56...3f5b682
 [0.2.0]: https://github.com/destinjones/carfinder/compare/778ca38...c85aa56

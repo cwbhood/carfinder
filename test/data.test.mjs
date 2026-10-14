@@ -115,8 +115,8 @@ function core() {
   const coreSrc = js.match(/\/\/<<core([\s\S]*)\/\/core>>/)[1];
   const RAW = { US: load('data/cars_us.json'), IN: load('data/cars_in.json') };
   for (const cc of ['CN', 'UK', 'AU', 'MX', 'ES', 'TH', 'RU', 'BR', 'CA']) RAW[cc] = load(`data/cars_${cc.toLowerCase()}.json`);
-  const STATES_US = load('data/states_us.json'), STATES_IN = load('data/states_in.json');
-  const X = new Function('RAW', 'STATES_US', 'STATES_IN', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS, EFF_UNIT};')(RAW, STATES_US, STATES_IN);
+  const STATES_US = load('data/states_us.json'), STATES_IN = load('data/states_in.json'), SOURCES = load('data/sources.json');
+  const X = new Function('RAW', 'STATES_US', 'STATES_IN', 'SOURCES', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS, EFF_UNIT, FX};')(RAW, STATES_US, STATES_IN, SOURCES);
   const DATA = {}; for (const cc of Object.keys(RAW)) DATA[cc] = X.normalize(RAW[cc], cc);
   return { X, DATA, STATES_US, STATES_IN };
 }

@@ -16,7 +16,7 @@ function appConstants(assembledBody){
   const js = assembledBody.match(/<script>([\s\S]*)<\/script>/)[1];
   const cut = js.indexOf('/* ===== state ===== */');
   if (cut < 0) throw new Error('state marker missing in src/script.html');
-  const src = js.slice(0, cut) + '\nreturn {FX, CUR, CUR_NAME, BAND, MKT_TXT, MKT_TXT_V, REGIONS, REGION_DEFAULT, COUNTRIES, CC_NAME, ABOUT, ABOUT_V, GLOSS, GLOSS_V, VERT, VFEES, STATES_US, STATES_IN, SOURCES, VT_LABEL};';
+  const src = js.slice(0, cut) + '\nreturn {FX, FX_DATE, FX_SRC, fxPerUsd, fxCross, CUR, CUR_NAME, BAND, MKT_TXT, MKT_TXT_V, REGIONS, REGION_DEFAULT, COUNTRIES, CC_NAME, ABOUT, ABOUT_V, GLOSS, GLOSS_V, VERT, VFEES, STATES_US, STATES_IN, SOURCES, VT_LABEL};';
   return new Function(src)();
 }
 
@@ -100,7 +100,9 @@ function build(assembledBody){
   const S = A.SOURCES; const fmt = iso => new Date(iso + 'T00:00:00Z').toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric', timeZone:'UTC'});
   const notes = {}; for (const cc of CC_ORDER) if (NOTE[cc]) notes[cc] = noteSections(read(`docs/tax-notes/${NOTE[cc]}.md`));
   const usBB = noteSections(read('docs/tax-notes/us-bikes-boats.md')); const airNote = noteSections(read('docs/tax-notes/aircraft.md'));
-  const srcList = srcs => `<span class="src">${srcs.map(([n, u]) => u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)}</a>` : esc(n)).join(' · ')}</span>`;
+  const srcList = srcs => `<span class="src">${srcs.map(([n, u]) => u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)}</a>` : `${esc(n)} <span class="nolink" title="No public web page to link for this source">not linked</span>`).join(' · ')}</span>`;
+  const Q = require('./quality.js'); const QM = Q.measure(); const floors = JSON.parse(read('data/quality-floor.json'));
+  const pc = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '–'; const n0 = x => x.toLocaleString('en-US');
   const toc = [];
   let body = '';
 
@@ -119,14 +121,31 @@ function build(assembledBody){
 
   /* 2. data as of, exchange rates */
   toc.push(['dates', 'Data as of']);
-  const fxRows = Object.entries(A.FX).filter(([k]) => k !== 'USD').map(([k, v]) => `<tr><td>${k}</td><td>${esc(A.CUR_NAME[k])}</td><td class="num">${v}</td><td class="num">${(1 / v).toFixed(4)}</td></tr>`).join('');
+  const fxDates = Object.keys(S.fx.perEur).sort(); const ccys = ['EUR','GBP','INR','CNY','AUD','MXN','THB','RUB','BRL','CAD'];
+  const fxHist = ccys.map(k => `<tr><td>${k}</td><td>${esc(A.CUR_NAME[k])}</td>${fxDates.map(d => { const f = A.fxPerUsd(d); const v = f && f[k]; return `<td class="num">${v ? (v >= 100 ? v.toFixed(2) : v.toFixed(4)) : '–'}</td>`; }).join('')}<td class="num">${(() => { const a = A.fxCross(S.fx.compiledAt.car, k, 'USD'), b = A.fxCross(S.fx.date, k, 'USD'); if (!a || !b) return '–'; const m = b / a - 1; return (m > 0 ? '+' : '−') + (Math.abs(m) * 100).toFixed(1) + '%'; })()}</td></tr>`).join('');
+  const dsRows = ['car','moto','boat','air'].map(vt => `<tr><td>${VT_NAME[vt]}</td><td>${fmt(S.compiled[vt])}</td><td>${fmt(S.rulesAsOf[vt] || S.compiled[vt])}</td><td>${S.fx.compiledAt[vt] ? fmt(S.fx.compiledAt[vt]) : '–'}</td><td>${S.fx.convertedAt[vt] ? fmt(S.fx.convertedAt[vt]) + ' (from the maker’s dollar or euro list)' : 'priced in the home currency, not converted'}</td><td class="num">${n0(QM.byVt[vt].est)} of ${n0(QM.byVt[vt].rows)} (${pc(QM.byVt[vt].est, QM.byVt[vt].rows)})</td></tr>`).join('');
   body += `<section id="dates"><h2>Data as of</h2>
-<div class="tbl"><table><thead><tr><th>Dataset</th><th>Prices compiled</th><th>Tax and fee rules as of</th></tr></thead><tbody>
-${Object.entries(S.compiled).map(([vt, d]) => `<tr><td>${VT_NAME[vt]}</td><td>${fmt(d)}</td><td>${fmt(S.rulesAsOf[vt] || d)}</td></tr>`).join('')}
+<p><b>Compiled</b> is the date of a whole dataset: every row in it was checked against the maker’s published list on that day, and rows that could not be matched exactly (announced, converted or partly confirmed pricing) are flagged <b>estimates</b> rather than left to pass as confirmed. There are no per-row verification dates yet; a row’s date is its dataset’s date.</p>
+<div class="tbl"><table><thead><tr><th>Dataset</th><th>Prices compiled</th><th>Tax and fee rules as of</th><th>Rates on the compile day</th><th>Converted at</th><th class="num">Estimates</th></tr></thead><tbody>${dsRows}</tbody></table></div>
+<p>Estimates are included by default and marked <i>preliminary</i> on the card; the filter panel’s “Include the … models with preliminary pricing” box turns them off (the permalink carries <code>est=0</code>), and each tab’s masthead counts them.</p>
+<h3>Exchange rates</h3>
+<p>The World tab converts every list price and on-road figure at the <a href="${esc(S.fx.url)}" target="_blank" rel="noopener">ECB euro foreign exchange reference rates</a> of <b>${fmt(S.fx.date)}</b>, the latest pull; rubles use the <a href="${esc(S.fx.rubUrl)}" target="_blank" rel="noopener">Bank of Russia official rate</a> of the same day, because the ECB has not published a ruble reference rate since March 2022. Aircraft list prices outside the US are converted once, at the rates of the day they were compiled (${fmt(S.fx.convertedAt.air)}), and stay fixed in local currency until the next compile. The table keeps every rate the data has used, per US dollar, and the last column is how far each currency has moved against the dollar between the car list’s compile day (${fmt(S.fx.compiledAt.car)}) and the World tab’s rates (positive: the currency strengthened, so a price converted from it is now worth more): that is the gap a converted price can carry, and the detail sheet states it for the row’s own currency against the currency you picked whenever it exceeds half a percent.</p>
+<div class="tbl"><table><thead><tr><th>Code</th><th>Currency</th>${fxDates.map(d => `<th class="num">${fmt(d)}</th>`).join('')}<th class="num">Moved since ${fmt(S.fx.compiledAt.car)}</th></tr></thead><tbody>${fxHist}</tbody></table></div>
+<p class="fine">Re-pull the rates for a new compile with <code>node tools/fx.mjs YYYY-MM-DD</code> (ECB 90-day history and the Bank of Russia daily XML into <code>data/sources.json</code>), set <code>fx.date</code> and the dataset’s <code>compiledAt</code> or <code>convertedAt</code>, regenerate the aircraft rows with <code>python3 tools/air.py</code>, then <code>node src/build.js</code>.</p>
+<h3 id="quality">What is measured</h3>
+<p>The trust layer is measured, not asserted: <code>src/quality.js</code> computes these figures from the data files at every build, writes them to <a href="https://github.com/destinjones/carfinder/blob/main/docs/DATA-QUALITY.md">docs/DATA-QUALITY.md</a>, and the test suite fails when one drops below its floor in <code>data/quality-floor.json</code>.</p>
+<div class="tbl"><table><thead><tr><th>Measure</th><th class="num">Value</th><th class="num">Floor</th></tr></thead><tbody>
+<tr><td>Rows</td><td class="num">${n0(QM.total.rows)}</td><td class="num"></td></tr>
+<tr><td>Confirmed from a published list (the rest are estimates)</td><td class="num">${n0(QM.total.confirmed)} (${pc(QM.total.confirmed, QM.total.rows)})</td><td class="num">${pc(floors.confirmedShare, 1)}</td></tr>
+<tr><td>Rows whose maker page is linked</td><td class="num">${n0(QM.total.makerLinked)} (${pc(QM.total.makerLinked, QM.total.rows)})</td><td class="num">${pc(floors.makerLinkShare, 1)}</td></tr>
+<tr><td>US car rows with a build-and-price link</td><td class="num">${n0(QM.datasets.find(d => d.vt === 'car' && d.cc === 'US').buildPrice)} of ${n0(QM.datasets.find(d => d.vt === 'car' && d.cc === 'US').rows)}</td><td class="num">${pc(floors.buildPriceShareUS, 1)}</td></tr>
+<tr><td>Rows with a photo</td><td class="num">${n0(QM.total.photos)} (${pc(QM.total.photos, QM.total.rows)})</td><td class="num">${pc(floors.photoShare, 1)}</td></tr>
+<tr><td>Price sources that cite a page</td><td class="num">${QM.sources.linked} of ${QM.sources.total}</td><td class="num">at most ${floors.unlinkedSourcesMax} unlinked</td></tr>
+<tr><td>US state rows with a citation</td><td class="num">${QM.states.US.cited} of ${QM.states.US.rows}</td><td class="num">all</td></tr>
+<tr><td>Indian state rows with a citation</td><td class="num">${QM.states.IN.cited} of ${QM.states.IN.rows}</td><td class="num">all</td></tr>
+<tr><td>Makers spelled two ways in the data or the source maps</td><td class="num">${QM.brandKeys.dupes.length}</td><td class="num">0</td></tr>
 </tbody></table></div>
-<p>The World tab converts every list price and on-road figure at the <a href="${esc(S.fx.url)}" target="_blank" rel="noopener">${esc(S.fx.name)}</a> of <b>${fmt(S.fx.date)}</b>, quoted here per US dollar. Aircraft list prices outside the US are converted at the same rates before tax.</p>
-<div class="tbl"><table><thead><tr><th>Code</th><th>Currency</th><th class="num">Per US dollar</th><th class="num">US dollars per unit</th></tr></thead><tbody>${fxRows}</tbody></table></div>
-<p>Each detail sheet in the app repeats the compile date, the price source and whether the row is confirmed or an estimate (<i>preliminary</i> rows: announced, converted or partly confirmed pricing).</p>
+<p class="fine">Sources recorded as a name only (a maker’s print list, a dealer quote) are shown as <span class="nolink">not linked</span> in the app rather than dressed up as citations; the scorecard lists them.</p>
 </section>`;
 
   /* 3. dealer bands */
@@ -149,15 +168,15 @@ ${CC_ORDER.map(cc => `<tr><td><b>${esc(A.CC_NAME[cc])}</b></td>${['hot','steady'
 <p><b>Price basis:</b> ${esc(set.basis || '')}. <b>Compiled:</b> ${fmt(S.compiled.car)} from ${srcList(set.sources || [])}</p>
 <div class="about">${A.ABOUT[cc]}</div>`;
     if (cc === 'US'){
-      sec += `<h4>State table (data/states_us.json)</h4><p>Combined state and average local sales-tax rate, the typical dealer documentation fee, and the note the breakdown shows. Title and plates are about $350 nationwide.</p>
-<div class="tbl"><table><thead><tr><th>State</th><th class="num">Sales tax</th><th class="num">Typical doc fee</th><th>Note</th></tr></thead><tbody>
-${Object.entries(A.STATES_US).map(([k, v]) => `<tr><td><b>${esc(v[0])}</b> <small>${k}</small></td><td class="num">${v[1]}%</td><td class="num">$${money0(v[2])}</td><td>${esc(v[3])}</td></tr>`).join('')}
+      sec += `<h4>State table (data/states_us.json)</h4><p>Combined state and average local sales-tax rate on a vehicle purchase, the typical dealer documentation fee, and the note the breakdown shows. Title and plates are about $350 nationwide. The <b>Source</b> column is the state revenue department, DMV or statute page the rate was read from, independent of this table; doc fees are the statutory cap where one exists and otherwise a typical figure from dealer surveys, so they are the least certain number in the row.</p>
+<div class="tbl"><table><thead><tr><th>State</th><th class="num">Sales tax</th><th class="num">Typical doc fee</th><th>Note</th><th>Source</th></tr></thead><tbody>
+${Object.entries(A.STATES_US).map(([k, v]) => `<tr><td><b>${esc(v[0])}</b> <small>${k}</small></td><td class="num">${v[1]}%</td><td class="num">$${money0(v[2])}</td><td>${esc(v[3])}</td><td>${v[4] ? `<a href="${esc(v[4])}" target="_blank" rel="noopener">${esc(v[5] || v[4])}</a>` : '<span class="nolink">not linked</span>'}</td></tr>`).join('')}
 </tbody></table></div>`;
     } else if (cc === 'IN'){
       const slab = p => p ? p.map(([u, r]) => `${u >= 1e6 ? 'above' : 'up to ₹' + u + ' L'}: ${r}%`).join('; ') : '—';
-      sec += `<h4>State table (data/states_in.json)</h4><p>RTO road tax by price slab (lakh of ex-showroom) and fuel, the cess multiplier, fixed registration charges and the EV rule.</p>
-<div class="tbl"><table><thead><tr><th>State</th><th>Petrol slabs</th><th>Diesel</th><th>EV</th><th>Note</th></tr></thead><tbody>
-${Object.entries(A.STATES_IN).map(([k, v]) => `<tr><td><b>${esc(v.name)}</b> <small>${k}</small></td><td>${esc(slab(v.p))}${v.mult && v.mult !== 1 ? ` <small>× ${v.mult} cess</small>` : ''}${v.cap ? ` <small>cap ₹${money0(v.cap)}</small>` : ''}</td><td>${v.d ? esc(slab(v.d)) : 'as petrol'}</td><td>${v.ev && v.ev.length === 0 ? 'exempt' : v.ev && v.ev.length ? esc(slab(v.ev)) : 'as petrol'}</td><td>${esc(v.note || '')}</td></tr>`).join('')}
+      sec += `<h4>State table (data/states_in.json)</h4><p>RTO road tax by price slab (lakh of ex-showroom) and fuel, the cess multiplier, fixed registration charges and the EV rule. The <b>Source</b> column is the state transport department’s tax page or the state’s Motor Vehicles Taxation Act on India Code; slabs change by notification, so the department page is the one to check when a figure looks off.</p>
+<div class="tbl"><table><thead><tr><th>State</th><th>Petrol slabs</th><th>Diesel</th><th>EV</th><th>Note</th><th>Source</th></tr></thead><tbody>
+${Object.entries(A.STATES_IN).map(([k, v]) => `<tr><td><b>${esc(v.name)}</b> <small>${k}</small></td><td>${esc(slab(v.p))}${v.mult && v.mult !== 1 ? ` <small>× ${v.mult} cess</small>` : ''}${v.cap ? ` <small>cap ₹${money0(v.cap)}</small>` : ''}</td><td>${v.d ? esc(slab(v.d)) : 'as petrol'}</td><td>${v.ev && v.ev.length === 0 ? 'exempt' : v.ev && v.ev.length ? esc(slab(v.ev)) : 'as petrol'}</td><td>${esc(v.note || '')}</td><td>${v.src ? `<a href="${esc(v.src)}" target="_blank" rel="noopener">${esc(v.srcName || v.src)}</a>` : '<span class="nolink">not linked</span>'}</td></tr>`).join('')}
 </tbody></table></div>`;
     } else {
       sec += `<p><b>Regions in the picker:</b> ${regions.map(esc).join(' · ')} (default ${esc(A.REGIONS[cc][A.REGION_DEFAULT[cc]][0])}). The rates, brackets and formulas for each are in the research note below.</p>`;
@@ -189,7 +208,7 @@ ${Object.entries(A.STATES_IN).map(([k, v]) => `<tr><td><b>${esc(v.name)}</b> <sm
   /* 6. corrections */
   toc.push(['corrections', 'Corrections']);
   body += `<section id="corrections"><h2>Corrections</h2>
-<p>Every detail sheet has a <i>Wrong price? Tell us</i> link that opens a GitHub issue with the vehicle, your region and the figures shown already filled in. You can also <a href="https://github.com/destinjones/carfinder/issues/new?template=wrong-price.yml">open one directly</a>, or edit the data: each country’s rows are a JSON file with a <a href="https://github.com/destinjones/carfinder/blob/main/docs/DATA.md">documented schema</a>, each car tax rule is one function and each bike, boat or aircraft fee is one row in <code>data/vfees.json</code>, and the tests re-run every vehicle in every region on every change. Corrections with a source are merged quickly.</p>
+<p>Every detail sheet has a <i>Wrong price? Tell us</i> button that opens a GitHub issue with the vehicle, your region, the figures shown and a link to the exact view already filled in (posting needs a free GitHub account), and a <i>Copy the details</i> button that puts the same text on your clipboard to paste into an e-mail or a message, no account needed${S.contact && S.contact.email ? `, plus an <i>E-mail it</i> button addressed to <a href="mailto:${esc(S.contact.email)}">${esc(S.contact.email)}</a>` : ''}. You can also <a href="https://github.com/destinjones/carfinder/issues/new?template=wrong-price.yml">open an issue directly</a>, or edit the data: each country’s rows are a JSON file with a <a href="https://github.com/destinjones/carfinder/blob/main/docs/DATA.md">documented schema</a>, each car tax rule is one function and each bike, boat or aircraft fee is one row in <code>data/vfees.json</code>, and the tests re-run every vehicle in every region on every change. Corrections with a source are merged quickly.</p>
 <p>Prices move monthly and tax rules change with budgets: treat every figure here as an estimate to bargain within, and get an out-the-door price in writing from two or three dealers before you sign.</p>
 </section>`;
 

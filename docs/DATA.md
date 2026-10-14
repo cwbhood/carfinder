@@ -76,11 +76,16 @@ price (5% EVs, 18% small cars, 40% larger ones, since 22 September 2025). `size`
 ARAI claimed mileage (km per kg for CNG); L/100 km for unit companions is 100 / kmpl.
 
 ## State tables
-- `states_us.json`: `code → [name, sales tax %, typical dealer doc fee $, note]`, 50 states + DC + `US` (nationwide
-  average). Connecticut's 7.75% above $50,000 and South Carolina's $500 cap are special-cased in `usTax()`.
-- `states_in.json`: `code → {name, p, d, c, ev, mult, fixed, cap, min, preGst, city, note}`: road-tax slabs by
-  price (lakh) for petrol (`p`), diesel (`d`), CNG (`c`) and EVs (`ev`, empty = exempt), a cess multiplier, fixed and
-  capped amounts, whether the slab applies to the pre-GST price, and a city surcharge. `BH` is the Bharat series.
+- `states_us.json`: `code → [name, sales tax %, typical dealer doc fee $, note, source URL, source name]`, 50 states +
+  DC + `US` (nationwide average). The source is the state revenue department, DMV or statute page the rate was read
+  from (the nationwide row cites the Tax Foundation's midyear table); the methodology page prints it as a Source
+  column and the detail sheet links it next to the region's rules. Connecticut's 7.75% above $50,000 and South
+  Carolina's $500 cap are special-cased in `usTax()`.
+- `states_in.json`: `code → {name, p, d, c, ev, mult, fixed, cap, min, preGst, city, note, src, srcName}`: road-tax
+  slabs by price (lakh) for petrol (`p`), diesel (`d`), CNG (`c`) and EVs (`ev`, empty = exempt), a cess multiplier,
+  fixed and capped amounts, whether the slab applies to the pre-GST price, a city surcharge, and the citation (`src`:
+  the state transport department's tax page or the state's Motor Vehicles Taxation Act on India Code). `BH` is the
+  Bharat series. `test/quality.test.mjs` fails when any state row in either file lacks its citation.
 - Every other country's regions and rates live in `src/script.html` next to the breakdown function that uses them
   (`REGIONS`, `RU_TAX`, `BR_ST`, `CA_PROV`, `CA_FREIGHT`, the Australian duty formulas, the Mexican ISAN table…), with
   the research behind them in [`docs/tax-notes/`](tax-notes/).
@@ -95,7 +100,10 @@ ARAI claimed mileage (km per kg for CNG); L/100 km for unit companions is 100 / 
 3. **Rebates** that the dealer takes off at purchase (the UK Electric Car Grant, Canada's EVAP and provincial rebates)
    are subtracted; rebates paid afterwards (Spain's Plan Auto+, China's trade-in subsidy) are shown as information.
 4. **World tab.** Each car's home on-road price for its default region is converted at the ECB reference rates of
-   29 September 2026 (`FX`; rubles at the market rate).
+   the date in `sources.json → fx.date` (`FX` is derived from `fx.perEur[fx.date]`; rubles at the Bank of Russia rate
+   in `fx.rubPerUsd`). The rates of each dataset's compile day are kept too (`fx.compiledAt`), so the app can say how
+   far a currency has moved since a price list was compiled: the masthead flags the largest move on the World tab and
+   the detail sheet states the row's own.
 
 Fuel cost uses the country's default fuel and electricity prices and typical annual distance (`COUNTRIES[cc].assume`,
 editable in the app), with a 12% charging-loss factor (25% for CLTC-rated ranges). Monthly payment is a standard
@@ -147,9 +155,12 @@ its description is all it takes.
 - `engines`: free text ("Single piston (Rotax)", "Twin turboshaft", "Electric motors (6)") that the engine filter
   matches on. `delivery` is a typical delivery-and-acceptance charge in local units where the maker charges one.
 - Prices are the maker's 2026 factory list from base to typically equipped. The US file is in dollars before sales
-  tax; every other file is the dollar or euro list converted at the ECB rates in `FX` (`src/script.html`), rounded,
-  shown before VAT / GST / duty (the fee rules add them) and marked `est = 1`, since the invoice follows the exchange
-  rate. Russia keeps only Russian-built types and the Western types that still reach it as parallel imports.
+  tax; every other file is the dollar or euro list converted at the rates of the aircraft compile day
+  (`sources.json → fx.convertedAt.air`, the table in `fx.perEur`; rubles at `fx.rubPerUsd`), rounded, shown before
+  VAT / GST / duty (the fee rules add them) and marked `est = 1`, since the invoice follows the exchange rate. The
+  files are generated: `python3 tools/air.py` rewrites them from the dollar master list in that script at the recorded
+  rates, so a new compile is "pull the rates, set `convertedAt.air`, run the script". Russia keeps only Russian-built
+  types and the Western types that still reach it as parallel imports.
 
 ### Price basis for bikes and boats
 US and Canada MSRP before freight and setup; UK OTR (bikes) and VAT-inclusive dealer price (boats); Australia
@@ -171,11 +182,24 @@ by state, Spain's registration tax applies through `bodies`, and the insurance, 
 `info` or `text`.
 
 ## Provenance: `sources.json`
-`compiled` and `rulesAsOf` give the compile date per vertical (`car`, `moto`, `boat`, `air`); `fx` the exchange-rate
-date, name and URL; `sets["<vt>/<CC>"]` the price basis, the sources the dataset was compiled from (`[name, url]`,
-`url` null when it is a brand's own price list rather than one site) and the rules applied; `setsDefault` the fallback
-for verticals without a per-country entry; `brands` the makers' sites and `brandsByCC` the country-specific ones. The
-app shows all of it in the detail sheet; `methodology.html` lists it per country.
+`compiled` and `rulesAsOf` give the compile date per vertical (`car`, `moto`, `boat`, `air`); `sets["<vt>/<CC>"]` the
+price basis, the sources the dataset was compiled from (`[name, url]`, `url` null when it is a brand's own price list
+rather than one site: the app and the methodology page then show it as **not linked** instead of dressing it up as a
+citation) and the rules applied; `setsDefault` the fallback for verticals without a per-country entry; `brands` the
+makers' sites, `brandsByCC` the country-specific ones and `buildPrice["<vt>/<CC>"]` the verified build-and-price entry
+points (US cars so far), which the detail sheet links in preference to the homepage. Keep one spelling per maker
+across the data and these maps (the maker's own: `MINI`, `SEAT`, `INFINITI`, `INEOS`, `Citroën`, `Fiat`); the quality
+test fails on a second spelling. Optional `contact.email` turns on an "E-mail it" button on the report panel.
+
+`fx` holds every exchange-rate table the data has used: `perEur[date]` (ECB reference rates per euro) and
+`rubPerUsd[date]` (Bank of Russia official rate), `date` (the table the World tab converts at), `compiledAt[vt]` (the
+rates of each dataset's compile day) and `convertedAt[vt]` (datasets whose prices were converted from a dollar or euro
+list: aircraft). Pull a new table with `node tools/fx.mjs YYYY-MM-DD` where the network allows it (it reads the ECB
+90-day history and the Bank of Russia daily XML and writes the entry), then set the dates by hand.
+
+The app shows all of it in the detail sheet ("Compiled" is the dataset date; a row is "Confirmed" when it matches the
+maker's published list on that date, otherwise an "Estimate" with the reason); `methodology.html` lists it per
+country, and `docs/DATA-QUALITY.md` is the measured scorecard (`src/quality.js`, regenerated by every build).
 
 ## Photo index: `images.json`
 `files` lists each Wikimedia Commons file once as `[name, host, md5 prefix, author, licence, "o"?]` and `map` goes from

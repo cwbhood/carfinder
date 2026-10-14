@@ -1,0 +1,10 @@
+{
+ "_": "Floors for test/quality.test.mjs: CI fails when a measure in docs/DATA-QUALITY.md drops below these. Raise them when coverage improves; never lower them to make a build pass.",
+ "confirmedShare": 0.44,
+ "makerLinkShare": 0.94,
+ "buildPriceShareUS": 0.80,
+ "photoShare": 0.74,
+ "unlinkedSourcesMax": 15,
+ "duplicateBrandKeys": 0,
+ "statesCited": {"US": "all", "IN": "all"}
+}

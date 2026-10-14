@@ -45,13 +45,27 @@ data/*.json      cars, bikes, boats, aircraft, state  ─┘                    
   Helicopter&rng=300&sort=perhp&cmp=…&d=…`: vertical, country, region or currency, World units, search, every filter
   set, price range, seats, drive, sliders, sort, model years, launch and preliminary toggles, the comparison set and
   the open sheet. Vehicles are named by a slug (`slugOf`: make-model, plus the country on the World tab and the year
-  for US leftovers and early arrivals). `render()` and the detail sheet rewrite the hash with `replaceState`; a pasted
-  hash on load, or a `hashchange`, rebuilds the view from it; the `?v=&cc=` query form still works. `shareLink()`
-  copies the permalink or opens the share sheet on phones.
-- **Provenance** (`provenance(c, cc)` in the core, `provHTML` in the sheet, `data/sources.json`): compile dates per
-  vertical, the exchange-rate date, per-dataset price sources with links, the makers' sites by brand (and by brand and
-  country for the big ones), and the confirmed-or-estimate status with its reason. `issueURL()` builds the prefilled
-  "Wrong price? Tell us" issue link; the masthead's `#asof` line shows the data-as-of date for the tab.
+  for US leftovers and early arrivals). History hygiene is per trigger: `render()` (filters, typing, sort) rewrites
+  the current entry with `replaceState`; opening a sheet (`d=` detail, `co=1` compare) adds one with `pushState`
+  (`sheetOpened`), so Back closes it and Forward reopens it, and closing a sheet with its button or Escape goes
+  `history.back()` over the entry it added (`sheetClosed`) rather than leaving a dead one. `onHashChange` tells a
+  sheet-only change (the keys in `SHEET_KEYS`, which include the comparison set a sheet can edit) from a real one: the
+  first opens or closes the sheet in place, the second rebuilds the view from the hash (`applyHash`), as a pasted hash
+  on load does; the app's own `back()` is flagged (`OWN_BACK`) so a stale hash never re-applies over a view that has
+  moved on. The `?v=&cc=` query form still works. `shareLink()` copies the permalink or opens the share sheet on
+  phones; none of the history writes change the title or focus, so screen readers hear nothing from them.
+- **Provenance** (`provenance(c, cc)` and `regionSource(cc, code)` in the core, `provHTML` in the sheet,
+  `data/sources.json`): the compile date per vertical ("Compiled" is a dataset date; there are no per-row dates yet),
+  the dated exchange-rate tables (`FX_SRC`, `fxPerUsd(date)`, `fxMove(from, to, since)`: the World tab converts at
+  `fx.date` and flags how far a currency has moved since a dataset's `compiledAt` day; aircraft rows record the
+  `convertedAt` day they were converted on), per-dataset price sources with links (a null URL renders as a *not
+  linked* badge), the makers' build-and-price pages (`buildPrice["vt/CC"]`) or sites by brand and country, the
+  citation behind the region's tax rules (US and Indian state rows carry one), and the confirmed-or-estimate status
+  with its reason. `issueURL()` builds the prefilled "Wrong price? Tell us" issue link, `reportText()` the plain-text
+  version that "Copy the details" puts on the clipboard (and an "E-mail it" button uses when `sources.json` names a
+  `contact.email`); the masthead's `#asof` line shows the data-as-of date, the estimate count, the FX-moved flag on the
+  World tab and the app version (`APP_VERSION`, stamped by the build). `src/quality.js` measures all of this into
+  `docs/DATA-QUALITY.md` at build time and `test/quality.test.mjs` holds it above `data/quality-floor.json`.
 
 ## The pricing core
 Everything between `//<<core` and `//core>>` in `src/script.html` is DOM-free so the tests can run it in Node:

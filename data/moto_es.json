@@ -118,7 +118,7 @@
 ["Hanway", "Scrambler 125 / Furious 125", "Retro", "125-300cc", "Mainstream", "Petrol", "Petrol", 3200, 3400, 125, 2.3, null, null, 11, 2, "Manual 5-speed", "deals", "Spanish-designed retros", 1, 0, 0],
 ["Rieju", "MRT 125 / Aventura 500", "Dual-sport", "300-650cc", "Mainstream", "Petrol", "Petrol", 4100, 7999, 500, 3.8, null, null, 45, 2, "Manual 6-speed", "steady", "Girona-built", 1, 0, 0],
 ["Silence", "S01 / S01+", "Scooter", "125-300cc", "Mainstream", "EV", "EV", 6300, 7500, null, null, 127, 5.6, 9.4, 2, "Single-speed", "deals", "Barcelona electric scooters with removable battery", 1, 0, 0],
-["Seat", "MÓ 125", "Scooter", "125-300cc", "Mainstream", "EV", "EV", 6850, 6850, null, null, 137, 5.6, 9.4, 2, "Single-speed", "deals", "Silence-built Seat electric", 1, 0, 0],
+["SEAT", "MÓ 125", "Scooter", "125-300cc", "Mainstream", "EV", "EV", 6850, 6850, null, null, 137, 5.6, 9.4, 2, "Single-speed", "deals", "Silence-built Seat electric", 1, 0, 0],
 ["Velca", "Tramontana / Bravo", "Scooter", "Under 125cc", "Mainstream", "EV", "EV", 3500, 4800, null, null, 90, 2.9, 4, 2, "Single-speed", "deals", "Spanish electric commuters", 1, 0, 0],
 ["NIU", "NQi GT / MQi GT", "Scooter", "Under 125cc", "Mainstream", "EV", "EV", 3599, 4499, null, null, 100, 3.1, 4.7, 2, "Single-speed", "deals", "Electric scooters", 1, 0, 0],
 ["Super Soco", "CPx / TC Max", "Scooter", "Under 125cc", "Mainstream", "EV", "EV", 4999, 5299, null, null, 110, 3.2, 6.7, 2, "Single-speed", "deals", "Electric commuters", 1, 0, 0],

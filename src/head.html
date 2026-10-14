@@ -108,6 +108,11 @@ body.no-scroll,body:has(dialog[open]){overflow:hidden}
 .prov-l dd{margin:0;overflow-wrap:anywhere}
 .prov-l a{color:var(--fg)}
 .prov b.ok{color:var(--deal)} .prov b.est{color:var(--hot)}
+.nolink{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;vertical-align:middle}
+.prov-act{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px} .prov-act .btn{text-decoration:none}
+.print-only{display:none}
+.masthead .asof .estcount{color:var(--hot);font-weight:600}
+.masthead .asof .fxmove{color:var(--hot);font-weight:600;cursor:help;border-bottom:1px dotted currentColor}
 @media (max-width:420px){ .prov-l > div{grid-template-columns:1fr;gap:1px} }
 .mast-actions{display:flex;flex-wrap:wrap;gap:8px;width:100%}
 .mast-actions .btn{flex:1 1 auto;font-size:14px;padding-inline:10px;white-space:normal;line-height:1.2}
@@ -272,7 +277,9 @@ details.assume summary{cursor:pointer;font-weight:700;font-size:14px;min-height:
   .layout{grid-template-columns:1fr !important;display:block}
   .grid{grid-template-columns:1fr 1fr;gap:10px}
   .card{box-shadow:none;break-inside:avoid;border-color:#bbb}
-  .masthead .asof a::after,.site-links a::after{content:" (" attr(href) ")";font-weight:400}
+  .masthead .asof a::after,.site-links a::after,.prov a::after,.credit-line a::after{content:" (" attr(href) ")";font-weight:400}
+  .print-only{display:block} .prov-act{display:none !important}
+  .prov{border:1px solid #bbb;break-inside:avoid}
   body:has(dialog[open]) .wrap{display:none}
   dialog[open]{position:static;width:100%;max-width:none;max-height:none;box-shadow:none;border:0;overflow:visible}
   dialog[open] .dlg-body{max-height:none;overflow:visible}
@@ -525,8 +532,8 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
         <div class="flbl"><span>Launch</span></div>
         <label class="check"><input type="checkbox" id="onlyNew"> Only launched or updated in 2025-26</label>
       </div>
-      <div class="fgroup">
-        <label class="check"><input type="checkbox" id="showEst" checked> Include models with preliminary pricing</label>
+      <div class="fgroup" id="estGroup">
+        <label class="check"><input type="checkbox" id="showEst" checked> <span id="showEstLbl">Include models with preliminary pricing</span></label>
       </div>
 
       <details class="assume" id="assume">

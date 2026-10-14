@@ -13,16 +13,26 @@
   "air": "2026-10-12"
  },
  "fx": {
-  "date": "2026-09-29",
-  "name": "ECB euro foreign exchange reference rates (rubles at the market rate)",
-  "url": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html"
+  "date": "2026-10-14",
+  "name": "ECB euro foreign exchange reference rates; rubles at the Bank of Russia official rate",
+  "url": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
+  "rubUrl": "https://www.cbr.ru/eng/currency_base/daily/",
+  "convertedAt": {"air": "2026-10-12"},
+  "compiledAt": {"car": "2026-09-29", "moto": "2026-10-09", "boat": "2026-10-09", "air": "2026-10-12"},
+  "perEur": {
+   "2026-09-29": {"USD": 1.1355, "GBP": 0.85718, "INR": 108.991, "CNY": 7.6117, "AUD": 1.6211, "MXN": 20.3222, "THB": 38.056, "BRL": 5.9177, "CAD": 1.6101},
+   "2026-10-09": {"USD": 1.1206, "GBP": 0.84763, "INR": 108.3965, "CNY": 7.4992, "AUD": 1.6052, "MXN": 20.395, "THB": 37.574, "BRL": 5.6086, "CAD": 1.5942},
+   "2026-10-12": {"USD": 1.1181, "GBP": 0.84478, "INR": 107.086, "CNY": 7.4832, "AUD": 1.6032, "MXN": 20.5081, "THB": 37.585, "BRL": 5.5819, "CAD": 1.5946},
+   "2026-10-14": {"USD": 1.1195, "GBP": 0.84385, "INR": 106.5283, "CNY": 7.4925, "AUD": 1.5971, "MXN": 20.56, "THB": 37.587, "BRL": 5.6246, "CAD": 1.5918}
+  },
+  "rubPerUsd": {"2026-09-29": 84.4075, "2026-10-09": 85.4173, "2026-10-12": 84.9048, "2026-10-14": 83.8675}
  },
  "sets": {
   "car/US": {
    "basis": "Manufacturer's suggested retail price (MSRP) by trim, 2026 model year",
    "sources": [
     [
-     "Manufacturer build-and-price pages",
+     "Manufacturer build-and-price pages (the maker link on each row)",
      null
     ],
     [
@@ -249,7 +259,7 @@
     ],
     [
      "State DMV fee schedules (docs/tax-notes/us-bikes-boats.md)",
-     null
+     "https://github.com/destinjones/carfinder/blob/main/docs/tax-notes/us-bikes-boats.md"
     ]
    ],
    "rules": "Freight and setup, doc fee, sales tax, title, plates and compulsory insurance per state"
@@ -263,7 +273,7 @@
     ],
     [
      "State boat sales-tax caps and registration fees (docs/tax-notes/us-bikes-boats.md)",
-     null
+     "https://github.com/destinjones/carfinder/blob/main/docs/tax-notes/us-bikes-boats.md"
     ]
    ],
    "rules": "Freight and prep, doc fee, sales tax with the boat caps, registration by length, trailer plates per state"
@@ -313,6 +323,46 @@
    "rules": "Freight and commissioning, tax, registration and fees for the region (data/vfees.json)"
   }
  },
+ "buildPrice": {
+  "car/US": {
+   "Toyota": "https://www.toyota.com/configurator/",
+   "BMW": "https://www.bmwusa.com/build-your-own.html",
+   "Mercedes-Benz": "https://www.mbusa.com/en/vehicles/build",
+   "Mercedes-AMG": "https://www.mbusa.com/en/vehicles/build",
+   "Lexus": "https://www.lexus.com/build",
+   "Hyundai": "https://www.hyundaiusa.com/us/en/build/options",
+   "Ford": "https://shop.ford.com/build/",
+   "Chevrolet": "https://www.chevrolet.com/shopping/configurator",
+   "Honda": "https://automobiles.honda.com/tools/build-and-price",
+   "Nissan": "https://www.nissanusa.com/shopping-tools/build-price",
+   "Subaru": "https://www.subaru.com/build.html",
+   "Jeep": "https://www.jeep.com/vehicle-selector.bmo.html",
+   "Mazda": "https://www.mazdausa.com/shopping-tools/build-and-price",
+   "Porsche": "https://www.porsche.com/usa/models/",
+   "Volkswagen": "https://www.vw.com/en/builder.html",
+   "Genesis": "https://www.genesis.com/us/en/build-and-price",
+   "Volvo": "https://www.volvocars.com/us/build/",
+   "Land Rover": "https://www.landroverusa.com/build-your-own/index.html",
+   "Acura": "https://www.acura.com/tools/build-and-price-luxury-vehicles-selection-page",
+   "Ram": "https://www.ramtrucks.com/vehicle-selector.bmo.html",
+   "Dodge": "https://www.dodge.com/vehicle-selector.bmo.html",
+   "Buick": "https://www.buick.com/build-and-price",
+   "MINI": "https://www.miniusa.com/build-your-own.html",
+   "Maserati": "https://www.maserati.com/us/en/shopping-tools/configurator",
+   "Ferrari": "https://carconfigurator.ferrari.com/",
+   "Aston Martin": "https://configurator.astonmartin.com/",
+   "Rolls-Royce": "https://www.rolls-roycemotorcars.com/en_US/bespoke/configure-your-rolls-royce.html",
+   "Chrysler": "https://www.chrysler.com/bmo.pacifica.html",
+   "Rivian": "https://rivian.com/configurations/list",
+   "Polestar": "https://www.polestar.com/us/configure/",
+   "Lamborghini": "https://configurator.lamborghini.com/",
+   "Bentley": "https://www.bentleymotors.com/en/misc/car-configurator.html",
+   "INFINITI": "https://www.infinitiusa.com/shopping-tools/build-price",
+   "Lucid": "https://lucidmotors.com/design-yours",
+   "INEOS": "https://ineosgrenadier.com/en/us/the-vehicle/vehicle-configurator",
+   "Fiat": "https://www.fiatusa.com/shopping-tools/vehicle-selector.bmo"
+  }
+ },
  "brands": {
   "Toyota": "https://www.toyota.com",
   "Honda": "https://www.honda.com",
@@ -338,7 +388,6 @@
   "Tesla": "https://www.tesla.com",
   "Lexus": "https://www.lexus.com",
   "Acura": "https://www.acura.com",
-  "Infiniti": "https://www.infinitiusa.com",
   "INFINITI": "https://www.infinitiusa.com",
   "Genesis": "https://www.genesis.com",
   "Porsche": "https://www.porsche.com",
@@ -347,7 +396,6 @@
   "Land Rover": "https://www.landrover.com",
   "Jaguar": "https://www.jaguar.com",
   "MINI": "https://www.mini.com",
-  "Mini": "https://www.mini.com",
   "Mitsubishi": "https://www.mitsubishi-motors.com",
   "Suzuki": "https://www.globalsuzuki.com",
   "Maruti Suzuki": "https://www.marutisuzuki.com",
@@ -357,18 +405,15 @@
   "BYD": "https://www.byd.com",
   "Skoda": "https://www.skoda-auto.com",
   "SEAT": "https://www.seat.com",
-  "Seat": "https://www.seat.com",
   "Cupra": "https://www.cupraofficial.com",
   "Renault": "https://www.renault.com",
   "Dacia": "https://www.dacia.com",
   "Peugeot": "https://www.peugeot.com",
   "Citroën": "https://www.citroen.com",
-  "Citroen": "https://www.citroen.com",
   "DS": "https://www.dsautomobiles.com",
   "Opel": "https://www.opel.com",
   "Vauxhall": "https://www.vauxhall.co.uk",
   "Fiat": "https://www.fiat.com",
-  "FIAT": "https://www.fiat.com",
   "Alfa Romeo": "https://www.alfaromeo.com",
   "Abarth": "https://www.abarth.com",
   "Lancia": "https://www.lancia.com",
@@ -412,7 +457,6 @@
   "Isuzu": "https://www.isuzu.co.jp",
   "KGM": "https://www.kgm-motors.co.uk",
   "INEOS": "https://ineosgrenadier.com",
-  "Ineos": "https://ineosgrenadier.com",
   "LDV": "https://www.ldvautomotive.com.au",
   "Omoda": "https://www.omodajaecoo.com",
   "Jaecoo": "https://www.omodajaecoo.com",
@@ -834,15 +878,11 @@
    "BR": "https://www.citroen.com.br"
   },
   "Fiat": {
+   "BR": "https://www.fiat.com.br",
+   "MX": "https://www.fiat.com.mx",
    "US": "https://www.fiatusa.com",
    "UK": "https://www.fiat.co.uk",
-   "MX": "https://www.fiat.com.mx",
-   "ES": "https://www.fiat.es",
-   "BR": "https://www.fiat.com.br"
-  },
-  "FIAT": {
-   "BR": "https://www.fiat.com.br",
-   "MX": "https://www.fiat.com.mx"
+   "ES": "https://www.fiat.es"
   },
   "Jeep": {
    "IN": "https://www.jeep-india.com",

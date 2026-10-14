@@ -6,7 +6,8 @@
                                          which supplies its own document skeleton; fonts from Google Fonts)
      node src/build.js --check       -> build to memory and exit 1 if carfinder.html on disk is out of date
 
-   Also writes methodology.html (the "How we calculate" page) from the same data; see src/methodology.js.
+   Also writes methodology.html (the "How we calculate" page) from the same data (src/methodology.js), sw.js and the
+   measured data-quality scorecard docs/DATA-QUALITY.md (src/quality.js).
    The data is inlined so the page works from a file:// URL and offline once loaded. */
 const fs = require('fs');
 const path = require('path');
@@ -16,7 +17,7 @@ const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const SITE = 'https://destinjones.github.io/carfinder/';
 const DESC = 'Every new car, truck, motorcycle, scooter, boat, plane, jet and helicopter on sale in the USA, India, China, the UK, Australia, Mexico, Spain, Thailand, Russia, Brazil and Canada: list price, what dealers really charge, and the on-road price for your state or city. Photos, filters, compare, fuel economy and EV range. Free, open source, no account.';
 
-const VERSION = '1.0.0';                 // bump with CHANGELOG.md and the git tag
+const VERSION = '1.1.0';                 // bump with CHANGELOG.md and the git tag
 const crypto = require('crypto');
 const CCS = ['US','IN','CN','UK','AU','MX','ES','TH','RU','BR','CA'];
 const exists = p => fs.existsSync(path.join(ROOT, p));
@@ -39,6 +40,8 @@ function assemble(){
   obj('/*__VFEES__*/{}', 'data/vfees.json');
   obj('/*__IMAGES__*/{}', 'data/images.json');
   obj('/*__SOURCES__*/{}', 'data/sources.json');
+  if (!script.includes('/*__APP_VERSION__*/')) throw new Error('placeholder missing: /*__APP_VERSION__*/');
+  script = script.replace('/*__APP_VERSION__*/', VERSION);
   const body = read('src/head.html').replace('/*__VERSION__*/', 'v' + VERSION) + script;
   const js = body.match(/<script>([\s\S]*)<\/script>/)[1];
   new Function(js);                                   // syntax check; throws on a parse error
@@ -90,6 +93,7 @@ ${body}
 const mode = process.argv[2] || '';
 const body = assemble();
 const methodology = () => require('./methodology.js').build(body);
+const quality = () => { const Q = require('./quality.js'); return Q.markdown(Q.measure(), JSON.parse(read('data/quality-floor.json'))); };
 const serviceWorker = pageHTML => read('src/sw.js').replace('/*__SW_VERSION__*/', VERSION + '-' + crypto.createHash('sha1').update(pageHTML).digest('hex').slice(0, 10));
 if (mode === '--artifact'){
   fs.mkdirSync(path.join(ROOT, 'dist'), {recursive: true});
@@ -106,7 +110,9 @@ if (mode === '--artifact'){
   if (m !== mDisk){ console.error('methodology.html is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
   const sw = serviceWorker(fresh), swDisk = fs.existsSync(path.join(ROOT, 'sw.js')) ? read('sw.js') : '';
   if (sw !== swDisk){ console.error('sw.js is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
-  console.log('carfinder.html, methodology.html and sw.js are up to date');
+  const q = quality(), qDisk = fs.existsSync(path.join(ROOT, 'docs/DATA-QUALITY.md')) ? read('docs/DATA-QUALITY.md') : '';
+  if (q !== qDisk){ console.error('docs/DATA-QUALITY.md is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
+  console.log('carfinder.html, methodology.html, sw.js and docs/DATA-QUALITY.md are up to date');
 } else {
   const out = page(body);
   fs.writeFileSync(path.join(ROOT, 'carfinder.html'), out);
@@ -116,4 +122,6 @@ if (mode === '--artifact'){
   console.log('wrote methodology.html', (m.length/1024).toFixed(0), 'KB');
   fs.writeFileSync(path.join(ROOT, 'sw.js'), serviceWorker(out));
   console.log('wrote sw.js');
+  fs.writeFileSync(path.join(ROOT, 'docs/DATA-QUALITY.md'), quality());
+  console.log('wrote docs/DATA-QUALITY.md');
 }

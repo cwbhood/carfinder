@@ -13,7 +13,8 @@ Encoded in `VFEES[cc].air` (`data/vfees.json`), `VERT.air` and `normalize()` for
 - The US file is in dollars before sales or use tax. Every other file is the dollar list (euro list for Pipistrel,
   Tecnam, Diamond, Extra, Stemme, Schempp-Hirth, Schleicher, AutoGyro, Magni, Dassault, Airbus Helicopters, Leonardo,
   Guimbal and the Russian and Chinese types priced in their home currency) converted at the ECB reference rates of
-  29 September 2026 that `FX` in `src/script.html` holds, rounded to the nearest 1,000 (100,000 rupees; 10,000 rubles,
+  the compile day, 12 October 2026 (`fx.convertedAt.air` and the matching `fx.perEur` table in `data/sources.json`;
+  rubles at the Bank of Russia official rate, 84.90 ₽/$), rounded to the nearest 1,000 (100,000 rupees; 10,000 rubles,
   baht or pesos), and shown **before VAT, GST, IVA or duty**, which the fee lines add. Because the invoice follows the
   exchange rate, every row outside the US carries `est = 1`.
 - Russia keeps only Russian-built types (UZGA, Russian Helicopters, Aviatika) and the Western types that still reach the
@@ -77,7 +78,8 @@ China; the Joby, Archer and Vertical air-taxi designs still in certification and
   Robinson, Bell, Airbus Helicopters, Leonardo), with the trade press for typically-equipped and delivery-position
   pricing: https://www.ainonline.com , https://www.flyingmag.com , https://www.aopa.org/news-and-media , and GAMA's
   shipment and billing reports https://gama.aero/news-and-events/statistics/
-- Exchange rates: ECB euro reference rates of 29 September 2026
+- Exchange rates: ECB euro reference rates of 12 October 2026 (the compile day; the tables in `data/sources.json`)
+  and the Bank of Russia official US dollar rate https://www.cbr.ru/eng/currency_base/daily/
   https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html
 - US sales and use tax on aircraft: state revenue departments (Virginia aircraft sales and use tax
   https://www.tax.virginia.gov/aircraft-sales-and-use-tax ; North Carolina aircraft cap
