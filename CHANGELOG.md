@@ -4,6 +4,17 @@ All notable changes to CarFinder. The format follows [Keep a Changelog](https://
 follow [Semantic Versioning](https://semver.org/) (data corrections are patches, new countries or verticals are minors,
 a schema change is a major).
 
+## [1.2.1] - 2026-10-14
+
+A patch so the front pages say what the app says, and the first release archived on Zenodo.
+
+### Changed
+- The website, README and About page use the four states (*checked*, *listed*, *converted*, *estimated*) instead of
+  "preliminary" and "confirmed or estimate", and count 4,228 rows with a photo, as the scorecard does (two Telluride
+  model years share one photo).
+- Releases from this one on are archived on Zenodo with a DOI, so a version can be cited and keeps existing if the
+  repository moves; `CITATION.cff` is what Zenodo reads for the title, author, licence and keywords.
+
 ## [1.2.0] - 2026-10-14
 
 Four honest states instead of one vague one, floors that cannot be tripped by adding data, and build-and-price
@@ -140,6 +151,7 @@ The first tagged release: four verticals, eleven countries, 5,700 vehicles, and 
   Russia, Brazil and Canada with list, dealer and on-road prices per state, province or city (compiled 29 September
   2026), the World tab, compare, the wizard, glossaries, and the tests that run every vehicle through every region.
 
+[1.2.1]: https://github.com/destinjones/carfinder/releases/tag/v1.2.1
 [1.2.0]: https://github.com/destinjones/carfinder/releases/tag/v1.2.0
 [1.1.0]: https://github.com/destinjones/carfinder/releases/tag/v1.1.0
 [1.0.0]: https://github.com/destinjones/carfinder/releases/tag/v1.0.0

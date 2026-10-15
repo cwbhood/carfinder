@@ -595,7 +595,7 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
       <div class="more-row" id="moreRow" hidden><button class="btn" id="btnMore" type="button">Show more</button></div>
       <div class="empty" id="empty" hidden>Nothing matches those filters. Loosen the price range or clear a filter.</div>
       <footer class="about" id="about"></footer>
-      <p class="site-links">CarFinder <span id="appVersion">v1.2.0</span> is free and open source. <a href="./">Project site</a> · <a href="methodology.html">How we calculate</a> · <a href="https://github.com/destinjones/carfinder">Source on GitHub</a> · <a href="https://github.com/destinjones/carfinder/blob/main/CHANGELOG.md">Changelog</a> · <a href="about.html">About the creator</a> · <a href="https://github.com/destinjones/carfinder/issues/new?template=wrong-price.yml">Report a wrong price</a></p>
+      <p class="site-links">CarFinder <span id="appVersion">v1.2.1</span> is free and open source. <a href="./">Project site</a> · <a href="methodology.html">How we calculate</a> · <a href="https://github.com/destinjones/carfinder">Source on GitHub</a> · <a href="https://github.com/destinjones/carfinder/blob/main/CHANGELOG.md">Changelog</a> · <a href="about.html">About the creator</a> · <a href="https://github.com/destinjones/carfinder/issues/new?template=wrong-price.yml">Report a wrong price</a></p>
     </main>
   </div>
 </div>
@@ -1716,7 +1716,7 @@ function silKey(c){
   return ({SUV:'suv',Truck:'truck',Pickup:'truck',Van:'van',Minivan:'van',MPV:'van',Hatch:'hatch',Wagon:'wagon',Coupe:'coupe',Conv:'conv',Sports:'coupe'})[c.body] || 'sedan';
 }
 const REPO = 'https://github.com/destinjones/carfinder';
-const APP_VERSION = '1.2.0';            // stamped by src/build.js from its VERSION constant
+const APP_VERSION = '1.2.1';            // stamped by src/build.js from its VERSION constant
 function permalink(opts){ return location.origin.replace(/^null$/, 'file://') + location.pathname + location.search + '#' + viewHash(opts); }
 function issueURL(c){
   const o = bd(c, c.price); const hcc = CC==='ALL' ? c.cc : CC;

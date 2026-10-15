@@ -2,7 +2,7 @@
    The app is one HTML file with its data inlined, so offline is simple: the page and the fonts are cached on install,
    HTML is fetched network-first (so a deploy shows up on the next online visit) with the cache as the offline fallback,
    and fonts and emblem images are cache-first. Vehicle photos live on Wikimedia Commons and are never cached. */
-const V = 'cf-1.2.0-f246b55b94';
+const V = 'cf-1.2.1-f93eee254e';
 const PRECACHE = ['carfinder.html', 'manifest.webmanifest', 'brand/fonts/fonts.css', 'brand/emblem/favicon.svg', 'brand/emblem/emblem-256.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('cf-') && k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
