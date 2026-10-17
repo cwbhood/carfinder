@@ -53,7 +53,7 @@ test('the scorecard and the app agree on every row’s state (checked, listed, c
   const js = script.match(/<script>([\s\S]*)<\/script>/)[1];
   const coreSrc = js.match(/\/\/<<core([\s\S]*)\/\/core>>/)[1];
   const load = f => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
-  const X = new Function('STATES_US', 'STATES_IN', 'VFEES', 'SOURCES', coreSrc + '\nreturn {normalize, rowStatus, STATUS};')(load('data/states_us.json'), load('data/states_in.json'), load('data/vfees.json'), load('data/sources.json'));
+  const X = new Function('STATES_US', 'STATES_IN', 'VFEES', 'SOURCES', 'US_TAX', 'US_LOCAL', coreSrc + '\nreturn {normalize, rowStatus, STATUS};')(load('data/states_us.json'), load('data/states_in.json'), load('data/vfees.json'), load('data/sources.json'), load('data/us_tax.json'), load('data/us_local.json'));
   assert.deepEqual(Object.keys(X.STATUS), Q.STATES);
   let checked = 0;
   for (const vt of Q.VTS) for (const cc of Q.CCS){

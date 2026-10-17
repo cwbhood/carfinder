@@ -124,6 +124,13 @@ the fee rules, the about texts), renders the per-country research notes from `do
 Markdown renderer, and fills the `src/methodology.html` shell. It writes `sw.js` from `src/sw.js` with a version
 stamp (the page's content hash), so every deploy invalidates the old cache; `--check` covers all three files.
 
+## Generated pages
+`src/pages.js` writes the crawlable pages from the same engine: `tax/<state>/` and `trade-in-credit/<state>/` for every
+state and DC (the answer in the first paragraph, a worked example priced by `breakdown()`, the citations, FAQPage and
+BreadcrumbList JSON-LD), the hubs `tax/` and `trade-in-credit/`, `data/` (the dataset page with Dataset JSON-LD and the
+DOI) and `sitemap.xml`. They are committed like `methodology.html`; `--check` fails when any is stale and
+`test/pages.test.mjs` checks every page. The app reads `#…&r=CA&loc=…` so a page links straight into a priced view.
+
 ## Website
 `index.html` (showcase, the demo video and GIFs, how-to) and `about.html` share the visual language of the author's
 other projects; they are static and hand-written. `brand/tools/shots.py` regenerates the screenshots and the social

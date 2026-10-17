@@ -1,0 +1,432 @@
+{
+ "_": "US purchase-tax rules per state, beside data/states_us.json (rate, doc fee, note). tax: the name of the tax the state charges on a vehicle purchase. trade: how a trade-in reduces it: \"full\" (tax on price less trade), \"none\" (tax on the full price), a number (credit capped at that trade value), or \"notax\". why: one sentence for the app and the state pages. src: [url, label] for the trade-in rule. Checked 17 October 2026; Sales Tax Handbook is the compiled source except where a state document is cited (it was out of date for Maryland, Kentucky and Michigan).",
+ "asof": "2026-10-17",
+ "states": {
+  "AL": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/alabama/sales-tax-vehicles",
+    "Sales Tax Handbook: Alabama sales tax on vehicles"
+   ]
+  },
+  "AK": {
+   "tax": "Sales tax",
+   "trade": "notax",
+   "why": "No state tax on the purchase, so a trade-in has nothing to reduce.",
+   "src": [
+    "https://www.commerce.alaska.gov/web/dcra/OfficeoftheStateAssessor/AlaskaSalesTaxInformation.aspx",
+    "Alaska Office of the State Assessor"
+   ]
+  },
+  "AZ": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/arizona/sales-tax-vehicles",
+    "Sales Tax Handbook: Arizona sales tax on vehicles"
+   ]
+  },
+  "AR": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/arkansas/sales-tax-vehicles",
+    "Sales Tax Handbook: Arkansas sales tax on vehicles"
+   ]
+  },
+  "CA": {
+   "tax": "Sales tax",
+   "trade": "none",
+   "src": [
+    "https://cdtfa.ca.gov/formspubs/pub34.pdf",
+    "CDTFA Publication 34, Motor Vehicle Dealers"
+   ],
+   "why": "The trade-in allowance is part of the taxable selling price: tax is charged on the full price before the trade."
+  },
+  "CO": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/colorado/sales-tax-vehicles",
+    "Sales Tax Handbook: Colorado sales tax on vehicles"
+   ]
+  },
+  "CT": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/connecticut/sales-tax-vehicles",
+    "Sales Tax Handbook: Connecticut sales tax on vehicles"
+   ]
+  },
+  "DE": {
+   "tax": "Document fee",
+   "trade": "full",
+   "src": [
+    "https://voltra.ai/car-sales-tax/trade-in-tax-credit-by-state/",
+    "Voltra, trade-in tax credit by state (compiled)"
+   ],
+   "why": "The 4.25% document fee is on the price less a Delaware-titled trade-in."
+  },
+  "DC": {
+   "tax": "Titling excise tax",
+   "trade": "none",
+   "src": [
+    "https://dmv.dc.gov/book/vehicle-fees/vehicle-title",
+    "DC DMV, Vehicle title fees and excise tax"
+   ],
+   "why": "The excise is charged on the vehicle’s fair market value from the NADA guide, so neither a trade-in nor a low negotiated price reduces it."
+  },
+  "FL": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/florida/sales-tax-vehicles",
+    "Sales Tax Handbook: Florida sales tax on vehicles"
+   ]
+  },
+  "GA": {
+   "tax": "Title Ad Valorem Tax (TAVT)",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/georgia/sales-tax-vehicles",
+    "Sales Tax Handbook: Georgia sales tax on vehicles"
+   ],
+   "why": "For a dealer purchase the TAVT is charged on the selling price less the trade-in."
+  },
+  "HI": {
+   "tax": "General excise tax",
+   "trade": "none",
+   "src": [
+    "https://www.salestaxhandbook.com/hawaii/sales-tax-vehicles",
+    "Sales Tax Handbook: Hawaii sales tax on vehicles"
+   ],
+   "why": "The general excise tax applies to the full price of the vehicle without considering the trade-in."
+  },
+  "ID": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/idaho/sales-tax-vehicles",
+    "Sales Tax Handbook: Idaho sales tax on vehicles"
+   ]
+  },
+  "IL": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/illinois/sales-tax-vehicles",
+    "Sales Tax Handbook: Illinois sales tax on vehicles"
+   ]
+  },
+  "IN": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/indiana/sales-tax-vehicles",
+    "Sales Tax Handbook: Indiana sales tax on vehicles"
+   ]
+  },
+  "IA": {
+   "tax": "One-time registration fee",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/iowa/sales-tax-vehicles",
+    "Sales Tax Handbook: Iowa sales tax on vehicles"
+   ]
+  },
+  "KS": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/kansas/sales-tax-vehicles",
+    "Sales Tax Handbook: Kansas sales tax on vehicles"
+   ]
+  },
+  "KY": {
+   "tax": "Motor vehicle usage tax",
+   "trade": "full",
+   "src": [
+    "https://revenue.ky.gov/ClerkNetwork/Documents/Motor%20Vehicle%20Usage%20Tax%20(2025).pdf",
+    "Kentucky Department of Revenue, Motor Vehicle Usage Tax manual (2025)"
+   ],
+   "why": "The usage tax is on the purchase price less the trade-in allowance shown on the invoice."
+  },
+  "LA": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/louisiana/sales-tax-vehicles",
+    "Sales Tax Handbook: Louisiana sales tax on vehicles"
+   ]
+  },
+  "ME": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/maine/sales-tax-vehicles",
+    "Sales Tax Handbook: Maine sales tax on vehicles"
+   ]
+  },
+  "MD": {
+   "tax": "Titling excise tax",
+   "trade": "full",
+   "src": [
+    "https://mva.maryland.gov/your-mva-guide/businesses/bulletins-businesses/taxable-price",
+    "Maryland MVA dealer bulletin: taxable price"
+   ],
+   "why": "Tax is on the price less the allowance for a non-leased trade-in."
+  },
+  "MA": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/massachusetts/sales-tax-vehicles",
+    "Sales Tax Handbook: Massachusetts sales tax on vehicles"
+   ]
+  },
+  "MI": {
+   "tax": "Sales tax",
+   "trade": 12000,
+   "src": [
+    "https://www.michigan.gov/documents/sos/PA_159_160_FAQ_Trade_in_Credit_711207_7.pdf",
+    "Michigan Department of State, trade-in credit FAQ (PA 159 & 160)"
+   ],
+   "why": "Michigan taxes the difference up to a cap that rises $1,000 every January: $12,000 in 2026, $13,000 in 2027, with no cap from 2029."
+  },
+  "MN": {
+   "tax": "Motor vehicle sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/minnesota/sales-tax-vehicles",
+    "Sales Tax Handbook: Minnesota sales tax on vehicles"
+   ]
+  },
+  "MS": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/mississippi/sales-tax-vehicles",
+    "Sales Tax Handbook: Mississippi sales tax on vehicles"
+   ]
+  },
+  "MO": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/missouri/sales-tax-vehicles",
+    "Sales Tax Handbook: Missouri sales tax on vehicles"
+   ]
+  },
+  "MT": {
+   "tax": "Sales tax",
+   "trade": "notax",
+   "why": "No state tax on the purchase, so a trade-in has nothing to reduce.",
+   "src": [
+    "https://leg.mt.gov/bills/mca/title_0610/chapter_0030/part_0030/section_0030/0610-0030-0030-0030.html",
+    "Montana Code Annotated 61-3-303"
+   ]
+  },
+  "NE": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/nebraska/sales-tax-vehicles",
+    "Sales Tax Handbook: Nebraska sales tax on vehicles"
+   ]
+  },
+  "NV": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/nevada/sales-tax-vehicles",
+    "Sales Tax Handbook: Nevada sales tax on vehicles"
+   ]
+  },
+  "NH": {
+   "tax": "Sales tax",
+   "trade": "notax",
+   "why": "No state tax on the purchase, so a trade-in has nothing to reduce.",
+   "src": [
+    "https://www.revenue.nh.gov/faq/does-new-hampshire-have-sales-tax",
+    "New Hampshire Department of Revenue Administration"
+   ]
+  },
+  "NJ": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/new-jersey/sales-tax-vehicles",
+    "Sales Tax Handbook: New Jersey sales tax on vehicles"
+   ]
+  },
+  "NM": {
+   "tax": "Motor vehicle excise tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/new-mexico/sales-tax-vehicles",
+    "Sales Tax Handbook: New Mexico sales tax on vehicles"
+   ]
+  },
+  "NY": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/new-york/sales-tax-vehicles",
+    "Sales Tax Handbook: New York sales tax on vehicles"
+   ]
+  },
+  "NC": {
+   "tax": "Highway use tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/north-carolina/sales-tax-vehicles",
+    "Sales Tax Handbook: North Carolina sales tax on vehicles"
+   ],
+   "why": "The 3% highway use tax is charged on the price less the trade-in at a dealer."
+  },
+  "ND": {
+   "tax": "Motor vehicle excise tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/north-dakota/sales-tax-vehicles",
+    "Sales Tax Handbook: North Dakota sales tax on vehicles"
+   ]
+  },
+  "OH": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/ohio/sales-tax-vehicles",
+    "Sales Tax Handbook: Ohio sales tax on vehicles"
+   ],
+   "why": "The deduction applies to new vehicles bought from a new-car dealer."
+  },
+  "OK": {
+   "tax": "Sales and excise tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/oklahoma/sales-tax-vehicles",
+    "Sales Tax Handbook: Oklahoma sales tax on vehicles"
+   ]
+  },
+  "OR": {
+   "tax": "Vehicle privilege tax",
+   "trade": "none",
+   "why": "The 0.5% privilege tax is on the retail price; there is no trade-in deduction (and no sales tax).",
+   "src": [
+    "https://www.oregon.gov/dor/programs/businesses/pages/vehicle-privilege-and-use-taxes.aspx",
+    "Oregon Department of Revenue, Vehicle privilege and use taxes"
+   ]
+  },
+  "PA": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/pennsylvania/sales-tax-vehicles",
+    "Sales Tax Handbook: Pennsylvania sales tax on vehicles"
+   ]
+  },
+  "RI": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/rhode-island/sales-tax-vehicles",
+    "Sales Tax Handbook: Rhode Island sales tax on vehicles"
+   ],
+   "why": "The deduction covers passenger cars, motorcycles and motor homes; trucks taken in trade get none."
+  },
+  "SC": {
+   "tax": "Infrastructure maintenance fee",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/south-carolina/sales-tax-vehicles",
+    "Sales Tax Handbook: South Carolina sales tax on vehicles"
+   ],
+   "why": "The 5% fee is on the price less the trade-in, and is capped at $500, so a trade-in only helps when the difference is under $10,000."
+  },
+  "SD": {
+   "tax": "Motor vehicle excise tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/south-dakota/sales-tax-vehicles",
+    "Sales Tax Handbook: South Dakota sales tax on vehicles"
+   ]
+  },
+  "TN": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/tennessee/sales-tax-vehicles",
+    "Sales Tax Handbook: Tennessee sales tax on vehicles"
+   ]
+  },
+  "TX": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/texas/sales-tax-vehicles",
+    "Sales Tax Handbook: Texas sales tax on vehicles"
+   ],
+   "why": "Texas taxes the price less the trade-in, and local sales taxes do not apply to cars."
+  },
+  "UT": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/utah/sales-tax-vehicles",
+    "Sales Tax Handbook: Utah sales tax on vehicles"
+   ]
+  },
+  "VT": {
+   "tax": "Purchase and use tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/vermont/sales-tax-vehicles",
+    "Sales Tax Handbook: Vermont sales tax on vehicles"
+   ]
+  },
+  "VA": {
+   "tax": "Motor vehicle sales and use tax",
+   "trade": "none",
+   "src": [
+    "https://law.lis.virginia.gov/vacode/title58.1/chapter24/section58.1-2405/",
+    "Code of Virginia § 58.1-2405"
+   ],
+   "why": "The sale price may not include credits for a trade-in (Code of Virginia § 58.1-2405), so tax is on the full price."
+  },
+  "WA": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/washington/sales-tax-vehicles",
+    "Sales Tax Handbook: Washington sales tax on vehicles"
+   ]
+  },
+  "WV": {
+   "tax": "Titling privilege tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/west-virginia/sales-tax-vehicles",
+    "Sales Tax Handbook: West Virginia sales tax on vehicles"
+   ]
+  },
+  "WI": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/wisconsin/sales-tax-vehicles",
+    "Sales Tax Handbook: Wisconsin sales tax on vehicles"
+   ]
+  },
+  "WY": {
+   "tax": "Sales tax",
+   "trade": "full",
+   "src": [
+    "https://www.salestaxhandbook.com/wyoming/sales-tax-vehicles",
+    "Sales Tax Handbook: Wyoming sales tax on vehicles"
+   ]
+  }
+ }
+}

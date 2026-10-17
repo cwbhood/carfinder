@@ -141,7 +141,7 @@ function core() {
   const RAW = { moto: {}, boat: {}, air: {} };
   for (const cc of CCS) for (const vt of ['moto', 'boat', 'air']) RAW[vt][cc] = load(`data/${vt}_${cc.toLowerCase()}.json`);
   const STATES_US = load('data/states_us.json'), STATES_IN = load('data/states_in.json'), VFEES = load('data/vfees.json'), SOURCES = load('data/sources.json');
-  const X = new Function('STATES_US', 'STATES_IN', 'VFEES', 'SOURCES', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS, airSpeedTxt, airRangeTxt, powerLbl, provenance, fmtDate};')(STATES_US, STATES_IN, VFEES, SOURCES);
+  const X = new Function('STATES_US', 'STATES_IN', 'VFEES', 'SOURCES', 'US_TAX', 'US_LOCAL', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS, airSpeedTxt, airRangeTxt, powerLbl, provenance, fmtDate};')(STATES_US, STATES_IN, VFEES, SOURCES, load('data/us_tax.json'), load('data/us_local.json'));
   const DATA = { moto: {}, boat: {}, air: {} };
   for (const vt of ['moto', 'boat', 'air']) for (const cc of CCS) DATA[vt][cc] = X.normalize(RAW[vt][cc], cc, vt);
   return { X, DATA, STATES_US, STATES_IN };

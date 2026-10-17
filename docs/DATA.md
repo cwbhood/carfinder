@@ -80,7 +80,19 @@ ARAI claimed mileage (km per kg for CNG); L/100 km for unit companions is 100 / 
   DC + `US` (nationwide average). The source is the state revenue department, DMV or statute page the rate was read
   from (the nationwide row cites the Tax Foundation's midyear table); the methodology page prints it as a Source
   column and the detail sheet links it next to the region's rules. Connecticut's 7.75% above $50,000 and South
-  Carolina's $500 cap are special-cased in `usTax()`.
+  Carolina's $500 cap are special-cased in `usTax()`, and DC's excise (a rate by weight class and city mpg on the NADA
+  value, since February 2025) is `DC_EXCISE` / `dcRate()`.
+- `us_tax.json`: `{asof, states: code → {tax, trade, why, src}}`: what the state calls the tax on a car purchase (sales
+  tax, Title Ad Valorem Tax, highway use tax, excise, document fee…), how a trade-in reduces it (`"full"`: tax on the
+  price less the trade-in; `"none"`: tax on the full price; a number: the credit is capped at that trade-in value, as in
+  Michigan; `"notax"`), one sentence of why, and the source of the trade-in rule (`[url, label]`). Every state and DC
+  has a row; `test/data.test.mjs` fails otherwise. Sales Tax Handbook is the compiled source except where a state
+  document is cited (it was out of date for Maryland, Kentucky and Michigan when checked).
+- `us_local.json`: `state → {asof, src, basis, places: [[label, combined rate %]]}`: the state's own table of combined
+  state and local rates for states where a car's rate depends on where it is registered (California from CDTFA, every
+  city and unincorporated county; New York from Publication 718, every county, city and NYC borough). Copied from the
+  published table and checksummed against it; refresh it the same way when the state publishes a new table. A state
+  without a table uses the average in `states_us.json`.
 - `states_in.json`: `code → {name, p, d, c, ev, mult, fixed, cap, min, preGst, city, note, src, srcName}`: road-tax
   slabs by price (lakh) for petrol (`p`), diesel (`d`), CNG (`c`) and EVs (`ev`, empty = exempt), a cess multiplier,
   fixed and capped amounts, whether the slab applies to the pre-GST price, a city surcharge, and the citation (`src`:

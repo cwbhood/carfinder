@@ -25,7 +25,13 @@ Thailand, Russia, Brazil and Canada, most with a photo. It runs in your browser
   fees for the place you live.
 - **Pick your state or city.** 50 US states, 20+ Indian states, 8 Chinese cities, Australian states, Mexican estados,
   Spanish regions, Russian regions, Brazilian states and Canadian provinces, each with its own sales tax, road tax,
-  plates, insurance, levies and rebates. Everything recomputes when you change it.
+  plates, insurance, levies and rebates. Everything recomputes when you change it. In California and New York you
+  pick your city or county too (every one, from the states' own rate tables), and the breakdown names each state's
+  real tax: Georgia's TAVT, North Carolina's highway use tax, South Carolina's capped fee, DC's excise by weight and mpg.
+- **Know your state's trade-in rule.** Enter a trade-in and the tax is charged the way your state charges it: on the
+  price less the trade-in in most states, on the full price in California, Virginia, Hawaii, Oregon and DC, with
+  Michigan's $12,000 cap. Every state has a [sales-tax page](https://destinjones.github.io/carfinder/tax/) and a
+  [trade-in page](https://destinjones.github.io/carfinder/trade-in-credit/) with a worked example and its sources.
 - **Cars, motorcycles, boats or aircraft.** The switch at the top changes the whole page: scooters, nakeds, cruisers
   and adventure bikes with engine-size and transmission filters and a ride-away price (freight and setup, tax, plates,
   compulsory insurance, licence classes); jet skis, pontoons, center consoles, wake boats, RIBs and sailboats with

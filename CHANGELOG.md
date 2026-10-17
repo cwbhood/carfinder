@@ -4,6 +4,36 @@ All notable changes to CarFinder. The format follows [Keep a Changelog](https://
 follow [Semantic Versioning](https://semver.org/) (data corrections are patches, new countries or verticals are minors,
 a schema change is a major).
 
+## [1.3.0] - 2026-10-17
+
+The drive-off price learns the two rules that move it most, trade-in credit and local tax, and every state gets its own
+page.
+
+### Added
+- **Trade-in tax credit in every state.** A *Trade-in value* under Cost assumptions; the tax is then charged on the
+  price less the trade-in in the 42 states that allow it, on the full price in California, Virginia, Hawaii, Oregon and
+  DC, with the credit capped at $12,000 in Michigan (2026), and the breakdown shows the tax it saves. With no trade-in
+  entered it says what a $15,000 trade would save in your state. The rule, a one-line why and a source for every state
+  are in `data/us_tax.json`; Sales Tax Handbook was out of date for Maryland, Kentucky and Michigan, so those cite the
+  state's own document. The trade-in also comes off the financed amount in the monthly payment.
+- **Local sales tax by city and county in California and New York.** Pick your city or county under the state menu:
+  all 541 California cities and unincorporated counties from CDTFA (effective 1 October 2026, 7.25% to 11.75%) and
+  every New York county, city and NYC borough from Publication 718 (7% to 8.875%). Copied from the states' tables and
+  checksummed against them; an unknown place falls back to the state average and says so. Links carry the place
+  (`&loc=`).
+- **The tax's real name.** The breakdown line says Title Ad Valorem Tax (Georgia), highway use tax (North Carolina),
+  infrastructure maintenance fee (South Carolina), usage tax (Kentucky), titling excise (Maryland, DC), document fee
+  (Delaware) and so on, instead of "Sales tax" for all.
+- **102 state pages** generated from the same data: `tax/<state>/` and `trade-in-credit/<state>/` for every state and
+  DC, each answering its question in the first paragraph, with a worked example priced by the app's engine, the
+  citations and FAQ and breadcrumb structured data, plus the two hubs, a **dataset page** (`data/`) with Dataset
+  JSON-LD and the Zenodo DOI, and a generated sitemap.
+
+### Fixed
+- **DC's excise** follows the February 2025 table (1% to 11% by weight class and city mpg; electric cars 1% to 3%, no
+  longer exempt) instead of "6%-8%, most EVs exempt".
+- California's and New York's state notes now quote the official local ranges.
+
 ## [1.2.1] - 2026-10-14
 
 A patch so the front pages say what the app says, and the first release archived on Zenodo.
@@ -151,6 +181,7 @@ The first tagged release: four verticals, eleven countries, 5,700 vehicles, and 
   Russia, Brazil and Canada with list, dealer and on-road prices per state, province or city (compiled 29 September
   2026), the World tab, compare, the wizard, glossaries, and the tests that run every vehicle through every region.
 
+[1.3.0]: https://github.com/destinjones/carfinder/releases/tag/v1.3.0
 [1.2.1]: https://github.com/destinjones/carfinder/releases/tag/v1.2.1
 [1.2.0]: https://github.com/destinjones/carfinder/releases/tag/v1.2.0
 [1.1.0]: https://github.com/destinjones/carfinder/releases/tag/v1.1.0

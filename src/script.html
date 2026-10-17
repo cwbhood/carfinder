@@ -8,6 +8,8 @@ const RAW = {
 };
 const STATES_US = /*__STATES_US__*/{};
 const STATES_IN = /*__STATES_IN__*/{};
+const US_TAX = /*__US_TAX__*/{};
+const US_LOCAL = /*__US_LOCAL__*/{};      // combined state + local rates by city or county, for states where a vehicle's rate depends on where it is registered (data/us_local.json)          // US purchase-tax rules per state: the tax's name, how a trade-in reduces it, and why (data/us_tax.json)
 const VFEES = /*__VFEES__*/{};          // motorcycle, boat and aircraft fee rules per country (data/vfees.json)
 const IMAGES = /*__IMAGES__*/{};        // Wikipedia lead photos: {files:[[name, host, md5 prefix, author, licence]], map:{'vt/cc':{'make|model':[fileIndex, approx]}}} (data/images.json)
 const SOURCES = /*__SOURCES__*/{};      // provenance: compile dates, exchange-rate date, per-dataset price sources, makers' sites (data/sources.json)
@@ -90,8 +92,8 @@ function provenance(c, cc){
   return {basis:set.basis, sources:set.sources||[], rules:set.rules||'', compiled, rulesAsOf, fx:S.fx||null, fxAt, fxCompiled, maker:{name:c.make, url, bp}, status, confirmed:status === 'listed' || status === 'checked', why};
 }
 /* the citation behind a region's tax rules: US and Indian states carry one per row; other countries cite the tax note */
-function regionSource(cc, code){
-  if (cc==='US'){ const s = STATES_US[code] || STATES_US.US; return s[4] ? {url:s[4], name:s[5] || s[4]} : null; }
+function regionSource(cc, code, loc){
+  if (cc==='US'){ const l = usLocal(code, loc); if (l) return {url:l.src[0], name:l.src[1]}; const s = STATES_US[code] || STATES_US.US; return s[4] ? {url:s[4], name:s[5] || s[4]} : null; }
   if (cc==='IN'){ const s = STATES_IN[code] || STATES_IN.IN; return s.src ? {url:s.src, name:s.srcName || s.src} : null; }
   return null;
 }
@@ -184,7 +186,7 @@ const MKT_TXT_V = {
 };
 function mktTxt(cc, c){ return (MKT_TXT_V[c.vt] || MKT_TXT[cc])[c.mkt]; }
 /* ---------- fuel cost, payment ---------- */
-function monthlyPay(price, A){ const P = price*(1 - A.down/100); const r = A.apr/100/12; const n = A.term; if (r===0) return P/n; return P*r/(1-Math.pow(1+r,-n)); }
+function monthlyPay(price, A){ const P = Math.max(0, price*(1 - A.down/100) - (A.trade||0)); const r = A.apr/100/12; const n = A.term; if (r===0) return P/n; return P*r/(1-Math.pow(1+r,-n)); }   // the down payment and any trade-in come off the amount financed
 function fuelCost(c, A, cc){
   if (c.vt==='boat'){                                               // hours on the water × fuel burn at cruise; marine fuel runs ~15% dearer
     if (!A.hours || c.fuel==='Sail') return null;
@@ -271,19 +273,45 @@ const REGIONS = {
 const REGION_DEFAULT = {CN:'XX', UK:'GB', AU:'NSW', MX:'CDMX', ES:'PEN', TH:'TH', RU:'MOW', BR:'SP', CA:'ON', ALL:'USD'};
 /* ---------- US ---------- */
 function usState(code){ const s = STATES_US[code] || STATES_US.US; return {code, name:s[0], rate:s[1], doc:s[2], note:s[3], src:s[4]||null, srcName:s[5]||''}; }
-function usTax(st, price){ if (st.code==='CT') return price > 50000 ? price*0.0775 : price*0.0635; if (st.code==='SC') return Math.min(price*0.05, 500); return price*st.rate/100; }
-function bdUS(c, msrp, st, M){
+function usLocalTable(code){ return (typeof US_LOCAL !== 'undefined' && US_LOCAL[code]) || null; }
+function usLocal(code, loc){ const T = usLocalTable(code); if (!T || !loc) return null; const p = T.places.find(x => x[0]===loc); return p ? {name:p[0], rate:p[1], asof:T.asof, src:T.src, basis:T.basis} : null; }
+function usRule(code){ return ((US_TAX.states||{})[code]) || {tax:'Sales tax', trade:'full'}; }
+/* the amount the state taxes after a trade-in: the full price where there is no credit, the difference where there is, up to a cap in Michigan */
+function usTaxable(rule, p, trade){ if (!(trade > 0) || rule.trade==='none' || rule.trade==='notax') return p; const t = typeof rule.trade==='number' ? Math.min(trade, rule.trade) : trade; return Math.max(0, p - t); }
+/* DC's titling excise since 17 Feb 2025: a rate by weight class and city mpg, on the NADA value (dmv.dc.gov). Weight is not in the data, so the class is estimated from body, size and fuel. */
+const DC_EXCISE = [[20, [9.0,10.0,11.0]], [25, [5.0,6.0,7.0]], [30, [3.1,4.1,5.1]], [39, [2.2,3.2,4.2]], [Infinity, [1.5,2.5,3.5]]];
+function dcWeightClass(c){ const heavy = c.body==='Truck' || c.body==='Van' || c.size==='Full-size' || c.size==='Heavy-duty'; if (heavy) return 2; const light = c.size==='Subcompact' || (c.size==='Compact' && c.body!=='SUV' && c.body!=='Minivan'); return light && c.fuel!=='EV' ? 0 : 1; }
+function dcRate(c){ const w = dcWeightClass(c); if (c.fuel==='EV' || c.fuel==='Hydrogen') return [1.0,2.0,3.0][w]; const mpg = Math.floor(c.city || c.mpg || 0); for (const [upto, r] of DC_EXCISE) if (mpg <= upto) return r[w]; return DC_EXCISE[4][1][w]; }
+function usTax(st, price, c, trade, rate){
+  const base = usTaxable(usRule(st.code), price, trade);
+  if (st.code==='CT') return base*(price > 50000 ? 0.0775 : 0.0635);      // the 7.75% rate is set by the price, the tax is on the price less any trade-in
+  if (st.code==='SC') return Math.min(base*0.05, 500);
+  if (st.code==='DC' && c) return base*dcRate(c)/100;
+  return base*(rate!=null ? rate : st.rate)/100;
+}
+function bdUS(c, msrp, st, M, opt){
   const b = BAND.US[c.mkt]; const s = msrp + c.dest; const lo = s*b[0], hi = s*b[1];
-  const f = p => p + st.doc + usTax(st,p) + 350;
+  const rule = usRule(st.code); const trade = (opt && opt.trade > 0) ? opt.trade : 0;
+  const local = usLocal(st.code, opt && opt.loc), T = usLocalTable(st.code);
+  const tx = (p, t) => usTax(st, p, c, t, local ? local.rate : null);
+  const f = p => p + st.doc + tx(p, trade) + 350;
   const L = [];
   L.push({k:'MSRP', sub:'manufacturer’s sticker price', v:M.money(msrp)});
   L.push({k:'Destination charge', sub:'mandatory, not negotiable', v:M.money(c.dest)});
   L.push({k:'Window sticker total', v:M.money(s), cls:'bold'});
   L.push({k:'Typical dealer price', sub:`${MKT_TXT.US[c.mkt][0].toLowerCase()} (${pct(b)})`, v:`${M.money(lo)} – ${M.money(hi)}`, cls:'est'});
-  L.push({k:'Sales tax', sub:st.note, v:`${M.money(usTax(st,lo))} – ${M.money(usTax(st,hi))}`});
+  const dcSub = st.code==='DC' ? `${dcRate(c)}% for this ${['lighter','mid-weight','heavier'][dcWeightClass(c)]} ${c.fuel==='EV' ? 'EV' : 'vehicle at '+Math.floor(c.city||c.mpg||0)+' mpg city'} (weight class estimated from body and size); ` : '';
+  const where = local ? `${local.name}: ${local.rate}% state and local rate, effective ${fmtDate(local.asof)} (${local.src[1].split(',')[0]}); ${local.basis}` : st.note + (T ? `. Pick your city or county under the state menu for the exact rate (${T.places.length} in the table)` : '');
+  L.push({k:rule.tax, sub:dcSub + where + (trade && rule.trade!=='none' && rule.trade!=='notax' ? `; charged on the price less your trade-in${typeof rule.trade==='number' ? ' (credit capped at '+M.money(rule.trade)+')' : ''}` : ''), v:`${M.money(tx(lo, trade))} – ${M.money(tx(hi, trade))}`});
+  if (trade){
+    const save = tx(hi, 0) - tx(hi, trade);
+    L.push({k:`Your ${M.money(trade)} trade-in`, sub:(rule.why || '') + ' It pays part of the price; the total here is before you hand it over.', v: rule.trade==='notax' ? 'no tax to reduce' : save > 0.5 ? `saves ${M.money(save)} in tax` : 'no tax saving', cls: save > 0.5 ? '' : 'info'});
+  } else if (rule.trade!=='notax'){
+    L.push({k:'Trading in a car?', sub: rule.trade==='none' ? (rule.why || '') + ' A trade-in saves no tax here.' : `${st.name} taxes the price less your trade-in${typeof rule.trade==='number' ? ', up to ' + M.money(rule.trade) : ''}: on this car a $15,000 trade saves about ${M.money(tx(hi, 0) - tx(hi, 15000))}. Enter yours under “Cost assumptions”.`, v: rule.trade==='none' ? 'no credit' : 'credit', cls:'info'});
+  }
   L.push({k:'Dealer doc fee', sub:`typical for ${st.name}; ask before you sign`, v:M.money(st.doc)});
   L.push({k:'Title, registration, plates', sub:'varies by state and vehicle', v:'~'+M.money(350)});
-  return {dlo:lo, dhi:hi, lo:f(lo), hi:f(hi), lines:L, head:st.name};
+  return {dlo:lo, dhi:hi, lo:f(lo), hi:f(hi), lines:L, head:local ? `${st.name} · ${local.name.replace(/ \(.*$/, '')}` : st.name};
 }
 /* ---------- India ---------- */
 function inState(code){ const s = STATES_IN[code] || STATES_IN.IN; return Object.assign({code}, s); }
@@ -593,12 +621,12 @@ function bdV(cc, c, price, region, M){
   }
   return {dlo:lo, dhi:hi, lo:tLo, hi:tHi, lines:L, head:regionHead(cc, region)};
 }
-function bdCarLike(cc, c, price, region, M){            // fallback when a country has no vfees entry yet: the car rules
-  switch(cc){ case 'US': return bdUS(c, price, usState(region), M); case 'IN': return bdIN(c, price, inState(region), M); case 'CN': return bdCN(c, price, region, M); case 'UK': return bdUK(c, price, region, M); case 'AU': return bdAU(c, price, region, M); case 'MX': return bdMX(c, price, region, M); case 'ES': return bdES(c, price, region, M); case 'TH': return bdTH(c, price, region, M); case 'RU': return bdRU(c, price, region, M); case 'BR': return bdBR(c, price, region, M); case 'CA': return bdCA(c, price, region, M); }
+function bdCarLike(cc, c, price, region, M, opt){            // fallback when a country has no vfees entry yet: the car rules
+  switch(cc){ case 'US': return bdUS(c, price, usState(region), M, opt); case 'IN': return bdIN(c, price, inState(region), M); case 'CN': return bdCN(c, price, region, M); case 'UK': return bdUK(c, price, region, M); case 'AU': return bdAU(c, price, region, M); case 'MX': return bdMX(c, price, region, M); case 'ES': return bdES(c, price, region, M); case 'TH': return bdTH(c, price, region, M); case 'RU': return bdRU(c, price, region, M); case 'BR': return bdBR(c, price, region, M); case 'CA': return bdCA(c, price, region, M); }
 }
-function breakdown(cc, c, price, region, M){
+function breakdown(cc, c, price, region, M, opt){
   if (c.vt && c.vt!=='car') return bdV(cc, c, price, region, M);
-  return bdCarLike(cc, c, price, region, M);
+  return bdCarLike(cc, c, price, region, M, opt);
 }
 //core>>
 /* ===== datasets: DATA[vertical][country], plus a pooled World list per vertical ===== */
@@ -630,7 +658,7 @@ const COUNTRIES = {
     presets:[[0,30000,'Under $30k'],[30000,45000,'$30-45k'],[45000,65000,'$45-65k'],[65000,100000,'$65-100k'],[100000,0,'$100k+']],
     eff:{mode:'min', label:'Minimum MPG', hint:'gas & hybrids; EVs always pass', max:55, step:1, unit:'mpg', sort:'Best MPG', get:c=>c.mpg},
     rng:{max:450, step:10, unit:'mi'}, powerUnit:'hp',
-    assume:{gas:['Gas $/gal',4.45,0.05], elec:['Electricity $/kWh',0.17,0.01], miles:['Miles per year',12000,1000], apr:['Loan APR %',7.0,0.1], term:['Loan term (months)',72,12], down:['Down payment %',10,1]}, distLabel:'miles',
+    assume:{gas:['Gas $/gal',4.45,0.05], elec:['Electricity $/kWh',0.17,0.01], miles:['Miles per year',12000,1000], apr:['Loan APR %',7.0,0.1], term:['Loan term (months)',72,12], down:['Down payment %',10,1], trade:['Trade-in value $',0,500]}, distLabel:'miles',
     wizardBudgets:[[30000,'Under $30k'],[45000,'$30-45k'],[65000,'$45-65k'],[100000,'$65-100k'],[0,'No limit']], budgetShare:0.9,
     wizardFuels:[['','No preference'],['Gas','Regular gas'],['Hybrid','Hybrid (no plug, best mpg)'],['PHEV','Plug-in hybrid'],['EV','Fully electric'],['cheap','Whatever costs least to run']],
     wizardAwd:'Snow, mud or mountains?', wizardWork:'Work, towing, hauling stuff',
@@ -868,6 +896,7 @@ function assumeFor(cc, vt){
   const base = COUNTRIES[cc].assume; const out = {};
   Object.entries(base).forEach(([k,v]) => out[k] = v.slice());
   if (vt==='car' || !Object.keys(base).length) return out;
+  delete out.trade;                                                  // the trade-in rule is modelled for cars only
   const V = VERT[vt].assume;
   if (vt==='moto'){ if (out.miles) out.miles = [out.miles[0], Math.round(out.miles[1]*V.distMult/500)*500, out.miles[2]]; }
   else if (vt==='air'){                                              // aviation fuel replaces road fuel; hours replace distance
@@ -992,7 +1021,7 @@ const TOP = c => CC==='ALL' ? c.wtop : c.top;
 const DEF_A_CACHE = {}; function DEFA(cc, vt){ const k = vt+'/'+cc; return DEF_A_CACHE[k] || (DEF_A_CACHE[k] = defA(cc, vt)); }
 function annualFuel(c){ if (CC==='ALL'){ const f = fuelCost(c.home, DEFA(c.cc, VT), c.cc); return f==null ? null : toWorld(f, c.cc); } return fuelCost(c, A, CC); }
 function bd(c, price){
-  if (CC!=='ALL') return breakdown(CC, c, price, S.state, M);
+  if (CC!=='ALL') return breakdown(CC, c, price, S.state, M, CC==='US' ? {trade:A.trade||0, loc:S.loc} : null);
   const o = breakdown(c.cc, c.home, price, regionDefault(c.cc), MONEY[c.cc]);
   return Object.assign(o, {lo:toWorld(o.lo, c.cc), hi:toWorld(o.hi, c.cc), dlo:toWorld(o.dlo, c.cc), dhi:toWorld(o.dhi, c.cc), head:`${CC_NAME[c.cc]} · ${o.head} · in ${CUR[c.cc]}`});
 }
@@ -1096,7 +1125,7 @@ function provHTML(c){
   const status = `<b class="${STATUS[pv.status].cls}">${STATUS[pv.status].label}</b>: ${esc(pv.why)}`;
   const region = CC==='ALL' ? regionDefault(hcc) : S.state;
   const rulesWhere = CC==='ALL' ? `${CC_NAME[hcc]} rules for ${esc(regionName(hcc, region))}` : `${esc(regionName(CC, S.state))} rules`;
-  const rs = regionSource(hcc, region);
+  const rs = regionSource(hcc, region, CC==='US' ? S.loc : null);
   let fxTxt = '';
   if (CC==='ALL' && pv.fx){
     fxTxt = `; converted at ${link('ECB rates of '+fmtDate(pv.fx.date), pv.fx.url)}`;
@@ -1275,7 +1304,7 @@ function detailDynamic(){
     trimVal: `<b>${ML.money(price)}</b> <span class="sm muted">${HC.cardPriceLabel} for the ${HC.trimWord} you picked</span>`,
     world: CC==='ALL' ? `<div class="panel"><h4>Converted to ${CUR_NAME[WCUR]}</h4><div class="big">${money(o.lo)} –<wbr> ${money(o.hi)}</div><p class="sm">Estimated on-road in ${CC_NAME[c.cc]} (${regionName(c.cc, regionDefault(c.cc))}) at ECB reference rates of ${fmtDate(FX_DATE)}. List price ${money(toWorld(price, c.cc))}. Open the ${CC_NAME[c.cc]} tab for other regions.</p></div>` : '',
     sticker: stickerHTML(o, HC.otdLabel, ML),
-    pay: `<h4>Est. monthly payment</h4><div class="big">${money(monthlyPay(mid, AA))}<span class="sm"> / mo</span></div><p class="sm">${AA.down}% down, ${AA.apr}% rate, ${AA.term} months, on the midpoint ${HC.otdLabel.replace('Est. ','')} price${CC==='ALL'?' with '+CC_NAME[c.cc]+' loan norms':''}. ${CC==='ALL'?'':'Change these under “Cost assumptions”.'}</p>`
+    pay: `<h4>Est. monthly payment</h4><div class="big">${money(monthlyPay(mid, AA))}<span class="sm"> / mo</span></div><p class="sm">${AA.down}% down${AA.trade ? ' plus your '+money(AA.trade)+' trade-in' : ''}, ${AA.apr}% rate, ${AA.term} months, on the midpoint ${HC.otdLabel.replace('Est. ','')} price${CC==='ALL'?' with '+CC_NAME[c.cc]+' loan norms':''}. ${CC==='ALL'?'':'Change these under “Cost assumptions”.'}</p>`
   };
 }
 function updateDetailPrice(){ const d = detailDynamic(); $('dTrimVal').innerHTML = d.trimVal; $('dWorld').innerHTML = d.world; $('dSticker').innerHTML = d.sticker; $('dPay').innerHTML = d.pay; }
@@ -1449,7 +1478,7 @@ function buildChrome(){
   // region select (currency select on the World tab)
   const def = regionDefault(CC);
   $('state').innerHTML = `<option value="${def}">${C.statePrompt}</option>` + regionsFor(CC).map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join('');
-  S.state = load('state_'+CC, def); if (![...$('state').options].some(o=>o.value===S.state)) S.state = def; $('state').value = S.state;
+  S.state = load('state_'+CC, def); if (![...$('state').options].some(o=>o.value===S.state)) S.state = def; $('state').value = S.state; syncLoc();
   if (CC==='ALL'){ WCUR = S.state; worldPrices(); worldPresets(); refreshPriceUI(); }
   $('assume').hidden = Object.keys(C.assume).length===0;
   // makes
@@ -1514,9 +1543,24 @@ const slugify = s => String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-
 function slugOf(c){ return (CC==='ALL' ? c.cc.toLowerCase() + '-' : '') + slugify(c.make + ' ' + c.model) + (c.year && c.year !== 2026 ? '-' + c.year : ''); }
 function bySlug(s){ for (let i = 0; i < CARS.length; i++) if (slugOf(CARS[i]) === s) return CARS[i]; return null; }
 const SORTS = ['price-asc','price-desc','fuel','mpg','range','hp','perhp','seats','name'];
+/* US local tax: a city-or-county box under the state menu for states with a local table; an unknown entry falls back to the state average and says so */
+function syncLoc(fromHash){
+  const T = (CC==='US' && VT==='car') ? usLocalTable(S.state) : null; const row = $('locRow');
+  if (!T){ S.loc = ''; row.hidden = true; return; }
+  row.hidden = false;
+  $('locList').innerHTML = T.places.map(p => `<option value="${esc(p[0])}">${p[1]}%</option>`).join('');
+  $('locLbl').textContent = `${usState(S.state).name}: your city or county (local tax)`;
+  const want = fromHash != null ? fromHash : load('loc_'+S.state, '');
+  S.loc = usLocal(S.state, want) ? want : ''; $('loc').value = S.loc; locNote();
+}
+function locNote(){
+  const T = usLocalTable(S.state); if (!T) return; const l = usLocal(S.state, S.loc); const typed = $('loc').value.trim();
+  $('locNote').textContent = l ? `${l.rate}% combined, effective ${fmtDate(l.asof)}` : typed ? `Not in the ${T.src[1].split(',')[0]} list; using the ${usState(S.state).rate}% state average` : `Using the ${usState(S.state).rate}% state average until you pick one`;
+}
 function viewHash(opts){
   const p = new URLSearchParams(); p.set('v', VT); p.set('cc', CC);
   if (S.state !== regionDefault(CC)) p.set('r', S.state);
+  if (CC==='US' && S.loc) p.set('loc', S.loc);
   if (CC==='ALL' && WUNIT !== 'l100') p.set('u', WUNIT);
   if (S.q) p.set('q', S.q);
   const list = (k, set) => { if (set.size) p.set(k, [...set].join(',')); };
@@ -1560,7 +1604,7 @@ function readHash(){ const h = location.hash.slice(1); return h && h.includes('=
 /* apply a hash after buildChrome(): filters into S, then the sheet or comparison it names */
 function applyHashFilters(p){
   const sets = (k, set) => { const v = p.get(k); if (v) v.split(',').forEach(x => { if (x) set.add(x); }); };
-  const r = p.get('r'); if (r && [...$('state').options].some(o => o.value === r)) { S.state = r; $('state').value = r; if (CC==='ALL'){ WCUR = r; worldPrices(); worldPresets(); refreshPriceUI(); updateAsof(); } }
+  const r = p.get('r'); if (r && [...$('state').options].some(o => o.value === r)) { S.state = r; $('state').value = r; if (CC==='US') syncLoc(p.get('loc')); if (CC==='ALL'){ WCUR = r; worldPrices(); worldPresets(); refreshPriceUI(); updateAsof(); } }
   const u = p.get('u'); if (CC==='ALL' && u && WORLD_UNITS[u]) { WUNIT = u; $('wunit').value = u; applyWorldUnits(); applySliders(); }
   S.q = (p.get('q') || '').trim().toLowerCase(); $('q').value = S.q;
   sets('b', S.body); sets('f', S.fuel); sets('s', S.size); sets('t', S.cls); sets('m', S.make); sets('k', S.countries);
@@ -1611,7 +1655,9 @@ function init(){
   $('vertTabs').addEventListener('click', e => { const b = e.target.closest('.vtab'); if (b && b.dataset.vt!==VT){ switchVertical(b.dataset.vt); window.scrollTo({top:0}); } });
   $('countryTabs').innerHTML = countryTabsHTML();
   $('countryTabs').addEventListener('click', e => { const b = e.target.closest('.ctab'); if (b && b.dataset.country!==CC){ switchCountry(b.dataset.country); window.scrollTo({top:0}); } });
-  $('state').addEventListener('change', e => { S.state = e.target.value; store('state_'+CC, S.state); if (CC==='ALL'){ WCUR = S.state; worldPrices(); worldPresets(); refreshPriceUI(); S.pmin = 0; S.pmax = 0; syncChips(); updateAsof(); } render(); if (detailCar && $('dlgDetail').open) renderDetail(); });
+  $('state').addEventListener('change', e => { S.state = e.target.value; store('state_'+CC, S.state); syncLoc(); if (CC==='ALL'){ WCUR = S.state; worldPrices(); worldPresets(); refreshPriceUI(); S.pmin = 0; S.pmax = 0; syncChips(); updateAsof(); } render(); if (detailCar && $('dlgDetail').open) renderDetail(); });
+  const onLoc = () => { const v = $('loc').value.trim(); const hit = usLocal(S.state, v) ? v : ''; if (hit === S.loc){ locNote(); return; } S.loc = hit; store('loc_'+S.state, S.loc); locNote(); render(); syncHash(); if (detailCar && $('dlgDetail').open) renderDetail(); };
+  $('loc').addEventListener('input', onLoc); $('loc').addEventListener('change', onLoc);
   // phones: the state picker gets its own row under the sticky search bar; wider screens keep it in the toolbar
   const mqPhone = matchMedia('(max-width:639px)'), mqWide = matchMedia('(min-width:960px)');
   const placeState = () => { (mqPhone.matches ? $('stateRow') : $('toolbar')).appendChild($('stateWrap')); };

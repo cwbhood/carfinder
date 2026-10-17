@@ -134,6 +134,10 @@ body.no-scroll,body:has(dialog[open]){overflow:hidden}
 .state-row{display:flex;gap:8px;padding-top:8px}
 .state-row .state{flex:1 1 auto;min-width:0}
 .state-row:empty{display:none}
+.loc-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding-top:8px}.loc-row[hidden]{display:none}
+.loc-row label{font-size:.9rem;font-weight:600;flex:1 1 100%}
+.loc-row input{flex:1 1 260px;min-width:0;max-width:100%;font-size:16px;min-height:var(--tap);padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg)}
+.loc-row .loc-note{font-size:.85rem;color:var(--muted);flex:1 1 200px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:600;min-height:var(--tap);white-space:nowrap;color:var(--fg)}
 .btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .btn.small{min-height:36px;padding:6px 10px;font-size:14px}
@@ -455,6 +459,7 @@ footer.about h2{font-size:20px;font-weight:600;color:var(--fg)}
     <div class="state" id="stateWrap"><select id="state" class="state-sel" aria-label="Your state for tax and fee estimates"></select></div>
   </div>
   <div class="state-row" id="stateRow"></div>
+  <div class="loc-row" id="locRow" hidden><label for="loc" id="locLbl">Your city or county (local tax)</label><input id="loc" list="locList" type="text" autocomplete="off" enterkeyhint="done" placeholder="Start typing a city or county"><datalist id="locList"></datalist><span class="loc-note" id="locNote" aria-live="polite"></span></div>
 
   <div class="chips" id="bodyChips" role="group" aria-label="Body type"></div>
   <div class="chips" id="fuelChips" role="group" aria-label="Fuel type"></div>

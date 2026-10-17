@@ -17,7 +17,7 @@ const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const SITE = 'https://destinjones.github.io/carfinder/';
 const DESC = 'Every new car, truck, motorcycle, scooter, boat, plane, jet and helicopter on sale in the USA, India, China, the UK, Australia, Mexico, Spain, Thailand, Russia, Brazil and Canada: list price, what dealers really charge, and the on-road price for your state or city. Photos, filters, compare, fuel economy and EV range. Free, open source, no account.';
 
-const VERSION = '1.2.1';                 // bump with CHANGELOG.md and the git tag
+const VERSION = '1.3.0';                 // bump with CHANGELOG.md and the git tag
 const crypto = require('crypto');
 const CCS = ['US','IN','CN','UK','AU','MX','ES','TH','RU','BR','CA'];
 const exists = p => fs.existsSync(path.join(ROOT, p));
@@ -37,6 +37,8 @@ function assemble(){
   const obj = (ph, f) => { if (!script.includes(ph)) throw new Error('placeholder missing: ' + ph); if (exists(f)) script = script.replace(ph, JSON.stringify(JSON.parse(read(f)))); };
   obj('/*__STATES_US__*/{}', 'data/states_us.json');
   obj('/*__STATES_IN__*/{}', 'data/states_in.json');
+  obj('/*__US_TAX__*/{}', 'data/us_tax.json');
+  obj('/*__US_LOCAL__*/{}', 'data/us_local.json');
   obj('/*__VFEES__*/{}', 'data/vfees.json');
   obj('/*__IMAGES__*/{}', 'data/images.json');
   obj('/*__SOURCES__*/{}', 'data/sources.json');
@@ -93,6 +95,7 @@ ${body}
 const mode = process.argv[2] || '';
 const body = assemble();
 const methodology = () => require('./methodology.js').build(body);
+const staticPages = () => require('./pages.js').build(body);       // tax/<state>/, trade-in-credit/<state>/, their hubs, data/ and sitemap.xml
 const quality = () => { const Q = require('./quality.js'); const m = Q.measure(); const hist = exists('docs/data-quality-history.csv') ? read('docs/data-quality-history.csv') : ''; return {md:Q.markdown(m, JSON.parse(read('data/quality-floor.json'))), csv:Q.historyCsv(hist, m, VERSION)}; };
 const serviceWorker = pageHTML => read('src/sw.js').replace('/*__SW_VERSION__*/', VERSION + '-' + crypto.createHash('sha1').update(pageHTML).digest('hex').slice(0, 10));
 if (mode === '--artifact'){
@@ -114,7 +117,9 @@ if (mode === '--artifact'){
   if (q.md !== qDisk){ console.error('docs/DATA-QUALITY.md is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
   const hDisk = exists('docs/data-quality-history.csv') ? read('docs/data-quality-history.csv') : '';
   if (q.csv !== hDisk){ console.error('docs/data-quality-history.csv is out of date: run `node src/build.js` and commit the result'); process.exit(1); }
-  console.log('carfinder.html, methodology.html, sw.js, docs/DATA-QUALITY.md and docs/data-quality-history.csv are up to date');
+  const P = staticPages(); const stale = Object.entries(P).filter(([f, h]) => !exists(f) || read(f) !== h).map(([f]) => f);
+  if (stale.length){ console.error(`${stale.length} generated pages are out of date (${stale.slice(0, 3).join(', ')}…): run \`node src/build.js\` and commit the result`); process.exit(1); }
+  console.log(`carfinder.html, methodology.html, sw.js, docs/DATA-QUALITY.md, docs/data-quality-history.csv and ${Object.keys(P).length} generated pages are up to date`);
 } else {
   const out = page(body);
   fs.writeFileSync(path.join(ROOT, 'carfinder.html'), out);
@@ -128,4 +133,7 @@ if (mode === '--artifact'){
   fs.writeFileSync(path.join(ROOT, 'docs/DATA-QUALITY.md'), q.md);
   fs.writeFileSync(path.join(ROOT, 'docs/data-quality-history.csv'), q.csv);
   console.log('wrote docs/DATA-QUALITY.md and docs/data-quality-history.csv');
+  const P = staticPages();
+  for (const [f, h] of Object.entries(P)){ fs.mkdirSync(path.dirname(path.join(ROOT, f)), {recursive: true}); fs.writeFileSync(path.join(ROOT, f), h); }
+  console.log('wrote', Object.keys(P).length, 'generated pages (tax/, trade-in-credit/, data/, sitemap.xml)');
 }
