@@ -17,7 +17,7 @@ const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const SITE = 'https://destinjones.github.io/carfinder/';
 const DESC = 'Every new car, truck, motorcycle, scooter, boat, plane, jet and helicopter on sale in the USA, India, China, the UK, Australia, Mexico, Spain, Thailand, Russia, Brazil and Canada: list price, what dealers really charge, and the on-road price for your state or city. Photos, filters, compare, fuel economy and EV range. Free, open source, no account.';
 
-const VERSION = '1.3.0';                 // bump with CHANGELOG.md and the git tag
+const VERSION = '1.4.0';                 // bump with CHANGELOG.md and the git tag
 const crypto = require('crypto');
 const CCS = ['US','IN','CN','UK','AU','MX','ES','TH','RU','BR','CA'];
 const exists = p => fs.existsSync(path.join(ROOT, p));
@@ -51,7 +51,7 @@ function assemble(){
 }
 
 const GOOGLE_FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap">`;
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@900&family=IBM+Plex+Mono:wght@400;500&display=swap">`;
 
 function page(body){
   return `<!doctype html>
@@ -59,8 +59,8 @@ function page(body){
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#eef1f4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f1317" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f0e8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0f11" media="(prefers-color-scheme: dark)">
 <title>CarFinder 2026 · every new car, bike, boat and plane, what it really costs</title>
 <meta name="description" content="${DESC}">
 <meta name="author" content="Destin Jones">

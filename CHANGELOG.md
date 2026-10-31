@@ -4,7 +4,31 @@ All notable changes to CarFinder. The format follows [Keep a Changelog](https://
 follow [Semantic Versioning](https://semver.org/) (data corrections are patches, new countries or verticals are minors,
 a schema change is a major).
 
-## [1.3.0] - 2026-10-17
+## [1.4.0] - 2026-10-31
+
+One design for everything: the app, the website and every generated page now share a single system built around the
+window sticker, the document the dealer never prints. No data or pricing changes.
+
+### Changed
+- **The design system** (`docs/DESIGN.md`, `brand/tokens.css`): warm paper in light mode and ink in dark mode, one
+  sticker-orange accent for the drive-off price and the primary action, three type families (Big Shoulders Display
+  for titles, Barlow for text, IBM Plex Mono for every figure), hairlines instead of shadows, 3 px and 6 px radii.
+  Every text colour passes WCAG AA in both themes. The per-country accent colours are gone.
+- **The app**: one header bar (wordmark, a segmented Cars/Bikes/Boats/Aircraft switch, a light/dark toggle), a quiet
+  country strip with counts, a compact masthead, and the actions in the toolbar. Body and fuel filters are square
+  toggles with counts. Cards are stickers: the drive-off figure in orange mono beside the sticker price, one line of
+  specs, one status, and a quiet compare control. The detail sheet reads as a receipt with dotted leaders and a rule
+  above the total; the provenance panel is fine print at the end.
+- **The website**: a working window sticker above the fold (a 2026 RAV4, switchable between five states, with figures
+  from the state pages), the same car in eight states, the four verticals and eleven countries as ruled tables.
+- **Methodology and the 102 state pages** share one stylesheet (`brand/site/pages.css`): answer first, a sticker
+  strip of the key figures, the worked example as a receipt, numbered sources with their dates, and a contents list
+  on the methodology page.
+- **One mark**: a sticker whose last line, the total, is orange; the favicon, app icons and share image are redrawn
+  to match.
+
+### Fixed
+- Texas pages no longer have a "local taxes" section: local sales tax does not apply to cars in Texas.
 
 The drive-off price learns the two rules that move it most, trade-in credit and local tax, and every state gets its own
 page.
@@ -181,6 +205,7 @@ The first tagged release: four verticals, eleven countries, 5,700 vehicles, and 
   Russia, Brazil and Canada with list, dealer and on-road prices per state, province or city (compiled 29 September
   2026), the World tab, compare, the wizard, glossaries, and the tests that run every vehicle through every region.
 
+[1.4.0]: https://github.com/destinjones/carfinder/releases/tag/v1.4.0
 [1.3.0]: https://github.com/destinjones/carfinder/releases/tag/v1.3.0
 [1.2.1]: https://github.com/destinjones/carfinder/releases/tag/v1.2.1
 [1.2.0]: https://github.com/destinjones/carfinder/releases/tag/v1.2.0

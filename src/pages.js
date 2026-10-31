@@ -47,7 +47,7 @@ ${THEME_INIT}
 <link rel="stylesheet" href="${up}brand/site/pages.css?v=${v}">`;
 }
 /* the emblem's price tag, drawn in ink with the car cut out of it */
-const MARK = `<svg viewBox="11 17 44 30" aria-hidden="true" focusable="false"><path class="tag" d="M12 21a3 3 0 0 1 3-3h24.5a3 3 0 0 1 2.2.95L54 31a1.5 1.5 0 0 1 0 2L41.7 45.05a3 3 0 0 1-2.2.95H15a3 3 0 0 1-3-3z"/><circle class="cut" cx="18.5" cy="32" r="2.8"/><path class="cut" d="M24.5 37.5l1.6-5.2a2 2 0 0 1 1.9-1.4h2.6l3-3.6a2 2 0 0 1 1.5-.7h5.6a2 2 0 0 1 1.6.8l2.7 3.5h2.3a2 2 0 0 1 2 2v3.4a1.2 1.2 0 0 1-1.2 1.2z"/><circle class="cut" cx="29.5" cy="38" r="2.5"/><circle class="cut" cx="44.5" cy="38" r="2.5"/></svg>`;
+const MARK = `<svg class="mark-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.75" y="2.75" width="14.5" height="18.5" rx="1.5"/><path d="M8 7.5h8M8 11h8"/><path class="mark-total" d="M8 16.25h8"/></svg>`;   // the sticker mark, shared with the website and the app (docs/DESIGN.md)
 function siteNav(up, current){
   const L = [['tax/', 'Sales tax by state'], ['trade-in-credit/', 'Trade-in credit'], ['methodology.html', 'How we calculate'], ['data/', 'Data']];
   return `<a class="skip" href="#main">Skip to content</a>

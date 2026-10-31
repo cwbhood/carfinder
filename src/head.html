@@ -64,6 +64,9 @@ body.no-scroll,body:has(dialog[open]){overflow:hidden}
 .brand b{font-weight:600}
 .brand span{font:500 12px/1 var(--mono);color:var(--muted);letter-spacing:.04em;padding-top:2px}
 .brand:hover{color:var(--ink)}
+.brand .mark-svg{width:28px;height:28px;flex:none;align-self:center;margin-right:4px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round}
+.brand .mark-svg .mark-total{stroke:var(--accent);stroke-width:2.5}
+@media (max-width:399px){.brand .mark-svg{display:none}}   /* narrow phones: the name, the four vehicle icons and the theme toggle fill the bar */
 .verts{display:flex;border:1px solid var(--line-strong);border-radius:var(--r-ctl);background:var(--surface);overflow:hidden;flex:0 0 auto}
 .vtab{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:var(--tap);min-width:var(--tap);padding:0 14px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);font-size:15px;font-weight:500;white-space:nowrap;transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
 .vtab:first-child{border-left:0}
@@ -525,7 +528,7 @@ footer.about b{color:var(--ink);font-weight:600}
 </defs></svg>
 <header class="topbar">
   <div class="topbar-in">
-    <a class="brand" href="./" title="CarFinder project site"><b>CarFinder</b><span>2026</span></a>
+    <a class="brand" href="./" title="CarFinder project site"><svg class="mark-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.75" y="2.75" width="14.5" height="18.5" rx="1.5"/><path d="M8 7.5h8M8 11h8"/><path class="mark-total" d="M8 16.25h8"/></svg><b>CarFinder</b><span>2026</span></a>
     <div class="verts" role="tablist" aria-label="Vehicle type" id="vertTabs"></div>
     <button class="ibtn theme" id="themeBtn" type="button" aria-label="Switch to dark theme" title="Light or dark"><svg class="i moon" aria-hidden="true"><use href="#ico-moon"></use></svg><svg class="i sun" aria-hidden="true"><use href="#ico-sun"></use></svg></button>
   </div>

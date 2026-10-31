@@ -131,6 +131,12 @@ BreadcrumbList JSON-LD), the hubs `tax/` and `trade-in-credit/`, `data/` (the da
 DOI) and `sitemap.xml`. They are committed like `methodology.html`; `--check` fails when any is stale and
 `test/pages.test.mjs` checks every page. The app reads `#…&r=CA&loc=…` so a page links straight into a priced view.
 
+## Styling
+The design system is `docs/DESIGN.md` with its tokens in `brand/tokens.css`. The app inlines the same values in
+`src/head.html` (it is one self-contained file); the website links `brand/site/site.css` and `brand/site/site.js`
+(theme toggle); methodology and every generated page link `brand/site/pages.css`, with nav, footer and head links built
+by `headLinks()`, `siteNav()` and `siteFoot()` in `src/pages.js`. All three store the theme choice as `cf_theme`.
+
 ## Website
 `index.html` (showcase, the demo video and GIFs, how-to) and `about.html` share the visual language of the author's
 other projects; they are static and hand-written. `brand/tools/shots.py` regenerates the screenshots and the social
