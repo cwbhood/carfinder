@@ -140,8 +140,8 @@ function core() {
   const coreSrc = js.match(/\/\/<<core([\s\S]*)\/\/core>>/)[1];
   const RAW = { moto: {}, boat: {}, air: {} };
   for (const cc of CCS) for (const vt of ['moto', 'boat', 'air']) RAW[vt][cc] = load(`data/${vt}_${cc.toLowerCase()}.json`);
-  const STATES_US = load('data/states_us.json'), STATES_IN = load('data/states_in.json'), VFEES = load('data/vfees.json');
-  const X = new Function('STATES_US', 'STATES_IN', 'VFEES', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS, airSpeedTxt, airRangeTxt, powerLbl};')(STATES_US, STATES_IN, VFEES);
+  const STATES_US = load('data/states_us.json'), STATES_IN = load('data/states_in.json'), VFEES = load('data/vfees.json'), SOURCES = load('data/sources.json');
+  const X = new Function('STATES_US', 'STATES_IN', 'VFEES', 'SOURCES', 'US_TAX', 'US_LOCAL', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS, airSpeedTxt, airRangeTxt, powerLbl, provenance, fmtDate};')(STATES_US, STATES_IN, VFEES, SOURCES, load('data/us_tax.json'), load('data/us_local.json'));
   const DATA = { moto: {}, boat: {}, air: {} };
   for (const vt of ['moto', 'boat', 'air']) for (const cc of CCS) DATA[vt][cc] = X.normalize(RAW[vt][cc], cc, vt);
   return { X, DATA, STATES_US, STATES_IN };
@@ -201,4 +201,21 @@ test('pricing engine: known bike, boat and aircraft quotes land where dealers do
   o = q('air', 'US', 'Cirrus', 'SR22 / SR22T (G7+)', 'OR');   assert.ok(o.lo > 900000 && o.hi < 945000, `SR22 Oregon, no sales tax ${o.lo}-${o.hi}`);
   o = q('air', 'UK', 'Bombardier', 'Challenger 3500', 'GB');  assert.ok(o.lo / 20760000 > 1.13 && o.hi / 20760000 < 1.21, `Challenger 3500 UK with 20% VAT ${o.lo}-${o.hi}`);
   o = q('air', 'IN', 'Robinson', 'R44 Raven I / II', 'MH');  assert.ok(o.lo / 43200000 > 1.25 && o.hi / 43200000 < 1.4, `R44 India with 3% duty and 28% GST ${o.lo}-${o.hi}`);
+});
+
+test('provenance: every dataset has a compile date and sources, and every vehicle resolves to a source, a date and a status', () => {
+  const S = load('data/sources.json'); const { X, DATA } = core();
+  for (const vt of ['car', 'moto', 'boat', 'air']) { assert.match(S.compiled[vt], /^\d{4}-\d{2}-\d{2}$/, `${vt} compile date`); assert.match(S.rulesAsOf[vt], /^\d{4}-\d{2}-\d{2}$/); }
+  assert.match(S.fx.date, /^\d{4}-\d{2}-\d{2}$/); assert.match(S.fx.url, /^https:\/\//);
+  for (const [k, set] of Object.entries(S.sets)) { assert.ok(set.basis && set.sources.length >= 1 && set.rules, `${k} basis, sources, rules`); for (const [n, u] of set.sources) { assert.ok(n, `${k} source name`); if (u) assert.match(u, /^https?:\/\/\S+$/, `${k} ${n} url`); } }
+  for (const [b, u] of Object.entries(S.brands)) assert.match(u, /^https:\/\/\S+$/, `brand site ${b}`);
+  for (const [b, m] of Object.entries(S.brandsByCC)) for (const [cc, u] of Object.entries(m)) { assert.ok(CCS.includes(cc), `${b} ${cc}`); assert.match(u, /^https:\/\/\S+$/, `brand site ${b} ${cc}`); }
+  let linked = 0, total = 0;
+  for (const vt of ['moto', 'boat', 'air']) for (const cc of CCS) for (const c of DATA[vt][cc]) {
+    const p = X.provenance(c, cc); total++; if (p.maker.url) linked++;
+    assert.ok(p.basis && p.compiled && p.rulesAsOf && p.maker.name === c.make, `${vt} ${cc} ${c.make} ${c.model}: provenance`);
+    assert.equal(p.confirmed, !c.est); if (c.est) assert.ok(p.why.length > 20, `${vt} ${cc} ${c.make} ${c.model}: an estimate says why`);
+    assert.ok(X.fmtDate(p.compiled).length > 8);
+  }
+  assert.ok(linked / total > 0.9, `${linked} of ${total} rows link to the maker's site`);
 });

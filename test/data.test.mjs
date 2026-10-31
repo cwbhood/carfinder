@@ -115,8 +115,8 @@ function core() {
   const coreSrc = js.match(/\/\/<<core([\s\S]*)\/\/core>>/)[1];
   const RAW = { US: load('data/cars_us.json'), IN: load('data/cars_in.json') };
   for (const cc of ['CN', 'UK', 'AU', 'MX', 'ES', 'TH', 'RU', 'BR', 'CA']) RAW[cc] = load(`data/cars_${cc.toLowerCase()}.json`);
-  const STATES_US = load('data/states_us.json'), STATES_IN = load('data/states_in.json');
-  const X = new Function('RAW', 'STATES_US', 'STATES_IN', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS, EFF_UNIT};')(RAW, STATES_US, STATES_IN);
+  const STATES_US = load('data/states_us.json'), STATES_IN = load('data/states_in.json'), SOURCES = load('data/sources.json');
+  const X = new Function('RAW', 'STATES_US', 'STATES_IN', 'SOURCES', 'US_TAX', 'US_LOCAL', coreSrc + '\nreturn {normalize, MONEY, breakdown, fuelCost, effShort, monthlyPay, REGIONS, EFF_UNIT, FX};')(RAW, STATES_US, STATES_IN, SOURCES, load('data/us_tax.json'), load('data/us_local.json'));
   const DATA = {}; for (const cc of Object.keys(RAW)) DATA[cc] = X.normalize(RAW[cc], cc);
   return { X, DATA, STATES_US, STATES_IN };
 }
@@ -161,6 +161,58 @@ test('pricing core: known quotes land where real-world quotes do', () => {
   o = q('UK', 'Dacia', 'Sandero', 'GB');     assert.ok(o.lo > 13000 && o.hi < 15500, `Sandero UK ${o.lo}-${o.hi}`);
   o = q('AU', 'Toyota', 'RAV4', 'NSW');      assert.ok(o.lo > 45000 && o.hi < 56000, `RAV4 NSW drive-away ${o.lo}-${o.hi}`);
   o = q('CN', 'BYD', 'Seagull', 'XX');       assert.ok(o.lo > 55000 && o.hi < 80000, `Seagull 落地价 ${o.lo}-${o.hi}`);
+});
+
+test('US trade-in rule: credit where the state gives it, none in California, Virginia, Hawaii and DC, capped in Michigan', () => {
+  const { X, DATA } = core();
+  const rav = DATA.US.find(x => x.make === 'Toyota' && x.model === 'RAV4');
+  const tax = (st, trade) => { const o = X.breakdown('US', rav, rav.price, st, X.MONEY.US, {trade}); return o.hi; };
+  const R = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/us_tax.json'), 'utf8')).states;
+  assert.equal(Object.keys(R).length, 51, 'a rule for every state and DC');
+  for (const [cc, r] of Object.entries(R)) {
+    assert.ok(['full', 'none', 'notax'].includes(r.trade) || typeof r.trade === 'number', `${cc} trade rule`);
+    assert.ok(r.tax && r.src && /^https:\/\//.test(r.src[0]) && r.src[1], `${cc} has a tax name and a cited source`);
+    const saved = tax(cc, 0) - tax(cc, 15000);
+    if (r.trade === 'none' || r.trade === 'notax') assert.ok(Math.abs(saved) < 0.01, `${cc}: a trade-in saves no tax (${saved})`);
+    else if (cc !== 'SC') assert.ok(saved > 0, `${cc}: a $15,000 trade-in saves tax (${saved})`);   // SC's $500 cap binds above $10,000
+  }
+  assert.ok(Math.abs((tax('TX', 0) - tax('TX', 15000)) - 15000 * 0.0625) < 0.01, 'Texas: 6.25% of the trade-in');
+  assert.ok(Math.abs((tax('MI', 0) - tax('MI', 15000)) - 12000 * 0.06) < 0.01, 'Michigan: credit capped at $12,000 in 2026');
+  assert.equal(tax('CA', 0), tax('CA', 15000), 'California: no credit');
+  const big = DATA.US.find(x => x.price > 30000 && x.fuel === 'Gas');
+  const sc = t => X.breakdown('US', big, big.price, 'SC', X.MONEY.US, {trade:t}).hi;
+  assert.equal(sc(0), sc(15000), 'South Carolina: the $500 cap binds on a $30,000+ car, so the trade-in saves nothing');
+  const o = X.breakdown('US', rav, rav.price, 'GA', X.MONEY.US, {trade:15000});
+  assert.ok(o.lines.some(l => /Title Ad Valorem/.test(l.k)), 'Georgia names its TAVT');
+});
+
+test('US local tax: a picked city or county replaces the state average with the official combined rate', () => {
+  const { X, DATA } = core();
+  const L = load('data/us_local.json');
+  const floor = {CA: 7.25, NY: 4};
+  for (const [st, T] of Object.entries(L)) {
+    if (st === '_') continue;
+    assert.match(T.asof, /^\d{4}-\d{2}-\d{2}$/); assert.ok(/^https:\/\//.test(T.src[0]) && T.src[1], `${st} cites its table`);
+    assert.equal(new Set(T.places.map(p => p[0])).size, T.places.length, `${st}: labels are unique`);
+    for (const [name, rate] of T.places) assert.ok(rate >= floor[st] && rate <= 12, `${st} ${name}: ${rate}%`);
+  }
+  const rav = DATA.US.find(x => x.make === 'Toyota' && x.model === 'RAV4');
+  const tax = (st, loc) => { const o = X.breakdown('US', rav, rav.price, st, X.MONEY.US, {loc}); return {o, line: o.lines.find(l => /tax/i.test(l.k) && /\$/.test(l.v))}; };
+  const la = tax('CA', 'Los Angeles (Los Angeles County)'), ca = tax('CA', ''), bad = tax('CA', 'Atlantis');
+  assert.ok(la.o.hi > ca.o.hi, 'Los Angeles (10.25%) costs more than the 8.75% state average');
+  assert.equal(bad.o.hi, ca.o.hi, 'an unknown place falls back to the state average');
+  assert.match(la.line.sub, /10\.25% state and local rate/);
+  const nyc = tax('NY', 'Brooklyn (Kings), New York City');
+  assert.ok(Math.abs((nyc.o.hi - tax('NY', '').o.hi) - (nyc.o.dhi * (0.08875 - 0.085))) < 1, 'Brooklyn at 8.875%');
+});
+
+test('DC titling excise follows the 2025 weight-and-mpg table, and EVs are no longer exempt', () => {
+  const { X, DATA } = core();
+  const ev = DATA.US.find(x => x.fuel === 'EV' && x.body === 'SUV' && x.size === 'Midsize');
+  const o = X.breakdown('US', ev, ev.price, 'DC', X.MONEY.US);
+  const line = o.lines.find(l => /excise/i.test(l.k));
+  assert.ok(line && /^\$[\d,]+/.test(line.v) && !/\$0 /.test(line.v), `a mid-size electric SUV pays DC excise: ${line && line.v}`);
+  assert.match(line.sub, /2\.?0?% for this mid-weight EV/);
 });
 
 test('mpg and miles companions: every non-US efficiency string carries a US-unit equivalent', () => {

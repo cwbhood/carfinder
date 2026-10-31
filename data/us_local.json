@@ -1,0 +1,2511 @@
+{
+"_": "Local (state + county + city + district) sales tax rates for states where the rate on a vehicle depends on where the buyer lives and registers it. One table per state, copied from the state's own publication on the date shown and checksummed against it. places: [label, combined rate %]. A state with no table here uses the average rate in data/states_us.json.",
+"CA": {
+"asof": "2026-10-01",
+"src": [
+"https://www.cdtfa.ca.gov/taxes-and-fees/rates.aspx",
+"CDTFA, California City and County Sales and Use Tax Rates (effective 1 October 2026)"
+],
+"basis": "district taxes on a vehicle follow the address where it is registered, not where the dealer is",
+"places": [
+[
+"Adelanto (San Bernardino County)",
+7.75
+],
+[
+"Agoura Hills (Los Angeles County)",
+10.25
+],
+[
+"Alameda (Alameda County)",
+10.75
+],
+[
+"Alameda County, unincorporated area",
+10.25
+],
+[
+"Albany (Alameda County)",
+10.75
+],
+[
+"Alhambra (Los Angeles County)",
+11
+],
+[
+"Aliso Viejo (Orange County)",
+7.75
+],
+[
+"Alpine County, unincorporated area",
+7.25
+],
+[
+"Alturas (Modoc County)",
+7.25
+],
+[
+"Amador City (Amador County)",
+8
+],
+[
+"Amador County, unincorporated area",
+7.75
+],
+[
+"American Canyon (Napa County)",
+7.75
+],
+[
+"Anaheim (Orange County)",
+7.75
+],
+[
+"Anderson (Shasta County)",
+7.75
+],
+[
+"Angels Camp (Calaveras County)",
+8.75
+],
+[
+"Antioch (Contra Costa County)",
+9.75
+],
+[
+"Apple Valley (San Bernardino County)",
+8.75
+],
+[
+"Arcadia (Los Angeles County)",
+11
+],
+[
+"Arcata (Humboldt County)",
+10.25
+],
+[
+"Arroyo Grande (San Luis Obispo County)",
+8.75
+],
+[
+"Artesia (Los Angeles County)",
+11
+],
+[
+"Arvin (Kern County)",
+8.25
+],
+[
+"Atascadero (San Luis Obispo County)",
+8.75
+],
+[
+"Atherton (San Mateo County)",
+9.375
+],
+[
+"Atwater (Merced County)",
+8.75
+],
+[
+"Auburn (Placer County)",
+7.25
+],
+[
+"Avalon (Los Angeles County)",
+10.75
+],
+[
+"Avenal (Kings County)",
+8.25
+],
+[
+"Azusa (Los Angeles County)",
+11.25
+],
+[
+"Bakersfield (Kern County)",
+8.25
+],
+[
+"Baldwin Park (Los Angeles County)",
+11
+],
+[
+"Banning (Riverside County)",
+7.75
+],
+[
+"Barstow (San Bernardino County)",
+8.75
+],
+[
+"Beaumont (Riverside County)",
+7.75
+],
+[
+"Bell (Los Angeles County)",
+10.25
+],
+[
+"Bell Gardens (Los Angeles County)",
+11.25
+],
+[
+"Bellflower (Los Angeles County)",
+11
+],
+[
+"Belmont (San Mateo County)",
+9.875
+],
+[
+"Belvedere (Marin County)",
+8.25
+],
+[
+"Benicia (Solano County)",
+9.625
+],
+[
+"Berkeley (Alameda County)",
+10.25
+],
+[
+"Beverly Hills (Los Angeles County)",
+10.25
+],
+[
+"Big Bear Lake (San Bernardino County)",
+7.75
+],
+[
+"Biggs (Butte County)",
+8.25
+],
+[
+"Bishop (Inyo County)",
+8.75
+],
+[
+"Blue Lake (Humboldt County)",
+9.75
+],
+[
+"Blythe (Riverside County)",
+8.75
+],
+[
+"Bradbury (Los Angeles County)",
+10.25
+],
+[
+"Brawley (Imperial County)",
+8.75
+],
+[
+"Brea (Orange County)",
+7.75
+],
+[
+"Brentwood (Contra Costa County)",
+8.75
+],
+[
+"Brisbane (San Mateo County)",
+9.875
+],
+[
+"Buellton (Santa Barbara County)",
+7.75
+],
+[
+"Buena Park (Orange County)",
+8.75
+],
+[
+"Burbank (Los Angeles County)",
+11
+],
+[
+"Burlingame (San Mateo County)",
+9.625
+],
+[
+"Butte County, unincorporated area",
+8.25
+],
+[
+"Calabasas (Los Angeles County)",
+11.25
+],
+[
+"Calaveras County, unincorporated area",
+8.25
+],
+[
+"Calexico (Imperial County)",
+8.25
+],
+[
+"California City (Kern County)",
+8.25
+],
+[
+"Calimesa (Riverside County)",
+7.75
+],
+[
+"Calipatria (Imperial County)",
+7.75
+],
+[
+"Calistoga (Napa County)",
+7.75
+],
+[
+"Camarillo (Ventura County)",
+7.25
+],
+[
+"Campbell (Santa Clara County)",
+10.5
+],
+[
+"Canyon Lake (Riverside County)",
+7.75
+],
+[
+"Capitola (Santa Cruz County)",
+9.25
+],
+[
+"Carlsbad (San Diego County)",
+7.75
+],
+[
+"Carmel-by-the-Sea (Monterey County)",
+9.25
+],
+[
+"Carpinteria (Santa Barbara County)",
+9
+],
+[
+"Carson (Los Angeles County)",
+11
+],
+[
+"Cathedral City (Riverside County)",
+9.25
+],
+[
+"Ceres (Stanislaus County)",
+8.375
+],
+[
+"Cerritos (Los Angeles County)",
+10.25
+],
+[
+"Chico (Butte County)",
+9.25
+],
+[
+"Chino (San Bernardino County)",
+8.75
+],
+[
+"Chino Hills (San Bernardino County)",
+7.75
+],
+[
+"Chowchilla (Madera County)",
+8.75
+],
+[
+"Chula Vista (San Diego County)",
+8.75
+],
+[
+"Citrus Heights (Sacramento County)",
+7.75
+],
+[
+"City of Commerce (Los Angeles County)",
+11.25
+],
+[
+"City of Industry (Los Angeles County)",
+10.25
+],
+[
+"Claremont (Los Angeles County)",
+10.25
+],
+[
+"Clayton (Contra Costa County)",
+8.75
+],
+[
+"Clearlake (Lake County)",
+8.75
+],
+[
+"Cloverdale (Sonoma County)",
+10
+],
+[
+"Clovis (Fresno County)",
+8.975
+],
+[
+"Coachella (Riverside County)",
+8.75
+],
+[
+"Coalinga (Fresno County)",
+8.975
+],
+[
+"Colfax (Placer County)",
+7.25
+],
+[
+"Colma (San Mateo County)",
+9.875
+],
+[
+"Colton (San Bernardino County)",
+8.75
+],
+[
+"Colusa (Colusa County)",
+8.75
+],
+[
+"Colusa County, unincorporated area",
+7.75
+],
+[
+"Compton (Los Angeles County)",
+11.25
+],
+[
+"Concord (Contra Costa County)",
+9.75
+],
+[
+"Contra Costa County, unincorporated area",
+8.75
+],
+[
+"Corcoran (Kings County)",
+8.25
+],
+[
+"Corning (Tehama County)",
+7.75
+],
+[
+"Corona (Riverside County)",
+8.75
+],
+[
+"Coronado (San Diego County)",
+7.75
+],
+[
+"Corte Madera (Marin County)",
+9
+],
+[
+"Costa Mesa (Orange County)",
+7.75
+],
+[
+"Cotati (Sonoma County)",
+10.25
+],
+[
+"Covina (Los Angeles County)",
+11.25
+],
+[
+"Crescent City (Del Norte County)",
+8.25
+],
+[
+"Cudahy (Los Angeles County)",
+11
+],
+[
+"Culver City (Los Angeles County)",
+11.25
+],
+[
+"Cupertino (Santa Clara County)",
+9.75
+],
+[
+"Cypress (Orange County)",
+7.75
+],
+[
+"Daly City (San Mateo County)",
+9.875
+],
+[
+"Dana Point (Orange County)",
+7.75
+],
+[
+"Danville (Contra Costa County)",
+8.75
+],
+[
+"Davis (Yolo County)",
+9.25
+],
+[
+"Del Mar (San Diego County)",
+8.75
+],
+[
+"Del Norte County, unincorporated area",
+8.25
+],
+[
+"Del Rey Oaks (Monterey County)",
+9.25
+],
+[
+"Delano (Kern County)",
+8.25
+],
+[
+"Desert Hot Springs (Riverside County)",
+8.75
+],
+[
+"Diamond Bar (Los Angeles County)",
+10.25
+],
+[
+"Dinuba (Tulare County)",
+8.5
+],
+[
+"Dixon (Solano County)",
+8.375
+],
+[
+"Dorris (Siskiyou County)",
+7.25
+],
+[
+"Dos Palos (Merced County)",
+8.25
+],
+[
+"Downey (Los Angeles County)",
+11
+],
+[
+"Duarte (Los Angeles County)",
+11
+],
+[
+"Dublin (Alameda County)",
+10.25
+],
+[
+"Dunsmuir (Siskiyou County)",
+8.25
+],
+[
+"East Palo Alto (San Mateo County)",
+9.875
+],
+[
+"Eastvale (Riverside County)",
+7.75
+],
+[
+"El Cajon (San Diego County)",
+8.25
+],
+[
+"El Centro (Imperial County)",
+8.25
+],
+[
+"El Cerrito (Contra Costa County)",
+10.25
+],
+[
+"El Dorado County, unincorporated area",
+7.25
+],
+[
+"El Monte (Los Angeles County)",
+11
+],
+[
+"El Segundo (Los Angeles County)",
+10.75
+],
+[
+"Elk Grove (Sacramento County)",
+8.75
+],
+[
+"Emeryville (Alameda County)",
+10.5
+],
+[
+"Encinitas (San Diego County)",
+7.75
+],
+[
+"Escalon (San Joaquin County)",
+8.75
+],
+[
+"Escondido (San Diego County)",
+8.75
+],
+[
+"Etna (Siskiyou County)",
+7.25
+],
+[
+"Eureka (Humboldt County)",
+10.25
+],
+[
+"Exeter (Tulare County)",
+8.75
+],
+[
+"Fairfax (Marin County)",
+9
+],
+[
+"Fairfield (Solano County)",
+8.375
+],
+[
+"Farmersville (Tulare County)",
+8.75
+],
+[
+"Ferndale (Humboldt County)",
+9.5
+],
+[
+"Fillmore (Ventura County)",
+7.25
+],
+[
+"Firebaugh (Fresno County)",
+7.975
+],
+[
+"Folsom (Sacramento County)",
+7.75
+],
+[
+"Fontana (San Bernardino County)",
+8.75
+],
+[
+"Fort Bragg (Mendocino County)",
+9.25
+],
+[
+"Fort Jones (Siskiyou County)",
+7.25
+],
+[
+"Fortuna (Humboldt County)",
+9.5
+],
+[
+"Foster City (San Mateo County)",
+9.375
+],
+[
+"Fountain Valley (Orange County)",
+8.75
+],
+[
+"Fowler (Fresno County)",
+8.975
+],
+[
+"Fremont (Alameda County)",
+10.25
+],
+[
+"Fresno (Fresno County)",
+8.35
+],
+[
+"Fresno County, unincorporated area",
+7.975
+],
+[
+"Fullerton (Orange County)",
+7.75
+],
+[
+"Galt (Sacramento County)",
+9.25
+],
+[
+"Garden Grove (Orange County)",
+8.75
+],
+[
+"Gardena (Los Angeles County)",
+11.25
+],
+[
+"Gilroy (Santa Clara County)",
+9.75
+],
+[
+"Glendale (Los Angeles County)",
+11
+],
+[
+"Glendora (Los Angeles County)",
+11.25
+],
+[
+"Glenn County, unincorporated area",
+7.25
+],
+[
+"Goleta (Santa Barbara County)",
+8.75
+],
+[
+"Gonzales (Monterey County)",
+8.75
+],
+[
+"Grand Terrace (San Bernardino County)",
+7.75
+],
+[
+"Grass Valley (Nevada County)",
+8.875
+],
+[
+"Greenfield (Monterey County)",
+9.5
+],
+[
+"Gridley (Butte County)",
+8.25
+],
+[
+"Grover Beach (San Luis Obispo County)",
+8.75
+],
+[
+"Guadalupe (Santa Barbara County)",
+8.75
+],
+[
+"Gustine (Merced County)",
+8.25
+],
+[
+"Half Moon Bay (San Mateo County)",
+9.875
+],
+[
+"Hanford (Kings County)",
+8.25
+],
+[
+"Hawaiian Gardens (Los Angeles County)",
+11
+],
+[
+"Hawthorne (Los Angeles County)",
+11
+],
+[
+"Hayward (Alameda County)",
+10.75
+],
+[
+"Healdsburg (Sonoma County)",
+9.75
+],
+[
+"Hemet (Riverside County)",
+8.75
+],
+[
+"Hercules (Contra Costa County)",
+9.25
+],
+[
+"Hermosa Beach (Los Angeles County)",
+10.25
+],
+[
+"Hesperia (San Bernardino County)",
+7.75
+],
+[
+"Hidden Hills (Los Angeles County)",
+10.25
+],
+[
+"Highland (San Bernardino County)",
+7.75
+],
+[
+"Hillsborough (San Mateo County)",
+9.375
+],
+[
+"Hollister (San Benito County)",
+9.25
+],
+[
+"Holtville (Imperial County)",
+7.75
+],
+[
+"Hughson (Stanislaus County)",
+7.875
+],
+[
+"Humboldt County, unincorporated area",
+8.75
+],
+[
+"Huntington Beach (Orange County)",
+7.75
+],
+[
+"Huntington Park (Los Angeles County)",
+11
+],
+[
+"Huron (Fresno County)",
+8.975
+],
+[
+"Imperial (Imperial County)",
+7.75
+],
+[
+"Imperial Beach (San Diego County)",
+8.75
+],
+[
+"Imperial County, unincorporated area",
+7.75
+],
+[
+"Indian Wells (Riverside County)",
+7.75
+],
+[
+"Indio (Riverside County)",
+8.75
+],
+[
+"Inglewood (Los Angeles County)",
+10.75
+],
+[
+"Inyo County, unincorporated area",
+7.75
+],
+[
+"Ione (Amador County)",
+7.75
+],
+[
+"Irvine (Orange County)",
+7.75
+],
+[
+"Irwindale (Los Angeles County)",
+11.25
+],
+[
+"Isleton (Sacramento County)",
+8.75
+],
+[
+"Jackson (Amador County)",
+7.75
+],
+[
+"Jurupa Valley (Riverside County)",
+7.75
+],
+[
+"Kerman (Fresno County)",
+8.975
+],
+[
+"Kern County, unincorporated area",
+8.25
+],
+[
+"King City (Monterey County)",
+8.75
+],
+[
+"Kings County, unincorporated area",
+7.25
+],
+[
+"Kingsburg (Fresno County)",
+8.975
+],
+[
+"La Cañada Flintridge (Los Angeles County)",
+11
+],
+[
+"La Habra (Orange County)",
+8.75
+],
+[
+"La Habra Heights (Los Angeles County)",
+10.25
+],
+[
+"La Mesa (San Diego County)",
+8.5
+],
+[
+"La Mirada (Los Angeles County)",
+10.25
+],
+[
+"La Palma (Orange County)",
+8.75
+],
+[
+"La Puente (Los Angeles County)",
+10.75
+],
+[
+"La Quinta (Riverside County)",
+8.75
+],
+[
+"La Verne (Los Angeles County)",
+11
+],
+[
+"Lafayette (Contra Costa County)",
+9.25
+],
+[
+"Laguna Beach (Orange County)",
+7.75
+],
+[
+"Laguna Hills (Orange County)",
+7.75
+],
+[
+"Laguna Niguel (Orange County)",
+7.75
+],
+[
+"Laguna Woods (Orange County)",
+7.75
+],
+[
+"Lake County, unincorporated area",
+7.25
+],
+[
+"Lake Elsinore (Riverside County)",
+8.75
+],
+[
+"Lake Forest (Orange County)",
+7.75
+],
+[
+"Lakeport (Lake County)",
+8.75
+],
+[
+"Lakewood (Los Angeles County)",
+11
+],
+[
+"Lancaster (Los Angeles County)",
+11.75
+],
+[
+"Larkspur (Marin County)",
+9.25
+],
+[
+"Lassen County, unincorporated area",
+7.25
+],
+[
+"Lathrop (San Joaquin County)",
+8.75
+],
+[
+"Lawndale (Los Angeles County)",
+11
+],
+[
+"Lemon Grove (San Diego County)",
+8.75
+],
+[
+"Lemoore (Kings County)",
+8.25
+],
+[
+"Lincoln (Placer County)",
+7.25
+],
+[
+"Lindsay (Tulare County)",
+8.75
+],
+[
+"Live Oak (Sutter County)",
+7.25
+],
+[
+"Livermore (Alameda County)",
+10.25
+],
+[
+"Livingston (Merced County)",
+8.75
+],
+[
+"Lodi (San Joaquin County)",
+8.25
+],
+[
+"Loma Linda (San Bernardino County)",
+7.75
+],
+[
+"Lomita (Los Angeles County)",
+11
+],
+[
+"Lompoc (Santa Barbara County)",
+8.75
+],
+[
+"Long Beach (Los Angeles County)",
+11
+],
+[
+"Loomis (Placer County)",
+7.5
+],
+[
+"Los Alamitos (Orange County)",
+9.25
+],
+[
+"Los Altos (Santa Clara County)",
+9.75
+],
+[
+"Los Altos Hills (Santa Clara County)",
+9.75
+],
+[
+"Los Angeles (Los Angeles County)",
+10.25
+],
+[
+"Los Angeles County, unincorporated area",
+10.25
+],
+[
+"Los Banos (Merced County)",
+8.75
+],
+[
+"Los Gatos (Santa Clara County)",
+9.875
+],
+[
+"Loyalton (Sierra County)",
+7.25
+],
+[
+"Lynwood (Los Angeles County)",
+11.25
+],
+[
+"Madera (Madera County)",
+8.25
+],
+[
+"Madera County, unincorporated area",
+7.75
+],
+[
+"Malibu (Los Angeles County)",
+10.75
+],
+[
+"Mammoth Lakes (Mono County)",
+7.75
+],
+[
+"Manhattan Beach (Los Angeles County)",
+10.75
+],
+[
+"Manteca (San Joaquin County)",
+9
+],
+[
+"Maricopa (Kern County)",
+8.25
+],
+[
+"Marin County, unincorporated area",
+8.25
+],
+[
+"Marina (Monterey County)",
+9.25
+],
+[
+"Mariposa County, unincorporated area",
+8.25
+],
+[
+"Martinez (Contra Costa County)",
+9.75
+],
+[
+"Marysville (Yuba County)",
+8.25
+],
+[
+"Maywood (Los Angeles County)",
+10.25
+],
+[
+"McFarland (Kern County)",
+9.25
+],
+[
+"Mendocino County, unincorporated area",
+7.875
+],
+[
+"Mendota (Fresno County)",
+9.225
+],
+[
+"Menifee (Riverside County)",
+8.75
+],
+[
+"Menlo Park (San Mateo County)",
+9.375
+],
+[
+"Merced (Merced County)",
+8.25
+],
+[
+"Merced County, unincorporated area",
+7.75
+],
+[
+"Mill Valley (Marin County)",
+9.25
+],
+[
+"Millbrae (San Mateo County)",
+9.375
+],
+[
+"Milpitas (Santa Clara County)",
+10
+],
+[
+"Mission Viejo (Orange County)",
+7.75
+],
+[
+"Modesto (Stanislaus County)",
+8.875
+],
+[
+"Modoc County, unincorporated area",
+7.25
+],
+[
+"Mono County, unincorporated area",
+7.25
+],
+[
+"Monrovia (Los Angeles County)",
+11
+],
+[
+"Montague (Siskiyou County)",
+7.25
+],
+[
+"Montclair (San Bernardino County)",
+9
+],
+[
+"Monte Sereno (Santa Clara County)",
+9.75
+],
+[
+"Montebello (Los Angeles County)",
+11
+],
+[
+"Monterey (Monterey County)",
+9.25
+],
+[
+"Monterey County, unincorporated area",
+8.75
+],
+[
+"Monterey Park (Los Angeles County)",
+11
+],
+[
+"Moorpark (Ventura County)",
+7.25
+],
+[
+"Moraga (Contra Costa County)",
+9.75
+],
+[
+"Moreno Valley (Riverside County)",
+8.75
+],
+[
+"Morgan Hill (Santa Clara County)",
+9.75
+],
+[
+"Morro Bay (San Luis Obispo County)",
+8.75
+],
+[
+"Mount Shasta (Siskiyou County)",
+7.5
+],
+[
+"Mountain House (San Joaquin County)",
+7.75
+],
+[
+"Mountain View (Santa Clara County)",
+9.75
+],
+[
+"Murrieta (Riverside County)",
+8.75
+],
+[
+"Napa (Napa County)",
+8.75
+],
+[
+"Napa County, unincorporated area",
+7.75
+],
+[
+"National City (San Diego County)",
+8.75
+],
+[
+"Needles (San Bernardino County)",
+7.75
+],
+[
+"Nevada City (Nevada County)",
+8.875
+],
+[
+"Nevada County, unincorporated area",
+7.5
+],
+[
+"Newark (Alameda County)",
+10.75
+],
+[
+"Newman (Stanislaus County)",
+7.875
+],
+[
+"Newport Beach (Orange County)",
+7.75
+],
+[
+"Norco (Riverside County)",
+8.75
+],
+[
+"Norwalk (Los Angeles County)",
+11
+],
+[
+"Novato (Marin County)",
+9.25
+],
+[
+"Oakdale (Stanislaus County)",
+8.375
+],
+[
+"Oakland (Alameda County)",
+10.75
+],
+[
+"Oakley (Contra Costa County)",
+8.75
+],
+[
+"Oceanside (San Diego County)",
+8.25
+],
+[
+"Ojai (Ventura County)",
+7.25
+],
+[
+"Ontario (San Bernardino County)",
+8.75
+],
+[
+"Orange (Orange County)",
+7.75
+],
+[
+"Orange County, unincorporated area",
+7.75
+],
+[
+"Orange Cove (Fresno County)",
+7.975
+],
+[
+"Orinda (Contra Costa County)",
+9.75
+],
+[
+"Orland (Glenn County)",
+8.25
+],
+[
+"Oroville (Butte County)",
+9.25
+],
+[
+"Oxnard (Ventura County)",
+9.25
+],
+[
+"Pacific Grove (Monterey County)",
+9.25
+],
+[
+"Pacifica (San Mateo County)",
+9.875
+],
+[
+"Palm Desert (Riverside County)",
+8.75
+],
+[
+"Palm Springs (Riverside County)",
+9.25
+],
+[
+"Palmdale (Los Angeles County)",
+11.75
+],
+[
+"Palo Alto (Santa Clara County)",
+9.75
+],
+[
+"Palos Verdes Estates (Los Angeles County)",
+10.25
+],
+[
+"Paradise (Butte County)",
+8.75
+],
+[
+"Paramount (Los Angeles County)",
+11
+],
+[
+"Parlier (Fresno County)",
+8.975
+],
+[
+"Pasadena (Los Angeles County)",
+11
+],
+[
+"Paso Robles (San Luis Obispo County)",
+8.75
+],
+[
+"Patterson (Stanislaus County)",
+7.875
+],
+[
+"Perris (Riverside County)",
+8.75
+],
+[
+"Petaluma (Sonoma County)",
+10.25
+],
+[
+"Pico Rivera (Los Angeles County)",
+11.25
+],
+[
+"Piedmont (Alameda County)",
+10.25
+],
+[
+"Pinole (Contra Costa County)",
+10.25
+],
+[
+"Pismo Beach (San Luis Obispo County)",
+8.25
+],
+[
+"Pittsburg (Contra Costa County)",
+9.25
+],
+[
+"Placentia (Orange County)",
+8.75
+],
+[
+"Placer County, unincorporated area",
+7.25
+],
+[
+"Placerville (El Dorado County)",
+8.25
+],
+[
+"Pleasant Hill (Contra Costa County)",
+9.25
+],
+[
+"Pleasanton (Alameda County)",
+10.25
+],
+[
+"Plumas County, unincorporated area",
+7.25
+],
+[
+"Plymouth (Amador County)",
+7.75
+],
+[
+"Point Arena (Mendocino County)",
+9.25
+],
+[
+"Pomona (Los Angeles County)",
+11
+],
+[
+"Port Hueneme (Ventura County)",
+8.75
+],
+[
+"Porterville (Tulare County)",
+9.25
+],
+[
+"Portola (Plumas County)",
+7.25
+],
+[
+"Portola Valley (San Mateo County)",
+9.375
+],
+[
+"Poway (San Diego County)",
+7.75
+],
+[
+"Rancho Cordova (Sacramento County)",
+8.75
+],
+[
+"Rancho Cucamonga (San Bernardino County)",
+7.75
+],
+[
+"Rancho Mirage (Riverside County)",
+7.75
+],
+[
+"Rancho Palos Verdes (Los Angeles County)",
+10.25
+],
+[
+"Rancho Santa Margarita (Orange County)",
+7.75
+],
+[
+"Red Bluff (Tehama County)",
+8.5
+],
+[
+"Redding (Shasta County)",
+7.25
+],
+[
+"Redlands (San Bernardino County)",
+8.75
+],
+[
+"Redondo Beach (Los Angeles County)",
+10.25
+],
+[
+"Redwood City (San Mateo County)",
+9.875
+],
+[
+"Reedley (Fresno County)",
+9.225
+],
+[
+"Rialto (San Bernardino County)",
+7.75
+],
+[
+"Richmond (Contra Costa County)",
+9.75
+],
+[
+"Ridgecrest (Kern County)",
+9.25
+],
+[
+"Rio Dell (Humboldt County)",
+9.5
+],
+[
+"Rio Vista (Solano County)",
+9.125
+],
+[
+"Ripon (San Joaquin County)",
+7.75
+],
+[
+"Riverbank (Stanislaus County)",
+7.875
+],
+[
+"Riverside (Riverside County)",
+8.75
+],
+[
+"Riverside County, unincorporated area",
+7.75
+],
+[
+"Rocklin (Placer County)",
+7.25
+],
+[
+"Rohnert Park (Sonoma County)",
+9.75
+],
+[
+"Rolling Hills (Los Angeles County)",
+10.25
+],
+[
+"Rolling Hills Estates (Los Angeles County)",
+10.25
+],
+[
+"Rosemead (Los Angeles County)",
+10.25
+],
+[
+"Roseville (Placer County)",
+7.75
+],
+[
+"Ross (Marin County)",
+8.25
+],
+[
+"Sacramento (Sacramento County)",
+8.75
+],
+[
+"Sacramento County, unincorporated area",
+7.75
+],
+[
+"Salinas (Monterey County)",
+9.25
+],
+[
+"San Anselmo (Marin County)",
+9.25
+],
+[
+"San Benito County, unincorporated area",
+8.25
+],
+[
+"San Bernardino (San Bernardino County)",
+8.75
+],
+[
+"San Bernardino County, unincorporated area",
+7.75
+],
+[
+"San Bruno (San Mateo County)",
+9.875
+],
+[
+"San Carlos (San Mateo County)",
+9.375
+],
+[
+"San Clemente (Orange County)",
+7.75
+],
+[
+"San Diego (San Diego County)",
+7.75
+],
+[
+"San Diego County, unincorporated area",
+7.75
+],
+[
+"San Dimas (Los Angeles County)",
+10.25
+],
+[
+"San Fernando (Los Angeles County)",
+11
+],
+[
+"San Francisco (San Francisco County)",
+8.625
+],
+[
+"San Francisco County, unincorporated area",
+8.625
+],
+[
+"San Gabriel (Los Angeles County)",
+11
+],
+[
+"San Jacinto (Riverside County)",
+8.75
+],
+[
+"San Joaquin (Fresno County)",
+7.975
+],
+[
+"San Joaquin County, unincorporated area",
+7.75
+],
+[
+"San Jose (Santa Clara County)",
+10
+],
+[
+"San Juan Bautista (San Benito County)",
+9
+],
+[
+"San Juan Capistrano (Orange County)",
+7.75
+],
+[
+"San Leandro (Alameda County)",
+10.75
+],
+[
+"San Luis Obispo (San Luis Obispo County)",
+8.75
+],
+[
+"San Luis Obispo County, unincorporated area",
+7.25
+],
+[
+"San Marcos (San Diego County)",
+8.75
+],
+[
+"San Marino (Los Angeles County)",
+11.25
+],
+[
+"San Mateo (San Mateo County)",
+9.625
+],
+[
+"San Mateo County, unincorporated area",
+9.375
+],
+[
+"San Pablo (Contra Costa County)",
+9.5
+],
+[
+"San Rafael (Marin County)",
+9.25
+],
+[
+"San Ramon (Contra Costa County)",
+9.75
+],
+[
+"Sand City (Monterey County)",
+9.25
+],
+[
+"Sanger (Fresno County)",
+8.725
+],
+[
+"Santa Ana (Orange County)",
+9.25
+],
+[
+"Santa Barbara (Santa Barbara County)",
+9.25
+],
+[
+"Santa Barbara County, unincorporated area",
+7.75
+],
+[
+"Santa Clara (Santa Clara County)",
+9.75
+],
+[
+"Santa Clara County, unincorporated area",
+9.75
+],
+[
+"Santa Clarita (Los Angeles County)",
+10.25
+],
+[
+"Santa Cruz (Santa Cruz County)",
+9.75
+],
+[
+"Santa Cruz County, unincorporated area",
+9.5
+],
+[
+"Santa Fe Springs (Los Angeles County)",
+11.5
+],
+[
+"Santa Maria (Santa Barbara County)",
+8.75
+],
+[
+"Santa Monica (Los Angeles County)",
+11.25
+],
+[
+"Santa Paula (Ventura County)",
+9.25
+],
+[
+"Santa Rosa (Sonoma County)",
+10
+],
+[
+"Santee (San Diego County)",
+7.75
+],
+[
+"Saratoga (Santa Clara County)",
+9.75
+],
+[
+"Sausalito (Marin County)",
+9.25
+],
+[
+"Scotts Valley (Santa Cruz County)",
+9.75
+],
+[
+"Seal Beach (Orange County)",
+9.25
+],
+[
+"Seaside (Monterey County)",
+9.25
+],
+[
+"Sebastopol (Sonoma County)",
+10.5
+],
+[
+"Selma (Fresno County)",
+8.475
+],
+[
+"Shafter (Kern County)",
+7.25
+],
+[
+"Shasta County, unincorporated area",
+7.25
+],
+[
+"Shasta Lake (Shasta County)",
+7.25
+],
+[
+"Sierra County, unincorporated area",
+7.25
+],
+[
+"Sierra Madre (Los Angeles County)",
+11
+],
+[
+"Signal Hill (Los Angeles County)",
+11
+],
+[
+"Simi Valley (Ventura County)",
+7.25
+],
+[
+"Siskiyou County, unincorporated area",
+7.25
+],
+[
+"Solana Beach (San Diego County)",
+8.75
+],
+[
+"Solano County, unincorporated area",
+7.375
+],
+[
+"Soledad (Monterey County)",
+9.25
+],
+[
+"Solvang (Santa Barbara County)",
+8.75
+],
+[
+"Sonoma (Sonoma County)",
+10.25
+],
+[
+"Sonoma County, unincorporated area",
+9.25
+],
+[
+"Sonora (Tuolumne County)",
+8.75
+],
+[
+"South El Monte (Los Angeles County)",
+11.25
+],
+[
+"South Gate (Los Angeles County)",
+11.25
+],
+[
+"South Lake Tahoe (El Dorado County)",
+8.75
+],
+[
+"South Pasadena (Los Angeles County)",
+11
+],
+[
+"South San Francisco (San Mateo County)",
+9.875
+],
+[
+"St. Helena (Napa County)",
+8.25
+],
+[
+"Stanislaus County, unincorporated area",
+7.875
+],
+[
+"Stanton (Orange County)",
+8.75
+],
+[
+"Stockton (San Joaquin County)",
+9
+],
+[
+"Suisun City (Solano County)",
+9.125
+],
+[
+"Sunnyvale (Santa Clara County)",
+9.75
+],
+[
+"Susanville (Lassen County)",
+8.25
+],
+[
+"Sutter County, unincorporated area",
+7.25
+],
+[
+"Sutter Creek (Amador County)",
+8.75
+],
+[
+"Taft (Kern County)",
+8.25
+],
+[
+"Tehachapi (Kern County)",
+8.25
+],
+[
+"Tehama (Tehama County)",
+7.25
+],
+[
+"Tehama County, unincorporated area",
+7.25
+],
+[
+"Temecula (Riverside County)",
+8.75
+],
+[
+"Temple City (Los Angeles County)",
+11
+],
+[
+"Thousand Oaks (Ventura County)",
+7.25
+],
+[
+"Tiburon (Marin County)",
+8.25
+],
+[
+"Torrance (Los Angeles County)",
+10.75
+],
+[
+"Tracy (San Joaquin County)",
+8.25
+],
+[
+"Trinidad (Humboldt County)",
+9.5
+],
+[
+"Trinity County, unincorporated area",
+7.25
+],
+[
+"Truckee (Nevada County)",
+9
+],
+[
+"Tulare (Tulare County)",
+8.25
+],
+[
+"Tulare County, unincorporated area",
+7.75
+],
+[
+"Tulelake (Siskiyou County)",
+7.25
+],
+[
+"Tuolumne County, unincorporated area",
+7.25
+],
+[
+"Turlock (Stanislaus County)",
+8.625
+],
+[
+"Tustin (Orange County)",
+7.75
+],
+[
+"Twentynine Palms (San Bernardino County)",
+7.75
+],
+[
+"Ukiah (Mendocino County)",
+8.875
+],
+[
+"Union City (Alameda County)",
+10.75
+],
+[
+"Upland (San Bernardino County)",
+7.75
+],
+[
+"Vacaville (Solano County)",
+8.125
+],
+[
+"Vallejo (Solano County)",
+9.25
+],
+[
+"Ventura (Ventura County)",
+7.75
+],
+[
+"Ventura County, unincorporated area",
+7.25
+],
+[
+"Vernon (Los Angeles County)",
+11
+],
+[
+"Victorville (San Bernardino County)",
+8.75
+],
+[
+"Villa Park (Orange County)",
+7.75
+],
+[
+"Visalia (Tulare County)",
+8.5
+],
+[
+"Vista (San Diego County)",
+8.25
+],
+[
+"Walnut (Los Angeles County)",
+10.25
+],
+[
+"Walnut Creek (Contra Costa County)",
+9.25
+],
+[
+"Wasco (Kern County)",
+8.25
+],
+[
+"Waterford (Stanislaus County)",
+7.875
+],
+[
+"Watsonville (Santa Cruz County)",
+9.75
+],
+[
+"Weed (Siskiyou County)",
+7.5
+],
+[
+"West Covina (Los Angeles County)",
+10.25
+],
+[
+"West Hollywood (Los Angeles County)",
+11
+],
+[
+"West Sacramento (Yolo County)",
+9.25
+],
+[
+"Westlake Village (Los Angeles County)",
+10.25
+],
+[
+"Westminster (Orange County)",
+9.25
+],
+[
+"Westmorland (Imperial County)",
+7.75
+],
+[
+"Wheatland (Yuba County)",
+7.75
+],
+[
+"Whittier (Los Angeles County)",
+11
+],
+[
+"Wildomar (Riverside County)",
+8.75
+],
+[
+"Williams (Colusa County)",
+8.25
+],
+[
+"Willits (Mendocino County)",
+9.125
+],
+[
+"Willows (Glenn County)",
+8.75
+],
+[
+"Windsor (Sonoma County)",
+9.25
+],
+[
+"Winters (Yolo County)",
+8.25
+],
+[
+"Woodlake (Tulare County)",
+8.75
+],
+[
+"Woodland (Yolo County)",
+8
+],
+[
+"Woodside (San Mateo County)",
+9.375
+],
+[
+"Yolo County, unincorporated area",
+7.25
+],
+[
+"Yorba Linda (Orange County)",
+7.75
+],
+[
+"Yountville (Napa County)",
+7.75
+],
+[
+"Yreka (Siskiyou County)",
+8.75
+],
+[
+"Yuba City (Sutter County)",
+7.25
+],
+[
+"Yuba County, unincorporated area",
+8.25
+],
+[
+"Yucaipa (San Bernardino County)",
+8.75
+],
+[
+"Yucca Valley (San Bernardino County)",
+8.75
+]
+]
+},
+"NY": {
+"asof": "2025-03-01",
+"src": [
+"https://www.tax.ny.gov/pdf/publications/sales/pub718.pdf",
+"NY Department of Taxation and Finance, Publication 718 (effective 1 March 2025)"
+],
+"basis": "a vehicle is taxed at the rate where the buyer lives and registers it",
+"places": [
+[
+"Albany County (outside its cities)",
+8
+],
+[
+"Allegany County (outside its cities)",
+8.5
+],
+[
+"Auburn (city, Cayuga County)",
+8
+],
+[
+"Bronx, New York City",
+8.875
+],
+[
+"Brooklyn (Kings), New York City",
+8.875
+],
+[
+"Broome County (outside its cities)",
+8
+],
+[
+"Cattaraugus County (outside its cities)",
+8
+],
+[
+"Cayuga County (outside its cities)",
+8
+],
+[
+"Chautauqua County (outside its cities)",
+8
+],
+[
+"Chemung County (outside its cities)",
+8
+],
+[
+"Chenango County (outside its cities)",
+8
+],
+[
+"Clinton County (outside its cities)",
+8
+],
+[
+"Columbia County (outside its cities)",
+8
+],
+[
+"Cortland County (outside its cities)",
+8
+],
+[
+"Delaware County (outside its cities)",
+8
+],
+[
+"Dutchess County (outside its cities)",
+8.125
+],
+[
+"Erie County (outside its cities)",
+8.75
+],
+[
+"Essex County (outside its cities)",
+8
+],
+[
+"Franklin County (outside its cities)",
+8
+],
+[
+"Fulton County (outside its cities)",
+8
+],
+[
+"Genesee County (outside its cities)",
+8
+],
+[
+"Glens Falls (city, Warren County)",
+7
+],
+[
+"Gloversville (city, Fulton County)",
+8
+],
+[
+"Greene County (outside its cities)",
+8
+],
+[
+"Hamilton County (outside its cities)",
+8
+],
+[
+"Herkimer County (outside its cities)",
+8.25
+],
+[
+"Ithaca (city, Tompkins County)",
+8
+],
+[
+"Jefferson County (outside its cities)",
+8
+],
+[
+"Johnstown (city, Fulton County)",
+8
+],
+[
+"Lewis County (outside its cities)",
+8
+],
+[
+"Livingston County (outside its cities)",
+8
+],
+[
+"Madison County (outside its cities)",
+8
+],
+[
+"Manhattan (New York County), New York City",
+8.875
+],
+[
+"Monroe County (outside its cities)",
+8
+],
+[
+"Montgomery County (outside its cities)",
+8
+],
+[
+"Mount Vernon (city, Westchester County)",
+8.375
+],
+[
+"Nassau County (outside its cities)",
+8.625
+],
+[
+"New Rochelle (city, Westchester County)",
+8.375
+],
+[
+"New York City (any borough)",
+8.875
+],
+[
+"Niagara County (outside its cities)",
+8
+],
+[
+"Norwich (city, Chenango County)",
+8
+],
+[
+"Ogdensburg (city, St. Lawrence County)",
+8
+],
+[
+"Olean (city, Cattaraugus County)",
+8
+],
+[
+"Oneida (city, Madison County)",
+8
+],
+[
+"Oneida County (outside its cities)",
+8.75
+],
+[
+"Onondaga County (outside its cities)",
+8
+],
+[
+"Ontario County (outside its cities)",
+7.5
+],
+[
+"Orange County (outside its cities)",
+8.125
+],
+[
+"Orleans County (outside its cities)",
+8
+],
+[
+"Oswego (city, Oswego County)",
+8
+],
+[
+"Oswego County (outside its cities)",
+8
+],
+[
+"Otsego County (outside its cities)",
+8
+],
+[
+"Putnam County (outside its cities)",
+8.375
+],
+[
+"Queens, New York City",
+8.875
+],
+[
+"Rensselaer County (outside its cities)",
+8
+],
+[
+"Rockland County (outside its cities)",
+8.375
+],
+[
+"Rome (city, Oneida County)",
+8.75
+],
+[
+"Salamanca (city, Cattaraugus County)",
+8
+],
+[
+"Saratoga County (outside its cities)",
+7
+],
+[
+"Saratoga Springs (city, Saratoga County)",
+7
+],
+[
+"Schenectady County (outside its cities)",
+8
+],
+[
+"Schoharie County (outside its cities)",
+8
+],
+[
+"Schuyler County (outside its cities)",
+8
+],
+[
+"Seneca County (outside its cities)",
+8
+],
+[
+"St. Lawrence County (outside its cities)",
+8
+],
+[
+"Staten Island (Richmond), New York City",
+8.875
+],
+[
+"Steuben County (outside its cities)",
+8
+],
+[
+"Suffolk County (outside its cities)",
+8.75
+],
+[
+"Sullivan County (outside its cities)",
+8
+],
+[
+"Tioga County (outside its cities)",
+8
+],
+[
+"Tompkins County (outside its cities)",
+8
+],
+[
+"Ulster County (outside its cities)",
+8
+],
+[
+"Utica (city, Oneida County)",
+8.75
+],
+[
+"Warren County (outside its cities)",
+7
+],
+[
+"Washington County (outside its cities)",
+7
+],
+[
+"Wayne County (outside its cities)",
+8
+],
+[
+"Westchester County (outside its cities)",
+8.375
+],
+[
+"White Plains (city, Westchester County)",
+8.375
+],
+[
+"Wyoming County (outside its cities)",
+8
+],
+[
+"Yates County (outside its cities)",
+8
+],
+[
+"Yonkers (city, Westchester County)",
+8.875
+]
+]
+}
+}

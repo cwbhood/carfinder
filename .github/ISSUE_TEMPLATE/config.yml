@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How the numbers are calculated
+    url: https://destinjones.github.io/carfinder/methodology.html
+    about: The price basis, dealer bands, tax and fee tables, exchange rates and sources behind every figure.
+  - name: Data schema and tax notes
+    url: https://github.com/destinjones/carfinder/tree/main/docs
+    about: Row schemas, the pricing core, and the per-country research notes with their sources.

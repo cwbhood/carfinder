@@ -29,6 +29,25 @@ all 2,729 cars) inside the page. Screenshots land in `test/browser/_out/` (ignor
 
 Both run in CI (`.github/workflows/ci.yml`) on every push and pull request.
 
+## Site build (`test/build.test.mjs`)
+`node src/build.js --check` must agree with the committed `carfinder.html`, `methodology.html` and `sw.js`; the
+methodology page must have a section per country, a fee table per vertical per country, hundreds of source links and
+no template residue; the service worker must carry a version stamp and precache only files that exist; every page's
+local links must resolve.
+
+## Provenance (`test/verticals.test.mjs`)
+`data/sources.json` must have a compile date per vertical, an exchange-rate date and URL, a basis and sources per
+dataset with well-formed URLs, and `provenance()` must give every bike, boat and aircraft a source, a date, a status
+and (for estimates) a reason; more than 90% of rows must link to the maker's site.
+
+## Data quality (`test/quality.test.mjs`)
+`src/quality.js` measures the data (confirmed share, maker-link and build-and-price coverage, photo coverage, linked
+sources, state-row citations, duplicate brand keys, the dates) and the test holds every measure above its floor in
+`data/quality-floor.json`, checks that `docs/DATA-QUALITY.md` is the scorecard of the current data, that every
+citation, maker link and build-and-price link is an absolute http(s) URL, that every US and Indian state row has one,
+and that every rate date the data refers to (`fx.date`, `compiledAt`, `convertedAt`) has a rate table. Raise a floor
+when coverage improves; a build that lowers one is the regression the test exists to catch.
+
 ## What is not tested automatically
 Real quotes drift: incentives change monthly, fuel prices weekly, exchange rates daily. The known-quote assertions are
 deliberately wide bands. When a rate changes, update the function, the tax note and, if needed, the band in the test.
@@ -42,5 +61,9 @@ gal/h and nautical-mile companions
 on every non-US bike), and known quotes (a Grom in Texas, a Splendor in Delhi, a Classic 350 in Karnataka, a Sea-Doo
 Spark in Florida, a PCX125 in the UK, a Hunter 350 in Ontario). The browser checks also switch verticals: the data pass
 renders every card, breakdown, compare table and detail sheet of all four verticals, and `interact.py` checks the
-bike, boat and aircraft filters, chips, wizard, glossary, the length and range sliders and persistence of the
-vertical across a reload.
+bike, boat and aircraft filters, chips, wizard, glossary, the length and range sliders, persistence of the
+vertical across a reload, the provenance panel (build-and-price link, compile date, status, the state citation, the
+*not linked* badge, the 44 px report buttons and the copied report text), the data-as-of line with its version and
+estimate count, and permalinks (the hash follows the view, a fresh load of a permalink restores it, an in-place hash
+change switches the view, opening a sheet adds exactly one history entry, Back closes it without rebuilding the view,
+Forward reopens it, and typing rewrites the entry instead of adding to history).

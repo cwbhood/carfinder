@@ -41,6 +41,31 @@ data/*.json      cars, bikes, boats, aircraft, state  ─┘                    
 - **Persistence**: vertical, country, region per country, compare list per vertical and country, assumptions per
   vertical and country and the World-tab units, all in localStorage under `cf_*`, every read and write wrapped in
   try/catch.
+- **Permalinks** (`viewHash`, `syncHash`, `applyHash`): the whole view lives in the URL hash, `#v=air&cc=UK&r=GB&b=
+  Helicopter&rng=300&sort=perhp&cmp=…&d=…`: vertical, country, region or currency, World units, search, every filter
+  set, price range, seats, drive, sliders, sort, model years, launch and preliminary toggles, the comparison set and
+  the open sheet. Vehicles are named by a slug (`slugOf`: make-model, plus the country on the World tab and the year
+  for US leftovers and early arrivals). History hygiene is per trigger: `render()` (filters, typing, sort) rewrites
+  the current entry with `replaceState`; opening a sheet (`d=` detail, `co=1` compare) adds one with `pushState`
+  (`sheetOpened`), so Back closes it and Forward reopens it, and closing a sheet with its button or Escape goes
+  `history.back()` over the entry it added (`sheetClosed`) rather than leaving a dead one. `onHashChange` tells a
+  sheet-only change (the keys in `SHEET_KEYS`, which include the comparison set a sheet can edit) from a real one: the
+  first opens or closes the sheet in place, the second rebuilds the view from the hash (`applyHash`), as a pasted hash
+  on load does; the app's own `back()` is flagged (`OWN_BACK`) so a stale hash never re-applies over a view that has
+  moved on. The `?v=&cc=` query form still works. `shareLink()` copies the permalink or opens the share sheet on
+  phones; none of the history writes change the title or focus, so screen readers hear nothing from them.
+- **Provenance** (`provenance(c, cc)` and `regionSource(cc, code)` in the core, `provHTML` in the sheet,
+  `data/sources.json`): the compile date per vertical ("Compiled" is a dataset date; there are no per-row dates yet),
+  the dated exchange-rate tables (`FX_SRC`, `fxPerUsd(date)`, `fxMove(from, to, since)`: the World tab converts at
+  `fx.date` and flags how far a currency has moved since a dataset's `compiledAt` day; aircraft rows record the
+  `convertedAt` day they were converted on), per-dataset price sources with links (a null URL renders as a *not
+  linked* badge), the makers' build-and-price pages (`buildPrice["vt/CC"]`) or sites by brand and country, the
+  citation behind the region's tax rules (US and Indian state rows carry one), and the confirmed-or-estimate status
+  with its reason. `issueURL()` builds the prefilled "Wrong price? Tell us" issue link, `reportText()` the plain-text
+  version that "Copy the details" puts on the clipboard (and an "E-mail it" button uses when `sources.json` names a
+  `contact.email`); the masthead's `#asof` line shows the data-as-of date, the estimate count, the FX-moved flag on the
+  World tab and the app version (`APP_VERSION`, stamped by the build). `src/quality.js` measures all of this into
+  `docs/DATA-QUALITY.md` at build time and `test/quality.test.mjs` holds it above `data/quality-floor.json`.
 
 ## The pricing core
 Everything between `//<<core` and `//core>>` in `src/script.html` is DOM-free so the tests can run it in Node:
@@ -91,6 +116,26 @@ line on the detail sheet. Nothing is copied into the repository.
    on the 21-field schema, and a `VFEES[cc].moto` / `.boat` / `.air` entry in `data/vfees.json` (bands, basis, fee
    lines, glossary) plus the country's avgas and Jet-A prices in `VERT.air.fuel`; without a fee entry the car rules are
    used as a fallback.
+
+## Methodology page and the service worker
+`node src/build.js` also writes `methodology.html` through `src/methodology.js`: it evaluates the assembled script up
+to the state marker to get the app's own constants (exchange rates, bands, market texts, regions, the state tables,
+the fee rules, the about texts), renders the per-country research notes from `docs/tax-notes/*.md` with a small
+Markdown renderer, and fills the `src/methodology.html` shell. It writes `sw.js` from `src/sw.js` with a version
+stamp (the page's content hash), so every deploy invalidates the old cache; `--check` covers all three files.
+
+## Generated pages
+`src/pages.js` writes the crawlable pages from the same engine: `tax/<state>/` and `trade-in-credit/<state>/` for every
+state and DC (the answer in the first paragraph, a worked example priced by `breakdown()`, the citations, FAQPage and
+BreadcrumbList JSON-LD), the hubs `tax/` and `trade-in-credit/`, `data/` (the dataset page with Dataset JSON-LD and the
+DOI) and `sitemap.xml`. They are committed like `methodology.html`; `--check` fails when any is stale and
+`test/pages.test.mjs` checks every page. The app reads `#…&r=CA&loc=…` so a page links straight into a priced view.
+
+## Styling
+The design system is `docs/DESIGN.md` with its tokens in `brand/tokens.css`. The app inlines the same values in
+`src/head.html` (it is one self-contained file); the website links `brand/site/site.css` and `brand/site/site.js`
+(theme toggle); methodology and every generated page link `brand/site/pages.css`, with nav, footer and head links built
+by `headLinks()`, `siteNav()` and `siteFoot()` in `src/pages.js`. All three store the theme choice as `cf_theme`.
 
 ## Website
 `index.html` (showcase, the demo video and GIFs, how-to) and `about.html` share the visual language of the author's

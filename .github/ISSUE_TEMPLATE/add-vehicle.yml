@@ -1,0 +1,38 @@
+name: Add a vehicle
+description: A car, motorcycle, boat or aircraft on sale in one of the eleven countries that is missing from its tab.
+title: "Add: "
+labels: ["add vehicle"]
+body:
+  - type: input
+    id: vehicle
+    attributes:
+      label: Make and model
+      placeholder: Honda ZR-V
+    validations:
+      required: true
+  - type: dropdown
+    id: vertical
+    attributes:
+      label: Kind of vehicle
+      options: ["Car or truck", "Motorcycle or scooter", "Boat or jet ski", "Plane, jet or helicopter"]
+    validations:
+      required: true
+  - type: dropdown
+    id: country
+    attributes:
+      label: Country
+      options: ["USA", "Canada", "Mexico", "Brazil", "United Kingdom", "Spain", "Russia", "India", "China", "Thailand", "Australia"]
+    validations:
+      required: true
+  - type: textarea
+    id: prices
+    attributes:
+      label: Published prices
+      description: The cheapest and dearest trim or variant, on the price basis that country uses (MSRP, ex-showroom, OTR, RRP, precio de lista…), with a link to the price list.
+    validations:
+      required: true
+  - type: textarea
+    id: specs
+    attributes:
+      label: Specs if you have them
+      description: Body type, fuel, official efficiency or range, power, seats, drivetrain or engine, and anything the note on the row should say.

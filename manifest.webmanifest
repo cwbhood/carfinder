@@ -1,0 +1,17 @@
+{
+  "name": "CarFinder 2026",
+  "short_name": "CarFinder",
+  "description": "Every new car, motorcycle, boat and aircraft on sale in 11 countries: list price, what dealers really charge, and the on-road price for your state or city.",
+  "start_url": "carfinder.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f0e8",
+  "theme_color": "#f3f0e8",
+  "lang": "en",
+  "categories": ["shopping", "utilities", "finance"],
+  "icons": [
+    {"src": "brand/emblem/emblem-256.png", "sizes": "256x256", "type": "image/png"},
+    {"src": "brand/emblem/emblem-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

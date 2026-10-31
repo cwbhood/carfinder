@@ -8,8 +8,11 @@ const RAW = {
 };
 const STATES_US = /*__STATES_US__*/{};
 const STATES_IN = /*__STATES_IN__*/{};
+const US_TAX = /*__US_TAX__*/{};
+const US_LOCAL = /*__US_LOCAL__*/{};      // combined state + local rates by city or county, for states where a vehicle's rate depends on where it is registered (data/us_local.json)          // US purchase-tax rules per state: the tax's name, how a trade-in reduces it, and why (data/us_tax.json)
 const VFEES = /*__VFEES__*/{};          // motorcycle, boat and aircraft fee rules per country (data/vfees.json)
 const IMAGES = /*__IMAGES__*/{};        // Wikipedia lead photos: {files:[[name, host, md5 prefix, author, licence]], map:{'vt/cc':{'make|model':[fileIndex, approx]}}} (data/images.json)
+const SOURCES = /*__SOURCES__*/{};      // provenance: compile dates, exchange-rate date, per-dataset price sources, makers' sites (data/sources.json)
 //<<core
 /* ---------- normalisation into one schema ---------- */
 const US_FIELDS = ['make','model','year','body','size','cls','fuel','price','top','dest','city','hwy','mpg','rngMi','mpge','hp','seats','drive','mkt','note','est'];
@@ -46,6 +49,54 @@ function normalize(raw, cc, vt){
     return o;
   });
 }
+/* ---------- provenance: where a price comes from (data/sources.json) ---------- */
+/* Four states, each true of the row and nothing more:
+     checked    a person compared this row to the maker's page after compile (the row carries a `checked` date; none yet)
+     listed     the maker's published list price for this market on the dataset's compile date, not individually re-checked
+     converted  a published list in another currency, converted at a dated rate (aircraft outside the US)
+     estimated  modelled from announcements, trade press or dealer quotes (most boats and bikes outside the US)
+   The row data keeps its `est` flag; the state is derived from it, the vertical and the market. */
+const STATUS = {
+  checked:   {label:'Checked',   short:'Checked',   cls:'ok',  desc:'a person compared the row to the maker\u2019s page after compile'},
+  listed:    {label:'Listed',    short:'Listed',    cls:'ok',  desc:'the maker\u2019s published list price for this market on the compile date'},
+  converted: {label:'Converted', short:'Converted', cls:'cv',  desc:'a published list in another currency, converted at a dated exchange rate'},
+  estimated: {label:'Estimate',  short:'Estimate',  cls:'est', desc:'modelled from announcements, trade press or dealer quotes'}
+};
+function rowStatus(c, cc){
+  if (c.checked) return 'checked';
+  if (!c.est) return 'listed';
+  if ((c.vt || 'car') === 'air' && cc !== 'US') return 'converted';
+  return 'estimated';
+}
+const fmtDate = iso => { if (!iso) return ''; const d = new Date(iso + 'T00:00:00Z'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric', timeZone:'UTC'}); };
+function provenance(c, cc){
+  const vt = c.vt || 'car'; const S = SOURCES || {}; const sets = S.sets || {};
+  const set = sets[vt+'/'+cc] || sets[vt+'/ALL'] || (S.setsDefault||{})[vt] || {basis:'Published list price', sources:[], rules:''};
+  const bcc = (S.brandsByCC||{})[c.make]; const url = (bcc && bcc[cc]) || (S.brands||{})[c.make] || null;
+  const bp = ((S.buildPrice||{})[vt+'/'+cc]||{})[c.make] || null;                       // the maker's build-and-price entry point, where one is verified
+  const compiled = (S.compiled||{})[vt] || null, rulesAsOf = (S.rulesAsOf||{})[vt] || compiled;
+  const fxAt = ((S.fx||{}).convertedAt||{})[vt] || null;                           // datasets converted from a dollar or euro list carry the rate date they were converted at
+  const fxCompiled = ((S.fx||{}).compiledAt||{})[vt] || compiled;                 // the rates on the day the price list was compiled (for the "rates moved since" flag)
+  const status = rowStatus(c, cc);
+  let why = '';
+  if (status === 'converted'){
+    why = 'the maker\u2019s dollar or euro list converted at ECB rates of ' + fmtDate(fxAt) + '; the invoice follows the exchange rate';
+    const mv = fxMove('USD', CUR[cc], fxAt); if (mv != null && Math.abs(mv) >= 0.005) why += ' (the dollar has moved ' + pctTxt(mv) + ' against the ' + CUR_NAME[CUR[cc]].replace(/s$/, '') + ' since)';
+  } else if (status === 'estimated'){
+    why = vt==='air' ? 'announced or typically-equipped pricing that the maker can still change' : 'announced, partly confirmed or dealer-quoted pricing; confirm the figure with a dealer';
+  } else if (status === 'listed'){
+    why = 'the maker\u2019s published list price for this market on the compile date, not individually re-checked since';
+  } else if (status === 'checked'){
+    why = 'compared to the maker\u2019s page on ' + fmtDate(c.checked);
+  }
+  return {basis:set.basis, sources:set.sources||[], rules:set.rules||'', compiled, rulesAsOf, fx:S.fx||null, fxAt, fxCompiled, maker:{name:c.make, url, bp}, status, confirmed:status === 'listed' || status === 'checked', why};
+}
+/* the citation behind a region's tax rules: US and Indian states carry one per row; other countries cite the tax note */
+function regionSource(cc, code, loc){
+  if (cc==='US'){ const l = usLocal(code, loc); if (l) return {url:l.src[0], name:l.src[1]}; const s = STATES_US[code] || STATES_US.US; return s[4] ? {url:s[4], name:s[5] || s[4]} : null; }
+  if (cc==='IN'){ const s = STATES_IN[code] || STATES_IN.IN; return s.src ? {url:s.src, name:s.srcName || s.src} : null; }
+  return null;
+}
 /* ---------- money ---------- */
 const en = (n,d=0) => Math.round(n).toLocaleString('en-US',{maximumFractionDigits:d});
 const trim0 = s => s.replace(/\.0+$/,'').replace(/(\.\d*?)0+$/,'$1');
@@ -68,13 +119,36 @@ const MONEY = {
   BR: {money:n=>'R$'+en(n), k:n=>kFmt('R$',n,'M'), range:rangeFmt('R$','M')},
   CA: {money:n=>'C$'+en(n), k:n=>kFmt('C$',n,'M'), range:rangeFmt('C$','M')}
 };
-/* ---------- world currency ---------- */
-const FX = {USD:1, EUR:0.8807, GBP:0.7549, INR:95.99, CNY:6.703, AUD:1.4277, MXN:17.897, THB:33.515, RUB:73.5, BRL:5.2115, CAD:1.418};   // per US dollar, ECB reference rates 29 Sept 2026 (RUB: market rate)
+/* ---------- world currency: ECB reference rates (quoted per euro) from data/sources.json, turned into per-US-dollar rates; rubles at the Bank of Russia official rate ---------- */
+const FX_SRC = (SOURCES && SOURCES.fx) || {};
+const FX_DATE = FX_SRC.date || null;                                   // the rates the World tab converts at (the latest pull)
+const FX_CCYS = ['GBP','INR','CNY','AUD','MXN','THB','BRL','CAD'];
+function fxPerUsd(date){
+  const e = (FX_SRC.perEur||{})[date]; if (!e || !e.USD) return null;
+  const o = {USD:1, EUR:1/e.USD}; FX_CCYS.forEach(k => { o[k] = e[k]/e.USD; }); o.RUB = (FX_SRC.rubPerUsd||{})[date] || null;
+  return o;
+}
+function fxCross(date, from, to){ const f = fxPerUsd(date); return f && f[from] && f[to] ? f[to]/f[from] : null; }   // units of `to` per one `from` on that date
+function fxMove(from, to, since){ const a = fxCross(since, from, to), b = fxCross(FX_DATE, from, to); return a && b ? b/a - 1 : null; }   // how far `from` has moved against `to` since that date (+ = stronger)
+const pctTxt = m => (m > 0 ? '+' : '−') + (Math.abs(m)*100).toFixed(1) + '%';
+const FX = fxPerUsd(FX_DATE) || {USD:1};
 const CUR = {US:'USD', IN:'INR', CN:'CNY', UK:'GBP', AU:'AUD', MX:'MXN', ES:'EUR', TH:'THB', RU:'RUB', BR:'BRL', CA:'CAD'};
 const CUR_NAME = {USD:'US dollars', EUR:'euros', GBP:'British pounds', INR:'Indian rupees', CNY:'Chinese yuan', AUD:'Australian dollars', MXN:'Mexican pesos', THB:'Thai baht', RUB:'Russian rubles', BRL:'Brazilian reais', CAD:'Canadian dollars'};
 const CUR_FMT = {USD:MONEY.US, EUR:MONEY.ES, GBP:MONEY.UK, INR:MONEY.IN, CNY:MONEY.CN, AUD:MONEY.AU, MXN:MONEY.MX, THB:MONEY.TH, RUB:MONEY.RU, BRL:MONEY.BR, CAD:MONEY.CA};
 let WCUR = 'USD';
 function toWorld(amount, cc){ return amount / FX[CUR[cc]] * FX[WCUR]; }
+function fxListTxt(){                                                  // "ECB reference rates of 14 Oct 2026 (USD 1.1195, GBP 0.844 … per euro; rubles at 83.87 per dollar)"
+  const e = (FX_SRC.perEur||{})[FX_DATE] || {}; const sig = v => v >= 100 ? v.toFixed(1) : v >= 10 ? v.toFixed(2) : v >= 1 ? v.toFixed(3) : v.toFixed(4);
+  const list = ['USD'].concat(FX_CCYS).filter(k => e[k]).map(k => k + ' ' + sig(e[k])).join(', ');
+  return `ECB reference rates of ${fmtDate(FX_DATE)} (${list} per euro; rubles at ${FX.RUB ? FX.RUB.toFixed(2) : '–'} per dollar, the Bank of Russia rate)`;
+}
+/* how far the currencies behind the World list have moved against the chosen currency since their price lists were compiled */
+function fxMovedTxt(vt){
+  let worst = 0, who = '';
+  for (const cc of Object.keys(CUR)){ if (CUR[cc] === WCUR) continue; const since = ((FX_SRC.compiledAt||{})[vt]) || null; const mv = since ? fxMove(CUR[cc], WCUR, since) : null; if (mv != null && Math.abs(mv) > Math.abs(worst)){ worst = mv; who = cc; } }
+  if (Math.abs(worst) < 0.005) return '';
+  return ` · <button type="button" class="fxmove" aria-describedby="fxmoveTip" aria-expanded="false">rates have moved since the lists were compiled (${CUR[who]} ${pctTxt(worst)} against ${WCUR})</button><span role="tooltip" id="fxmoveTip" class="tip">Price lists were compiled at the rates of their day; the World tab converts at the latest ECB rates, so a currency that has moved since changes a vehicle\u2019s converted price. Largest move: the ${CUR_NAME[CUR[who]]} ${pctTxt(worst)} against ${CUR_NAME[WCUR]}. Each detail sheet states its own row\u2019s move.</span>`;
+}
 MONEY.ALL = {money:n=>CUR_FMT[WCUR].money(n), k:n=>CUR_FMT[WCUR].k(n), range:(lo,hi)=>CUR_FMT[WCUR].range(lo,hi)};
 /* ---------- dealer price bands (share of list) ---------- */
 const BAND = {
@@ -112,7 +186,7 @@ const MKT_TXT_V = {
 };
 function mktTxt(cc, c){ return (MKT_TXT_V[c.vt] || MKT_TXT[cc])[c.mkt]; }
 /* ---------- fuel cost, payment ---------- */
-function monthlyPay(price, A){ const P = price*(1 - A.down/100); const r = A.apr/100/12; const n = A.term; if (r===0) return P/n; return P*r/(1-Math.pow(1+r,-n)); }
+function monthlyPay(price, A){ const P = Math.max(0, price*(1 - A.down/100) - (A.trade||0)); const r = A.apr/100/12; const n = A.term; if (r===0) return P/n; return P*r/(1-Math.pow(1+r,-n)); }   // the down payment and any trade-in come off the amount financed
 function fuelCost(c, A, cc){
   if (c.vt==='boat'){                                               // hours on the water × fuel burn at cruise; marine fuel runs ~15% dearer
     if (!A.hours || c.fuel==='Sail') return null;
@@ -198,20 +272,46 @@ const REGIONS = {
 };
 const REGION_DEFAULT = {CN:'XX', UK:'GB', AU:'NSW', MX:'CDMX', ES:'PEN', TH:'TH', RU:'MOW', BR:'SP', CA:'ON', ALL:'USD'};
 /* ---------- US ---------- */
-function usState(code){ const s = STATES_US[code] || STATES_US.US; return {code, name:s[0], rate:s[1], doc:s[2], note:s[3]}; }
-function usTax(st, price){ if (st.code==='CT') return price > 50000 ? price*0.0775 : price*0.0635; if (st.code==='SC') return Math.min(price*0.05, 500); return price*st.rate/100; }
-function bdUS(c, msrp, st, M){
+function usState(code){ const s = STATES_US[code] || STATES_US.US; return {code, name:s[0], rate:s[1], doc:s[2], note:s[3], src:s[4]||null, srcName:s[5]||''}; }
+function usLocalTable(code){ return (typeof US_LOCAL !== 'undefined' && US_LOCAL[code]) || null; }
+function usLocal(code, loc){ const T = usLocalTable(code); if (!T || !loc) return null; const p = T.places.find(x => x[0]===loc); return p ? {name:p[0], rate:p[1], asof:T.asof, src:T.src, basis:T.basis} : null; }
+function usRule(code){ return ((US_TAX.states||{})[code]) || {tax:'Sales tax', trade:'full'}; }
+/* the amount the state taxes after a trade-in: the full price where there is no credit, the difference where there is, up to a cap in Michigan */
+function usTaxable(rule, p, trade){ if (!(trade > 0) || rule.trade==='none' || rule.trade==='notax') return p; const t = typeof rule.trade==='number' ? Math.min(trade, rule.trade) : trade; return Math.max(0, p - t); }
+/* DC's titling excise since 17 Feb 2025: a rate by weight class and city mpg, on the NADA value (dmv.dc.gov). Weight is not in the data, so the class is estimated from body, size and fuel. */
+const DC_EXCISE = [[20, [9.0,10.0,11.0]], [25, [5.0,6.0,7.0]], [30, [3.1,4.1,5.1]], [39, [2.2,3.2,4.2]], [Infinity, [1.5,2.5,3.5]]];
+function dcWeightClass(c){ const heavy = c.body==='Truck' || c.body==='Van' || c.size==='Full-size' || c.size==='Heavy-duty'; if (heavy) return 2; const light = c.size==='Subcompact' || (c.size==='Compact' && c.body!=='SUV' && c.body!=='Minivan'); return light && c.fuel!=='EV' ? 0 : 1; }
+function dcRate(c){ const w = dcWeightClass(c); if (c.fuel==='EV' || c.fuel==='Hydrogen') return [1.0,2.0,3.0][w]; const mpg = Math.floor(c.city || c.mpg || 0); for (const [upto, r] of DC_EXCISE) if (mpg <= upto) return r[w]; return DC_EXCISE[4][1][w]; }
+function usTax(st, price, c, trade, rate){
+  const base = usTaxable(usRule(st.code), price, trade);
+  if (st.code==='CT') return base*(price > 50000 ? 0.0775 : 0.0635);      // the 7.75% rate is set by the price, the tax is on the price less any trade-in
+  if (st.code==='SC') return Math.min(base*0.05, 500);
+  if (st.code==='DC' && c) return base*dcRate(c)/100;
+  return base*(rate!=null ? rate : st.rate)/100;
+}
+function bdUS(c, msrp, st, M, opt){
   const b = BAND.US[c.mkt]; const s = msrp + c.dest; const lo = s*b[0], hi = s*b[1];
-  const f = p => p + st.doc + usTax(st,p) + 350;
+  const rule = usRule(st.code); const trade = (opt && opt.trade > 0) ? opt.trade : 0;
+  const local = usLocal(st.code, opt && opt.loc), T = usLocalTable(st.code);
+  const tx = (p, t) => usTax(st, p, c, t, local ? local.rate : null);
+  const f = p => p + st.doc + tx(p, trade) + 350;
   const L = [];
   L.push({k:'MSRP', sub:'manufacturer’s sticker price', v:M.money(msrp)});
   L.push({k:'Destination charge', sub:'mandatory, not negotiable', v:M.money(c.dest)});
   L.push({k:'Window sticker total', v:M.money(s), cls:'bold'});
   L.push({k:'Typical dealer price', sub:`${MKT_TXT.US[c.mkt][0].toLowerCase()} (${pct(b)})`, v:`${M.money(lo)} – ${M.money(hi)}`, cls:'est'});
-  L.push({k:'Sales tax', sub:st.note, v:`${M.money(usTax(st,lo))} – ${M.money(usTax(st,hi))}`});
+  const dcSub = st.code==='DC' ? `${dcRate(c)}% for this ${['lighter','mid-weight','heavier'][dcWeightClass(c)]} ${c.fuel==='EV' ? 'EV' : 'vehicle at '+Math.floor(c.city||c.mpg||0)+' mpg city'} (weight class estimated from body and size); ` : '';
+  const where = local ? `${local.name}: ${local.rate}% state and local rate, effective ${fmtDate(local.asof)} (${local.src[1].split(',')[0]}); ${local.basis}` : st.note + (T ? `. Pick your city or county under the state menu for the exact rate (${T.places.length} in the table)` : '');
+  L.push({k:rule.tax, sub:dcSub + where + (trade && rule.trade!=='none' && rule.trade!=='notax' ? `; charged on the price less your trade-in${typeof rule.trade==='number' ? ' (credit capped at '+M.money(rule.trade)+')' : ''}` : ''), v:`${M.money(tx(lo, trade))} – ${M.money(tx(hi, trade))}`});
+  if (trade){
+    const save = tx(hi, 0) - tx(hi, trade);
+    L.push({k:`Your ${M.money(trade)} trade-in`, sub:(rule.why || '') + ' It pays part of the price; the total here is before you hand it over.', v: rule.trade==='notax' ? 'no tax to reduce' : save > 0.5 ? `saves ${M.money(save)} in tax` : 'no tax saving', cls: save > 0.5 ? '' : 'info'});
+  } else if (rule.trade!=='notax'){
+    L.push({k:'Trading in a car?', sub: rule.trade==='none' ? (rule.why || '') + ' A trade-in saves no tax here.' : `${st.name} taxes the price less your trade-in${typeof rule.trade==='number' ? ', up to ' + M.money(rule.trade) : ''}: on this car a $15,000 trade saves about ${M.money(tx(hi, 0) - tx(hi, 15000))}. Enter yours under “Cost assumptions”.`, v: rule.trade==='none' ? 'no credit' : 'credit', cls:'info'});
+  }
   L.push({k:'Dealer doc fee', sub:`typical for ${st.name}; ask before you sign`, v:M.money(st.doc)});
   L.push({k:'Title, registration, plates', sub:'varies by state and vehicle', v:'~'+M.money(350)});
-  return {dlo:lo, dhi:hi, lo:f(lo), hi:f(hi), lines:L, head:st.name};
+  return {dlo:lo, dhi:hi, lo:f(lo), hi:f(hi), lines:L, head:local ? `${st.name} · ${local.name.replace(/ \(.*$/, '')}` : st.name};
 }
 /* ---------- India ---------- */
 function inState(code){ const s = STATES_IN[code] || STATES_IN.IN; return Object.assign({code}, s); }
@@ -264,7 +364,7 @@ function bdCN(c, price, r, M){
 }
 /* ---------- UK ---------- */
 const ECG_BAND1 = /^(500e|A290|iX1|iX2|ë-C5 Aircross|e-C5 Aircross|Puma Gen-E|E-Tourneo Courier|Kona Electric|EV2|EV4|Countryman Electric|Leaf|Micra|4 E-Tech|5 E-Tech|Scenic E-Tech)/i;
-const ECG_MAKES = new Set(['Abarth','Alpine','BMW','Citroen','Citroën','Fiat','Ford','Hyundai','Kia','MINI','Mini','Nissan','Renault','Alfa Romeo','Cupra','DS','Jeep','Peugeot','Skoda','Toyota','Vauxhall','Volkswagen']);
+const ECG_MAKES = new Set(['Abarth','Alpine','BMW','Citroën','Fiat','Ford','Hyundai','Kia','MINI','Nissan','Renault','Alfa Romeo','Cupra','DS','Jeep','Peugeot','Skoda','Toyota','Vauxhall','Volkswagen']);
 function ukVed1(co2){ return co2==null ? 10 : co2<=50 ? 115 : co2<=75 ? 135 : co2<=90 ? 280 : co2<=100 ? 365 : co2<=110 ? 405 : co2<=130 ? 455 : co2<=150 ? 560 : co2<=170 ? 1410 : co2<=190 ? 2270 : co2<=225 ? 3420 : co2<=255 ? 4850 : 5690; }
 function bdUK(c, otr, r, M){
   const b = BAND.UK[c.mkt]; const lo = otr*b[0], hi = otr*b[1];
@@ -521,12 +621,12 @@ function bdV(cc, c, price, region, M){
   }
   return {dlo:lo, dhi:hi, lo:tLo, hi:tHi, lines:L, head:regionHead(cc, region)};
 }
-function bdCarLike(cc, c, price, region, M){            // fallback when a country has no vfees entry yet: the car rules
-  switch(cc){ case 'US': return bdUS(c, price, usState(region), M); case 'IN': return bdIN(c, price, inState(region), M); case 'CN': return bdCN(c, price, region, M); case 'UK': return bdUK(c, price, region, M); case 'AU': return bdAU(c, price, region, M); case 'MX': return bdMX(c, price, region, M); case 'ES': return bdES(c, price, region, M); case 'TH': return bdTH(c, price, region, M); case 'RU': return bdRU(c, price, region, M); case 'BR': return bdBR(c, price, region, M); case 'CA': return bdCA(c, price, region, M); }
+function bdCarLike(cc, c, price, region, M, opt){            // fallback when a country has no vfees entry yet: the car rules
+  switch(cc){ case 'US': return bdUS(c, price, usState(region), M, opt); case 'IN': return bdIN(c, price, inState(region), M); case 'CN': return bdCN(c, price, region, M); case 'UK': return bdUK(c, price, region, M); case 'AU': return bdAU(c, price, region, M); case 'MX': return bdMX(c, price, region, M); case 'ES': return bdES(c, price, region, M); case 'TH': return bdTH(c, price, region, M); case 'RU': return bdRU(c, price, region, M); case 'BR': return bdBR(c, price, region, M); case 'CA': return bdCA(c, price, region, M); }
 }
-function breakdown(cc, c, price, region, M){
+function breakdown(cc, c, price, region, M, opt){
   if (c.vt && c.vt!=='car') return bdV(cc, c, price, region, M);
-  return bdCarLike(cc, c, price, region, M);
+  return bdCarLike(cc, c, price, region, M, opt);
 }
 //core>>
 /* ===== datasets: DATA[vertical][country], plus a pooled World list per vertical ===== */
@@ -558,7 +658,7 @@ const COUNTRIES = {
     presets:[[0,30000,'Under $30k'],[30000,45000,'$30-45k'],[45000,65000,'$45-65k'],[65000,100000,'$65-100k'],[100000,0,'$100k+']],
     eff:{mode:'min', label:'Minimum MPG', hint:'gas & hybrids; EVs always pass', max:55, step:1, unit:'mpg', sort:'Best MPG', get:c=>c.mpg},
     rng:{max:450, step:10, unit:'mi'}, powerUnit:'hp',
-    assume:{gas:['Gas $/gal',4.45,0.05], elec:['Electricity $/kWh',0.17,0.01], miles:['Miles per year',12000,1000], apr:['Loan APR %',7.0,0.1], term:['Loan term (months)',72,12], down:['Down payment %',10,1]}, distLabel:'miles',
+    assume:{gas:['Gas $/gal',4.45,0.05], elec:['Electricity $/kWh',0.17,0.01], miles:['Miles per year',12000,1000], apr:['Loan APR %',7.0,0.1], term:['Loan term (months)',72,12], down:['Down payment %',10,1], trade:['Trade-in value $',0,500]}, distLabel:'miles',
     wizardBudgets:[[30000,'Under $30k'],[45000,'$30-45k'],[65000,'$45-65k'],[100000,'$65-100k'],[0,'No limit']], budgetShare:0.9,
     wizardFuels:[['','No preference'],['Gas','Regular gas'],['Hybrid','Hybrid (no plug, best mpg)'],['PHEV','Plug-in hybrid'],['EV','Fully electric'],['cheap','Whatever costs least to run']],
     wizardAwd:'Snow, mud or mountains?', wizardWork:'Work, towing, hauling stuff',
@@ -796,6 +896,7 @@ function assumeFor(cc, vt){
   const base = COUNTRIES[cc].assume; const out = {};
   Object.entries(base).forEach(([k,v]) => out[k] = v.slice());
   if (vt==='car' || !Object.keys(base).length) return out;
+  delete out.trade;                                                  // the trade-in rule is modelled for cars only
   const V = VERT[vt].assume;
   if (vt==='moto'){ if (out.miles) out.miles = [out.miles[0], Math.round(out.miles[1]*V.distMult/500)*500, out.miles[2]]; }
   else if (vt==='air'){                                              // aviation fuel replaces road fuel; hours replace distance
@@ -872,21 +973,21 @@ const GLOSS = {
   RU: [['РРЦ (recommended price)','The maker\u2019s list price including 20% VAT; every discount is quoted from it and imported cars carry the utilisation fee and duty inside it.'],['Выгода / прямая скидка','The direct discount the maker or dealer gives anyone; often 5% to 15% of the РРЦ.'],['Скидка по трейд-ин / по кредиту','Extra discounts only if you trade in a car or finance through the captive bank; the 0.01% rate is paid for inside the price.'],['Допы','Dealer-installed extras (mats, film, alarm) the salesman bundles; illegal to force, hard to avoid on hot models, 30,000 to 500,000 ₽.'],['Утильсбор','The recycling fee every importer pays per car, 0.8 to 2.5 M ₽ on imported models and rising every January; refunded to Russian plants.'],['Госпрограмма (льготный автокредит)','State programme paying 20% (25% in the Far East) of the price on a loan for eligible buyers of Russian-built cars, 35% up to 925,000 ₽ for Russian-built EVs.'],['ОСАГО','Compulsory third-party insurance you must hold to register; 6,000 to 12,000 ₽ a year for a typical driver, more in Moscow and Chelyabinsk.'],['КАСКО','Optional comprehensive cover; banks require it on financed cars; 3.5% to 7% of value a year.'],['Транспортный налог','Annual regional tax per horsepower, billed the following year; from 0 ₽/hp in Sverdlovsk to 150 ₽/hp for 250+ hp cars.'],['Повышающий коэффициент','The ×3 transport-tax multiplier for cars on the 10 M ₽+ list.'],['Госпошлина / ГИБДД / СТС / ЭПТС','The 4,500 ₽ state duty for registration, the registration card and the electronic vehicle passport.'],['КБМ','Your no-claims class in ОСАГО: 1.17 for a new driver, 0.46 after about 10 clean years.'],['Параллельный импорт','Grey import of brands with no official importer (Toyota, BMW, Zeekr): no factory warranty, full utilisation fee; not listed here.'],['Локализация','Localisation points a Russian-assembled model needs for utilisation-fee refunds and state-loan eligibility.']],
   BR: [['Preço público sugerido / tabela','The brand\u2019s published São Paulo price with IPI, PIS/COFINS, ICMS and frete inside; the ceiling you negotiate down from.'],['Bônus de fábrica / preço promocional','The manufacturer\u2019s monthly cash discount (R$5,000 to R$50,000) that the dealer must pass on.'],['Venda direta (CNPJ, PcD, taxista)','Direct-sales channels 10% to 30% under retail; PcD and taxi buyers also get IPI and ICMS exemptions.'],['IPI Verde / Carro Sustentável','The federal excise inside the price, 0% to 20% by fuel, power and efficiency; 0% for national 1.0 compacts through 2026.'],['ICMS','State VAT (12% on cars in São Paulo and most states), inside the price and the reason it differs by state.'],['Emplacamento','First registration, Mercosul plates and the despachante: R$700 to R$1,700 in fees, R$1,500 to R$3,500 if the dealer does it.'],['IPVA','Annual state ownership tax, 1.9% to 4% of the invoice value, prorated in the purchase year; several states exempt EVs and São Paulo exempts flex hybrids.'],['Licenciamento anual','The yearly Detran renewal (R$120 to R$300) paid with the IPVA.'],['Tabela FIPE','The monthly reference value of every model, used for IPVA, insurance and trade-ins.'],['Flex / regra dos 70%','Almost every Brazilian-built car burns any mix of petrol and ethanol; ethanol is cheaper per km when it costs less than 70% of petrol.'],['PBEV / INMETRO','The official efficiency label (km/L for petrol and ethanol, range for EVs).'],['CDC / entrada / CET / IOF','The standard car loan, the down payment (20% to 30%), the total effective cost of the loan and the 0.38%-plus-daily federal tax on credit.'],['Consórcio','A savings pool that delivers a car without interest but with a 12% to 20% admin fee and no fixed date.'],['Supervalorização do usado','The dealer\u2019s inflated trade-in offer used instead of a cash discount.']],
   CA: [['MSRP / PDSF','The manufacturer\u2019s sticker before freight, fees and taxes.'],['Freight & PDI','The manufacturer\u2019s fixed delivery and pre-delivery charge (C$1,850 to C$4,000), added to every sale and taxed.'],['All-in price','What Ontario, Quebec, BC, Alberta, Manitoba and Saskatchewan dealers must advertise: MSRP plus freight and every fee, before sales tax and registration.'],['A/C tax and green levy','The C$100 federal excise on air conditioning and the C$1,000 to C$4,000 levy on cars rated 13 L/100 km or worse (pickups exempt).'],['Luxury tax','Federal tax on vehicles over C$100,000: the lesser of 10% of the price or 20% of the amount above C$100,000, with sales tax on top.'],['HST / GST / PST / QST','Harmonised tax in Ontario (13%) and the Atlantic provinces (14% to 15%); the 5% federal GST plus provincial taxes elsewhere; BC\u2019s PST climbs to 20% on expensive cars.'],['EVAP','The federal Electric Vehicle Affordability Program: C$5,000 for a BEV or C$2,500 for a PHEV at the dealer on vehicles under C$50,000 all-in, one per person, 2026 to 2030.'],['Roulez vert','Quebec\u2019s EV rebate (C$2,000 BEV / C$1,000 PHEV), ending 31 Dec 2026.'],['Counter-tariff','Canada\u2019s 25% surtax on US-assembled vehicles, remitted for makers with Canadian plants; Chinese-built EVs pay 6.1% inside a 49,000-unit quota.'],['Admin / doc fee','The dealer\u2019s own paperwork charge (C$199 to C$999), negotiable and inside all-in prices.'],['ICBC / MPI / SGI / SAAQ','The public insurance schemes of BC, Manitoba, Saskatchewan and (injury only) Quebec, bought with the plate.'],['NRCan rating','Canada\u2019s official fuel-consumption and range figures, on every window sticker.'],['Residual / km allowance','Leasing terms: the buy-back price and the 16,000 to 24,000 km-a-year cap.'],['CUSMA-compliant','A vehicle meeting the North American content rules; only its non-Canadian/Mexican share carries the counter-tariff.']],
-  ALL: [['Converted price','Each car\u2019s home-market list price converted at ECB reference rates of 29 September 2026 (rubles at the market rate). Currency moves change the ranking, not the cars.'],['Why the same car costs different amounts','Taxes inside the sticker differ (18% to 40% GST in India, up to 50% excise in Thailand, 35% import duty in Brazil), as do freight, dealer margins and what equipment comes standard.'],['Est. on-road','Computed with the car\u2019s home-market rules for its default region (Ontario, São Paulo, Moscow, Shanghai excluded, NSW and so on), then converted.'],['Purchasing power','A car can be cheap in dollars but expensive locally: an Alto K10 is US$3,900 in India, where the average income is a tenth of the US figure.'],['Efficiency units','Pick mpg (US), L/100 km or km/L in the filter panel; EV range shows in miles with mpg and in km otherwise. Home-market test cycles differ (EPA, WLTP, CLTC, NEDC), so ranges are not perfectly comparable.'],['Price per horsepower','The list price divided by peak power, a quick value screen for performance buyers; it ignores weight, gearbox and drivetrain.'],['Fuel cost','Yearly running cost at the home market\u2019s fuel and electricity prices and typical annual distance, converted.'],['Preliminary','Announced or estimated pricing that can still change; imported and luxury models are the most common cases.'],['Grey imports','Cars only available as parallel imports (Toyota in Russia, VW in Thailand) are not listed; every row has an official importer or plant.']],
+  ALL: [['Converted price','Each car\u2019s home-market list price converted at ECB reference rates of ' + fmtDate(FX_DATE) + ' (rubles at the Bank of Russia official rate). Currency moves change the ranking, not the cars; the detail sheet says how far a currency has moved since its price list was compiled.'],['Why the same car costs different amounts','Taxes inside the sticker differ (18% to 40% GST in India, up to 50% excise in Thailand, 35% import duty in Brazil), as do freight, dealer margins and what equipment comes standard.'],['Est. on-road','Computed with the car\u2019s home-market rules for its default region (Ontario, São Paulo, Moscow, Shanghai excluded, NSW and so on), then converted.'],['Purchasing power','A car can be cheap in dollars but expensive locally: an Alto K10 is US$3,900 in India, where the average income is a tenth of the US figure.'],['Efficiency units','Pick mpg (US), L/100 km or km/L in the filter panel; EV range shows in miles with mpg and in km otherwise. Home-market test cycles differ (EPA, WLTP, CLTC, NEDC), so ranges are not perfectly comparable.'],['Price per horsepower','The list price divided by peak power, a quick value screen for performance buyers; it ignores weight, gearbox and drivetrain.'],['Fuel cost','Yearly running cost at the home market\u2019s fuel and electricity prices and typical annual distance, converted.'],['Estimate','Announced or estimated pricing that can still change; imported and luxury models are the most common cases.'],['Grey imports','Cars only available as parallel imports (Toyota in Russia, VW in Thailand) are not listed; every row has an official importer or plant.']],
   TH: [['ราคาป้าย (list price)','The brand’s published retail price; already includes excise, interior tax and VAT.'],['ภาษีสรรพสามิต (excise tax)','The big hidden tax, 2% to 50% of the pre-VAT price by CO2 and technology: 2% for EV3.5 electric cars, 13% to 34% for petrol cars, 25% for PPVs.'],['CBU / CKD','Fully imported (duty up to 80% from Japan and Europe, 0% from China) versus assembled in Thailand. That is why a Forester costs ฿2.6 m.'],['Eco Sticker','The government fuel-economy label (km/L, CO2) every new car carries; source of the efficiency figures.'],['PPV','Pickup passenger vehicle: a 7-seat SUV on a pickup chassis (Fortuner, MU-X, Everest, Pajero Sport). Taxed at 18% to 25%.'],['EV3.5','The 2024-27 government EV package: 2% excise plus a ฿25,000 to ฿50,000 subsidy already deducted from participating brands’ stickers. Expires end of 2027.'],['ป้ายแดง (red plate)','Temporary dealer plate used for up to 30 days until your white plate arrives.'],['ภาษีรถประจำปี (annual tax)','The yearly road-tax sticker, ฿900 to ฿7,000 by engine size (weight for pickups and EVs).'],['พ.ร.บ. (por-ror-bor)','Compulsory third-party injury insurance, ฿645 for a car, sold with the annual tax. Separate from voluntary insurance.'],['ประกันชั้น 1 / 2+ / 3+','First-class (comprehensive), 2+ and 3+ voluntary insurance. Finance companies require first class while you owe money.'],['ดาวน์ / ฟรีดาวน์','Down payment / zero-down deal. Thai loans are hire-purchase: the finance company owns the car until the last instalment.'],['ดอกเบี้ยคงที่ (flat rate)','Adverts quote a flat rate; the true effective rate is about 1.8 to 1.9 times higher (2.99% flat ≈ 5.5%).'],['ของแถม (freebies)','Dealer extras that replace cash discounts: film, insurance, mats, wall-box. Always ask for their cash value.'],['Motor Show / Motor Expo','The Bangkok shows (March-April and December) where launch prices and the year’s best finance deals appear.']]
 };
 const ABOUT = {
-  US: `<h2>How these numbers work</h2><p><b>Sticker (MSRP)</b> is the manufacturer’s base price for each model’s cheapest trim through its most expensive, before the mandatory destination charge. Prices are the 2026 model year as published by the manufacturers, compiled September 29, 2026, with 2025 leftovers and early 2027 models included and labeled. Models marked <i>preliminary</i> use announced or expected pricing that can still change.</p><p><b>Estimated drive-off</b> starts from the sticker plus destination, applies a typical dealer discount or markup for that model’s demand level (in August 2026 incentives averaged about 6.6% of MSRP industry-wide, with far larger EV incentives), then adds your state’s sales tax, a typical dealer documentation fee, and roughly $350 for title and plates. Local tax rates, dealer add-ons and negotiation change the real number, so treat it as a range to bargain within.</p><p><b>Fuel economy</b> is the EPA combined rating for the most efficient common configuration; electric range is the EPA figure for the longest-range trim. The federal $7,500 EV tax credit ended September 30, 2025; some states and utilities still offer EV rebates.</p>`,
-  IN: `<h2>How these numbers work</h2><p><b>Ex-showroom</b> is the manufacturer’s published price, GST included, for each model’s cheapest variant through its most expensive, as listed on September 29, 2026 after the September 2025 GST cut (18% on small cars, 40% on larger ones, 5% on EVs). Models marked <i>preliminary</i> use announced, expected or imported-model pricing that can still change.</p><p><b>Estimated on-road</b> applies a typical dealer discount for that model’s demand, then adds your state’s RTO road tax by price slab and fuel type, about ₹3,000 for registration, HSRP plates and FASTag, a first-year comprehensive insurance estimate, and 1% TCS on cars above ₹10 lakh. Accessories, extended warranty and any “handling charges” are extra and negotiable.</p><p><b>Mileage</b> is the ARAI-claimed figure for the most efficient common variant; EV range is the manufacturer’s claimed figure for the biggest battery. Road-tax slabs change with state budgets and several EV waivers have expiry dates, so confirm the on-road quote with two or three dealers.</p>`,
+  US: `<h2>How these numbers work</h2><p><b>Sticker (MSRP)</b> is the manufacturer’s base price for each model’s cheapest trim through its most expensive, before the mandatory destination charge. Prices are the 2026 model year as published by the manufacturers, compiled September 29, 2026, with 2025 leftovers and early 2027 models included and labeled. Models marked <i>Estimate</i> use announced or expected pricing that can still change; <i>Listed</i> rows are the maker\u2019s published list price on the compile date.</p><p><b>Estimated drive-off</b> starts from the sticker plus destination, applies a typical dealer discount or markup for that model’s demand level (in August 2026 incentives averaged about 6.6% of MSRP industry-wide, with far larger EV incentives), then adds your state’s sales tax, a typical dealer documentation fee, and roughly $350 for title and plates. Local tax rates, dealer add-ons and negotiation change the real number, so treat it as a range to bargain within.</p><p><b>Fuel economy</b> is the EPA combined rating for the most efficient common configuration; electric range is the EPA figure for the longest-range trim. The federal $7,500 EV tax credit ended September 30, 2025; some states and utilities still offer EV rebates.</p>`,
+  IN: `<h2>How these numbers work</h2><p><b>Ex-showroom</b> is the manufacturer’s published price, GST included, for each model’s cheapest variant through its most expensive, as listed on September 29, 2026 after the September 2025 GST cut (18% on small cars, 40% on larger ones, 5% on EVs). Models marked <i>Estimate</i> use announced, expected or imported-model pricing that can still change; <i>Listed</i> rows are the maker\u2019s published ex-showroom price on the compile date.</p><p><b>Estimated on-road</b> applies a typical dealer discount for that model’s demand, then adds your state’s RTO road tax by price slab and fuel type, about ₹3,000 for registration, HSRP plates and FASTag, a first-year comprehensive insurance estimate, and 1% TCS on cars above ₹10 lakh. Accessories, extended warranty and any “handling charges” are extra and negotiable.</p><p><b>Mileage</b> is the ARAI-claimed figure for the most efficient common variant; EV range is the manufacturer’s claimed figure for the biggest battery. Road-tax slabs change with state budgets and several EV waivers have expiry dates, so confirm the on-road quote with two or three dealers.</p>`,
   CN: `<h2>How these numbers work</h2><p><b>Guide price (厂商指导价)</b> is the manufacturer’s list price including 13% VAT and consumption tax, for each model’s cheapest trim through its most expensive, as listed on Autohome in late September 2026. CLTC range is quoted; expect 65% to 80% of it in real use.</p><p><b>Estimated 落地价</b> applies the discount typical for that model (the price war has joint-venture petrol cars and German luxury 15% to 35% below list, while hot NEVs sell at list), then adds purchase tax (10% of the ex-VAT price; 5% for NEVs in 2026-27 with the reduction capped at ¥15,000), compulsory and commercial insurance, registration and, for your city, a plate: Shanghai auctions ICE and PHEV plates (about ¥94,000 in September 2026) and gives BEVs a free green plate; Beijing allocates plates by lottery and points; Guangzhou, Shenzhen, Hangzhou and Tianjin auction petrol plates for ¥1,500 to ¥12,000 and give NEVs free ones; every other city charges only the ¥150 registration.</p><p>The national trade-in subsidy (6% to 12% of the price, capped at ¥13,000 to ¥20,000) is paid to you afterwards and is shown but not subtracted.</p>`,
   UK: `<h2>How these numbers work</h2><p><b>OTR price</b> is the manufacturer’s on-the-road price (VAT, delivery, plates, £55 registration and first-year road tax included) for each model’s cheapest trim through its most expensive, as published on brand sites, Carwow and What Car? in September 2026, before the Electric Car Grant. Pickups are shown VAT-inclusive.</p><p><b>Estimated drive-away</b> applies the discount brokers and dealers typically achieve for that model (0% to 2% on waiting-list cars, 5% to 8% on most, 12% to 25% on EVs over £37k, Stellantis brands and pre-registered stock), then takes off the Electric Car Grant (£1,500 or £3,750) where the maker is on the scheme and the trim lists under £37,000. Taxes are identical across England, Scotland, Wales and Northern Ireland; the only regional variable is insurance.</p><p>Road tax from year two is £200, plus £440 a year in years two to six for cars listed over £40,000 (£50,000 for EVs). mpg, CO2 and range are WLTP figures.</p>`,
-  AU: `<h2>How these numbers work</h2><p><b>RRP</b> is the manufacturer’s recommended retail price before on-road costs (GST and any Luxury Car Tax included) for each model’s cheapest grade through its most expensive, from carsguide, Drive, CarExpert and brand sites in September 2026. Brands that publish only drive-away prices are converted and marked <i>preliminary</i>.</p><p><b>Estimated drive-away</b> applies the discount typical for that model (Toyota and Tesla at RRP; A$1,000 to A$3,000 off most; 6% to 15% off Chinese brands, diesel utes and run-out stock), adds a typical dealer delivery fee (negotiable), your state or territory’s stamp duty on the dutiable value, and 12 months of registration, CTP and plates. Comprehensive insurance is shown but not included.</p><p>Fuel figures are the ADR combined L/100 km on the windscreen label; range is WLTP where the brand quotes it. September 2026 fuel prices (unleaded about A$2.35, diesel about A$2.80) reflect the mid-year oil shock.</p>`,
+  AU: `<h2>How these numbers work</h2><p><b>RRP</b> is the manufacturer’s recommended retail price before on-road costs (GST and any Luxury Car Tax included) for each model’s cheapest grade through its most expensive, from carsguide, Drive, CarExpert and brand sites in September 2026. Brands that publish only drive-away prices are backed out and marked <i>Estimate</i>.</p><p><b>Estimated drive-away</b> applies the discount typical for that model (Toyota and Tesla at RRP; A$1,000 to A$3,000 off most; 6% to 15% off Chinese brands, diesel utes and run-out stock), adds a typical dealer delivery fee (negotiable), your state or territory’s stamp duty on the dutiable value, and 12 months of registration, CTP and plates. Comprehensive insurance is shown but not included.</p><p>Fuel figures are the ADR combined L/100 km on the windscreen label; range is WLTP where the brand quotes it. September 2026 fuel prices (unleaded about A$2.35, diesel about A$2.80) reflect the mid-year oil shock.</p>`,
   MX: `<h2>How these numbers work</h2><p><b>Precio de lista</b> is the brand’s published price, IVA and ISAN included, for each model’s cheapest versión through its most expensive, from brand sites and Autocosmos in September 2026. Promotional “precios especiales” tied to financing are noted, not used.</p><p><b>Estimated precio final</b> applies the discount typical for that model (nothing on Versa, Hilux or RAV4; MX$10,000 to MX$30,000 bonos on most; 6% to 15% on Chinese brands and slow sellers), then adds your state’s alta de placas, the holograma for Megalópolis states, and first-year tenencia where it still applies (3% of the pre-IVA value in CDMX and Edomex above MX$638,000; EVs and hybrids exempt). Comprehensive insurance is shown but not included.</p><p>Rendimiento comes from the CONUEE Ecovehículos label; EV range is as published by the brand (NEDC/CLTC for Chinese brands, EPA for Tesla, GM and Ford). Cars built in China carry a 50% import tariff since January 2026, absorbed so far by the brands.</p>`,
   ES: `<h2>How these numbers work</h2><p><b>PVP</b> is the manufacturer’s tarifa oficial including IVA 21% and the impuesto de matriculación, for each model’s cheapest versión through its most expensive, from km77 and brand tariffs in September 2026, before campaign discounts (Toyota’s advertised promo prices are 10% to 15% below its tariff, so Toyota looks dearer here than in adverts).</p><p><b>Estimated precio final</b> applies the discount typical for that model (0% to 3% on Dacia and hot launches, 4% to 9% on most, 10% to 20% on Toyota promos, Stellantis campaigns, Tesla and km-0 stock), then adds matriculación costs (DGT fee, plates, gestoría) and the prorated first-year IVTM. Canarias prices are recomputed with IGIC instead of IVA; Ceuta and Melilla with IPSI. Plan Auto+ (up to €4,500, paid after purchase) and the 15% IRPF deduction are shown for CERO-label cars but not subtracted.</p><p>Consumption, CO2 and range are WLTP figures.</p>`,
   RU: `<h2>How these numbers work</h2><p><b>Recommended price (РРЦ)</b> is the maker\u2019s list price with 20% VAT, for each model\u2019s cheapest trim through its most expensive, from official price lists and Russian portals in late September 2026, before the advertised benefits. Only brands with an official importer or plant are listed; parallel imports (Toyota, BMW, Kia) are not. Imported cars carry the utilisation fee and 15% duty inside the price.</p><p><b>Estimated drive-away</b> applies the benefits typical for that model (0% to 3% on waiting-list cars, 5% to 10% on most, 12% to 25% on imported stock), adds a typical dealer add-on package, the 4,500 ₽ registration duty and a first-year ОСАГО premium for your region. КАСКО, the transport tax billed next year and the state loan discount are shown but not included.</p><p>Consumption is the maker\u2019s combined figure; EV range is NEDC or CLTC as published. Fuel prices are the 29 September 2026 national averages.</p>`,
   BR: `<h2>How these numbers work</h2><p><b>Preço de tabela</b> is the brand\u2019s published São Paulo price with IPI, PIS/COFINS, ICMS and frete inside, for each model\u2019s cheapest versão through its most expensive, from Webmotors and brand launch pricing in late September 2026 (model year 2027 where already on sale). Rio prices run about 1.5% higher.</p><p><b>Estimated preço final</b> applies the bonus typical for that model (nothing on Polo, Onix, HB20 or Toyota hybrids; 3% to 7% on most; 8% to 20% on Stellantis SUVs, imported EVs and 2025-plate stock), then adds your state\u2019s emplacamento and first-year IPVA (prorated for a late-September purchase, with each state\u2019s EV and hybrid rules). There is no compulsory insurance in 2026; comprehensive cover is shown but not included.</p><p>km/L is the INMETRO petrol figure; ethanol returns about 30% less per litre but is cheaper per km when it costs under 70% of petrol, as in São Paulo now.</p>`,
-  CA: `<h2>How these numbers work</h2><p><b>MSRP</b> is the manufacturer\u2019s Canadian sticker before freight, fees and taxes, for each model\u2019s cheapest trim through its most expensive, from brand sites, Unhaggle and AutoTrader in late September 2026 (2027 model year where already on sale). Brands that only publish all-in prices are backed out and marked <i>preliminary</i>.</p><p><b>Estimated drive-away</b> applies the discount typical for that model, then adds the brand\u2019s freight & PDI, the A/C tax, tire and admin fees, the green levy and federal luxury tax where they apply, your province\u2019s sales tax (BC\u2019s price-tiered PST included), registration, and takes off the federal EVAP rebate and any provincial EV rebate. Insurance is shown but not included.</p><p>Consumption and range are NRCan ratings. September 2026 fuel prices reflect the Gulf shock (diesel at a record C$2.64) and the suspended federal excise tax.</p>`,
-  ALL: `<h2>How the World view works</h2><p>Every car from the eleven country tabs in one list. <b>List price</b> is the home-market sticker converted at ECB reference rates of 29 September 2026 (USD 1.1355, GBP 0.857, INR 108.99, CNY 7.61, AUD 1.62, MXN 20.32, THB 38.06, BRL 5.92, CAD 1.61 per euro; rubles at 73.5 per dollar). <b>Est. on-road</b> is computed with each car\u2019s home rules for its default region and converted the same way.</p><p>Prices are not directly comparable across borders: stickers include very different taxes (5% to 40% GST in India, 2% to 50% excise in Thailand, 35% import duty in Brazil, VAT in Europe, nothing in the US and Canada), and equipment, warranties and safety kit differ. Use this view to spot outliers and value, then read the car\u2019s home tab for what it really costs there.</p><p>Efficiency is shown in the unit you pick; EV ranges come from different test cycles (EPA, WLTP, CLTC, NEDC) and CLTC figures run about 20% optimistic.</p>`,
+  CA: `<h2>How these numbers work</h2><p><b>MSRP</b> is the manufacturer\u2019s Canadian sticker before freight, fees and taxes, for each model\u2019s cheapest trim through its most expensive, from brand sites, Unhaggle and AutoTrader in late September 2026 (2027 model year where already on sale). Brands that only publish all-in prices are backed out and marked <i>Estimate</i>.</p><p><b>Estimated drive-away</b> applies the discount typical for that model, then adds the brand\u2019s freight & PDI, the A/C tax, tire and admin fees, the green levy and federal luxury tax where they apply, your province\u2019s sales tax (BC\u2019s price-tiered PST included), registration, and takes off the federal EVAP rebate and any provincial EV rebate. Insurance is shown but not included.</p><p>Consumption and range are NRCan ratings. September 2026 fuel prices reflect the Gulf shock (diesel at a record C$2.64) and the suspended federal excise tax.</p>`,
+  ALL: `<h2>How the World view works</h2><p>Every car from the eleven country tabs in one list. <b>List price</b> is the home-market sticker converted at ${fxListTxt()}. <b>Est. on-road</b> is computed with each car\u2019s home rules for its default region and converted the same way.</p><p>Prices are not directly comparable across borders: stickers include very different taxes (5% to 40% GST in India, 2% to 50% excise in Thailand, 35% import duty in Brazil, VAT in Europe, nothing in the US and Canada), and equipment, warranties and safety kit differ. Use this view to spot outliers and value, then read the car\u2019s home tab for what it really costs there.</p><p>Efficiency is shown in the unit you pick; EV ranges come from different test cycles (EPA, WLTP, CLTC, NEDC) and CLTC figures run about 20% optimistic.</p>`,
   TH: `<h2>How these numbers work</h2><p><b>Retail price (ราคาป้าย)</b> is the brand’s published price including excise, interior tax and 7% VAT, for each model’s cheapest grade through its most expensive, from brand sites and Thai portals in September 2026. Chinese-brand list prices move every few months and their promo prices are often 5% to 10% below the row.</p><p><b>Estimated on-road</b> applies the discount typical for that model (nothing on waiting-list cars; freebies worth 1% to 3% on Japanese mainstream; 8% to 15% on run-outs and the EV price war), then adds DLT registration, the first year’s annual tax (by engine size, weight for pickups and EVs; the 80% EV discount expired in November 2025), พ.ร.บ. compulsory insurance and a typical dealer processing fee. Taxes are national, so there is no region to pick. First-class insurance is shown but not included since financed cars often get it free.</p><p>km/L and CO2 are Eco Sticker figures; EV range is NEDC for most Chinese, Japanese and Korean EVs and WLTP for Tesla and the Europeans. E20 gasohol is the default petrol price.</p>`
 };
 
@@ -896,9 +997,9 @@ const GLOSS_V = {
   boat: [['MSRP / package price','The brand\u2019s published price. In the US and Canada many boats are priced as a boat-motor-trailer (BMT) package; others list the hull alone and the engine is extra. The row note says which.'],['Freight & prep / commissioning','Shipping from the factory plus rigging, fluids, battery and sea trial. Typically 3% to 6% of the price, charged on top in North America, often inside the price in Europe.'],['Outboard / sterndrive / inboard / jet','Where the engine lives. Outboards hang off the transom (easy to service, most fishing boats), sterndrives sit inside with a drive unit through the transom (runabouts), inboards are fully inside (wake boats), jets have no propeller (jet skis, jet boats).'],['Length overall (LOA)','Hull length in feet; registration fees, slip rents and towing rules scale with it. Boats over about 26 ft are hard to trailer behind a normal car.'],['Capacity plate','The maximum persons and weight the hull is rated for; printed on a plate inside the boat and enforced on the water.'],['Hull types','Deep-V hulls cut chop (center consoles, bowriders); flat and pontoon hulls are stable and shallow (fishing, pontoons); planing wake hulls make the biggest wave.'],['Gallons per hour (gph)','Fuel use at cruise with the standard engine. A 150 hp outboard burns about 6 to 7 gph at 25 knots; multiply by your hours on the water for the fuel bill.'],['Registration / titling','Most countries register boats over a size or power threshold with a state, provincial or maritime authority; fees scale with length and the sticker is renewed every year or three.'],['Trailer','Usually a separate purchase or an option (US$1,500 to US$6,000) and separately registered. Check the tow rating of your car against the boat-motor-trailer weight.'],['Boating licence','Many places require a boating safety certificate or licence above a horsepower or length threshold (PCOC in Canada, state cards in the US, PER/PNB in Spain, boat licences in Australian states).'],['Slip, mooring, storage','Keeping a boat at a marina costs more than the loan payment on many boats; trailer boats avoid it. Shown as information, not added.']]
 };
 const ABOUT_V = {
-  moto: cc => `<h2>How these numbers work</h2><p><b>List price</b> is the maker\u2019s published price for each model\u2019s cheapest variant through its most expensive, on the basis used locally (${cc==='US'||cc==='CA' ? 'MSRP before freight and setup' : cc==='UK' ? 'OTR, with VAT, delivery, registration and first-year VED inside' : cc==='AU' ? 'ride-away where the brand publishes it, RRP plus typical on-road costs otherwise' : cc==='IN' ? 'ex-showroom, GST included' : 'the brand\u2019s retail price with taxes inside'}), compiled in early October 2026. Rows marked <i>preliminary</i> use estimated or unconfirmed pricing.</p><p><b>Estimated ride-away</b> applies the discount typical for that model\u2019s demand, then adds freight and setup where they are charged, the sales, purchase or road tax for your region, registration and plates, and the compulsory insurance where it is bought with the bike. Full insurance is shown as information. Dealer-fitted extras and accessories are not included.</p><p><b>Fuel economy</b> is the maker\u2019s or the official combined figure; electric range is the claimed figure for the biggest battery. Licence classes, learner restrictions and city bans are noted per model where they matter.</p>`,
-  air: cc => `<h2>How these numbers work</h2><p><b>Factory list price</b> is the maker\u2019s 2026 price for each type from the base configuration to a typically equipped one, compiled in October 2026 from manufacturer price lists, type announcements and the trade press. ${cc==='US' ? 'US prices are the maker\u2019s dollar list before sales or use tax.' : cc==='ES' ? 'Prices are the maker\u2019s euro list, or the dollar list converted at ECB rates, before IVA and the registration tax.' : 'Prices are the maker\u2019s dollar or euro list converted at ECB reference rates of 29 September 2026 and shown before VAT, GST and duty, so every row is marked <i>preliminary</i>: the invoice is in the maker\u2019s currency and moves with the exchange rate.'} Business jets and helicopters are quoted typically equipped; the spread in each row covers the usual options.</p><p><b>Estimated delivered</b> applies the discount or premium typical for that type (delivery positions on hot types trade above list; slow sellers and end-of-run types go for 5% to 12% under), then adds delivery and acceptance where the maker charges it, the sales tax, VAT, GST or duty for your region with the exemptions and caps that apply to aircraft, and registration with the national authority. Insurance, hangarage, the annual inspection and a pilot licence are shown as information, since they dwarf the purchase taxes over the years you own it.</p><p><b>Fuel burn</b> is the maker\u2019s cruise figure in gallons or litres per hour; the yearly fuel estimate multiplies it by the flight hours you set in the cost assumptions at local avgas and Jet-A prices. Speed and range are the maker\u2019s long-range cruise figures in knots and nautical miles, with km or miles alongside.</p>`,
-  boat: cc => `<h2>How these numbers work</h2><p><b>List price</b> is the brand\u2019s published price for each model\u2019s cheapest standard package through its most expensive, compiled in early October 2026. In ${cc==='US'||cc==='CA'||cc==='AU' ? 'this market many boats are priced as boat-motor-trailer packages and others as a hull with the engine extra; the note on each row says which' : 'this market the price normally includes the standard engine; trailers, electronics and canvas are extra'}. Rows marked <i>preliminary</i> use estimated or unconfirmed pricing.</p><p><b>Estimated on-the-water</b> applies the discount typical for that model, then adds freight and dealer preparation where they are charged, the sales or purchase tax for your region (with the caps some places apply to boats), registration and titling, and the compulsory insurance where any exists. Trailer registration, slips, mooring and full insurance are shown as information.</p><p><b>Fuel use</b> is a typical cruise figure in gallons or litres per hour for the standard engine; the yearly fuel estimate multiplies it by the engine hours you set in the cost assumptions.</p>`
+  moto: cc => `<h2>How these numbers work</h2><p><b>List price</b> is the maker\u2019s published price for each model\u2019s cheapest variant through its most expensive, on the basis used locally (${cc==='US'||cc==='CA' ? 'MSRP before freight and setup' : cc==='UK' ? 'OTR, with VAT, delivery, registration and first-year VED inside' : cc==='AU' ? 'ride-away where the brand publishes it, RRP plus typical on-road costs otherwise' : cc==='IN' ? 'ex-showroom, GST included' : 'the brand\u2019s retail price with taxes inside'}), compiled in early October 2026. Rows marked <i>Estimate</i> use estimated or unconfirmed pricing; <i>Listed</i> rows are the maker\u2019s published price on the compile date.</p><p><b>Estimated ride-away</b> applies the discount typical for that model\u2019s demand, then adds freight and setup where they are charged, the sales, purchase or road tax for your region, registration and plates, and the compulsory insurance where it is bought with the bike. Full insurance is shown as information. Dealer-fitted extras and accessories are not included.</p><p><b>Fuel economy</b> is the maker\u2019s or the official combined figure; electric range is the claimed figure for the biggest battery. Licence classes, learner restrictions and city bans are noted per model where they matter.</p>`,
+  air: cc => `<h2>How these numbers work</h2><p><b>Factory list price</b> is the maker\u2019s 2026 price for each type from the base configuration to a typically equipped one, compiled in October 2026 from manufacturer price lists, type announcements and the trade press. ${cc==='US' ? 'US prices are the maker\u2019s dollar list before sales or use tax.' : cc==='ES' ? 'Prices are the maker\u2019s euro list, or the dollar list converted at ECB rates, before IVA and the registration tax.' : 'Prices are the maker\u2019s dollar or euro list converted at ECB reference rates of ' + fmtDate((FX_SRC.convertedAt||{}).air) + ' and shown before VAT, GST and duty, so every row is marked <i>Converted</i>: the invoice is in the maker\u2019s currency and moves with the exchange rate.'} Business jets and helicopters are quoted typically equipped; the spread in each row covers the usual options.</p><p><b>Estimated delivered</b> applies the discount or premium typical for that type (delivery positions on hot types trade above list; slow sellers and end-of-run types go for 5% to 12% under), then adds delivery and acceptance where the maker charges it, the sales tax, VAT, GST or duty for your region with the exemptions and caps that apply to aircraft, and registration with the national authority. Insurance, hangarage, the annual inspection and a pilot licence are shown as information, since they dwarf the purchase taxes over the years you own it.</p><p><b>Fuel burn</b> is the maker\u2019s cruise figure in gallons or litres per hour; the yearly fuel estimate multiplies it by the flight hours you set in the cost assumptions at local avgas and Jet-A prices. Speed and range are the maker\u2019s long-range cruise figures in knots and nautical miles, with km or miles alongside.</p>`,
+  boat: cc => `<h2>How these numbers work</h2><p><b>List price</b> is the brand\u2019s published price for each model\u2019s cheapest standard package through its most expensive, compiled in early October 2026. In ${cc==='US'||cc==='CA'||cc==='AU' ? 'this market many boats are priced as boat-motor-trailer packages and others as a hull with the engine extra; the note on each row says which' : 'this market the price normally includes the standard engine; trailers, electronics and canvas are extra'}. Rows marked <i>Estimate</i> use estimated or unconfirmed pricing; <i>Listed</i> rows are the maker\u2019s published price on the compile date.</p><p><b>Estimated on-the-water</b> applies the discount typical for that model, then adds freight and dealer preparation where they are charged, the sales or purchase tax for your region (with the caps some places apply to boats), registration and titling, and the compulsory insurance where any exists. Trailer registration, slips, mooring and full insurance are shown as information.</p><p><b>Fuel use</b> is a typical cruise figure in gallons or litres per hour for the standard engine; the yearly fuel estimate multiplies it by the engine hours you set in the cost assumptions.</p>`
 };
 function glossFor(cc, vt){ if (vt==='car') return GLOSS[cc]; const extra = ((VFEES[cc]||{})[vt]||{}).glossary || []; return GLOSS_V[vt].concat(extra); }
 function aboutFor(cc, vt){ return vt==='car' ? ABOUT[cc] : ABOUT_V[vt](cc); }
@@ -920,7 +1021,7 @@ const TOP = c => CC==='ALL' ? c.wtop : c.top;
 const DEF_A_CACHE = {}; function DEFA(cc, vt){ const k = vt+'/'+cc; return DEF_A_CACHE[k] || (DEF_A_CACHE[k] = defA(cc, vt)); }
 function annualFuel(c){ if (CC==='ALL'){ const f = fuelCost(c.home, DEFA(c.cc, VT), c.cc); return f==null ? null : toWorld(f, c.cc); } return fuelCost(c, A, CC); }
 function bd(c, price){
-  if (CC!=='ALL') return breakdown(CC, c, price, S.state, M);
+  if (CC!=='ALL') return breakdown(CC, c, price, S.state, M, CC==='US' ? {trade:A.trade||0, loc:S.loc} : null);
   const o = breakdown(c.cc, c.home, price, regionDefault(c.cc), MONEY[c.cc]);
   return Object.assign(o, {lo:toWorld(o.lo, c.cc), hi:toWorld(o.hi, c.cc), dlo:toWorld(o.dlo, c.cc), dhi:toWorld(o.dhi, c.cc), head:`${CC_NAME[c.cc]} · ${o.head} · in ${CUR[c.cc]}`});
 }
@@ -1002,35 +1103,95 @@ function silKey(c){
   if (c.vt==='air') return ({'Light jet':'jet','Midsize jet':'jet','Large jet':'jet',Helicopter:'heli',eVTOL:'evtol',Gyroplane:'gyro',Glider:'glider'})[c.body] || 'plane';
   return ({SUV:'suv',Truck:'truck',Pickup:'truck',Van:'van',Minivan:'van',MPV:'van',Hatch:'hatch',Wagon:'wagon',Coupe:'coupe',Conv:'conv',Sports:'coupe'})[c.body] || 'sedan';
 }
+const REPO = 'https://github.com/destinjones/carfinder';
+const APP_VERSION = '/*__APP_VERSION__*/';            // stamped by src/build.js from its VERSION constant
+function permalink(opts){ return location.origin.replace(/^null$/, 'file://') + location.pathname + location.search + '#' + viewHash(opts); }
+function issueURL(c){
+  const o = bd(c, c.price); const hcc = CC==='ALL' ? c.cc : CC;
+  const p = new URLSearchParams({template:'wrong-price.yml', labels:'wrong price', title:`Wrong price: ${c.make} ${c.model} (${hcc})`,
+    vehicle:`${c.make} ${c.model} ${c.year} · ${VT_LABEL[VT]} · ${CC_NAME[hcc]||hcc}`, region:regionName(CC, S.state),
+    shown:`${C.cardPriceLabel}: ${money(P(c))}${TOP(c)>P(c)?' – '+money(TOP(c)):''} · ${C.otdLabel}: ${M.range(o.lo, o.hi)}`, link:permalink({detail:c})});
+  return REPO + '/issues/new?' + p.toString();
+}
+/* the provenance panel in the detail sheet: price list, cross-checks, compile date and status, the rules applied and their citation */
+const hostOf = u => u.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '');
+function provHTML(c){
+  const hcc = CC==='ALL' ? c.cc : CC; const pv = provenance(c.home || c, hcc);
+  const link = (name, url) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(name)}</a>` : `${esc(name)} <span class="nolink" title="This source has no public web page to link">not linked</span>`;
+  const maker = pv.maker.bp ? `${link(pv.maker.name + ' build & price', pv.maker.bp)} <span class="muted">(${esc(hostOf(pv.maker.bp))})</span>`
+    : pv.maker.url ? `${link(pv.maker.name + ' site', pv.maker.url)} <span class="muted">(${esc(hostOf(pv.maker.url))})</span>`
+    : `${esc(pv.maker.name)} <span class="nolink" title="No maker page is linked for this brand yet">no maker link yet</span>`;
+  const srcs = pv.sources.map(([n,u]) => link(n, u)).join(' · ');
+  const status = `<b class="${STATUS[pv.status].cls}">${STATUS[pv.status].label}</b>: ${esc(pv.why)}`;
+  const region = CC==='ALL' ? regionDefault(hcc) : S.state;
+  const rulesWhere = CC==='ALL' ? `${CC_NAME[hcc]} rules for ${esc(regionName(hcc, region))}` : `${esc(regionName(CC, S.state))} rules`;
+  const rs = regionSource(hcc, region, CC==='US' ? S.loc : null);
+  let fxTxt = '';
+  if (CC==='ALL' && pv.fx){
+    fxTxt = `; converted at ${link('ECB rates of '+fmtDate(pv.fx.date), pv.fx.url)}`;
+    const mv = fxMove(CUR[hcc], WCUR, pv.fxCompiled);
+    if (CUR[hcc] !== WCUR && mv != null && Math.abs(mv) >= 0.005) fxTxt += ` (the ${CUR_NAME[CUR[hcc]].replace(/s$/, '')} has moved ${pctTxt(mv)} against ${CUR_NAME[WCUR]} since this list was compiled)`;
+  }
+  const mail = (SOURCES.contact && SOURCES.contact.email) ? `<a class="btn" href="${esc(mailtoURL(c))}">E-mail it</a>` : '';
+  return `<div class="panel prov"><h4>Where this price comes from</h4><dl class="prov-l">
+    <div><dt>Price list</dt><dd>${maker} · ${esc(pv.basis)}</dd></div>
+    ${srcs ? `<div><dt>Compiled from</dt><dd>${srcs}</dd></div>` : ''}
+    <div><dt>Compiled</dt><dd>${fmtDate(pv.compiled)} (the whole ${esc(VT_LABEL[VT].toLowerCase())} list)</dd></div>
+    <div><dt>Status</dt><dd>${status}</dd></div>
+    <div><dt>Taxes and fees</dt><dd>${rulesWhere} as of ${fmtDate(pv.rulesAsOf)}${rs ? ` · source: ${link(rs.name, rs.url)}` : ''}${fxTxt} · <a href="methodology.html#${hcc.toLowerCase()}" target="_blank" rel="noopener">how we calculate</a></dd></div>
+  </dl><div class="prov-act"><a class="btn" href="${esc(issueURL(c))}" target="_blank" rel="noopener">Wrong price? Tell us</a><button class="btn" type="button" id="dCopyBtn">Copy the details</button>${mail}</div>
+  <p class="fine">“Tell us” opens a GitHub issue with this vehicle, your region and the figures shown already filled in (a free account is needed to post it). “Copy the details” puts the same text on your clipboard to paste into an e-mail or a message, no account needed.</p>
+  <p class="print-only fine">Printed from ${esc(permalink({detail:c}))}</p></div>`;
+}
+/* the plain-text version of a report: what the "Copy the details" button and the e-mail fallback carry */
+function reportText(c){
+  const hcc = CC==='ALL' ? c.cc : CC; const pv = provenance(c.home || c, hcc); const o = bd(c, c.price);
+  const src = pv.maker.bp || pv.maker.url;
+  return [`Wrong price report · CarFinder ${APP_VERSION}`,
+    `Vehicle: ${c.make} ${c.model} ${c.year} · ${VT_LABEL[VT]} · ${CC_NAME[hcc]||hcc}`,
+    `Region: ${regionName(CC, S.state)}`,
+    `Shown: ${C.cardPriceLabel}: ${money(P(c))}${TOP(c)>P(c)?' – '+money(TOP(c)):''} · ${C.otdLabel}: ${M.range(o.lo, o.hi)}`,
+    `Source: ${pv.maker.name}${src ? ' (' + src + ')' : ''} · ${pv.basis}`,
+    `Compiled: ${fmtDate(pv.compiled)} · ${STATUS[pv.status].label}${pv.status === 'converted' || pv.status === 'estimated' ? ' (' + pv.why + ')' : ''}`,
+    `Link: ${permalink({detail:c})}`,
+    `Correct price and where you saw it: `].join('\n');
+}
+function mailtoURL(c){ const to = SOURCES.contact && SOURCES.contact.email; return `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(`Wrong price: ${c.make} ${c.model}`)}&body=${encodeURIComponent(reportText(c))}`; }
+function copyReport(c){
+  const t = reportText(c); const done = () => toast('Details copied. Paste them into an e-mail, a message or an issue.');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, () => toast('Could not copy; select the text in the sheet instead.'));
+  else toast('Could not copy; select the text in the sheet instead.');
+}
 function creditHTML(c){ const r = imgRec(c); if (!r) return ''; return `<p class="fine credit-line">Photo: ${esc(r.artist||'unknown author')}${r.license ? ', '+esc(r.license) : ''}, via <a href="https://commons.wikimedia.org/wiki/File:${encodeURIComponent(r.file)}" target="_blank" rel="noopener">Wikimedia Commons</a>${r.approx ? ' · may show an earlier generation or another market’s version' : ''}</p>`; }
+/* the card is a window sticker: make, model and year, then the two prices, one line of specs and at most one status
+   (the price status when it is not a maker's list price, otherwise the market band); everything else is in the sheet */
+const CMP_BOX = '<span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>';
+function cmpBtnHTML(c){ const on = compare.includes(c.id); return `<button class="cmp" type="button" data-cmp="${c.id}" aria-pressed="${on}" aria-label="Compare ${esc(c.make+' '+c.model)}">${CMP_BOX}Compare</button>`; }
+function otdSize(s){ const n = s.length; return n <= 9 ? '' : n <= 10 ? ' l1' : n <= 12 ? ' l2' : n <= 14 ? ' l3' : ' l4'; }   // the drive-off figure steps down a size as the range gets longer, so it stays on one line
 function cardHTML(c){
   const o = CC==='ALL' ? {lo:c.wlo, hi:c.whi} : bd(c, c.price);
-  const tags = [`<span class="tag">${C.bodyLabel[c.body]||c.body} · ${c.size}</span>`, `<span class="tag f-${c.fuel}">${c.fuels.map(fuelLbl).join(' / ')}</span>`];
-  if (CC==='ALL') tags.unshift(`<span class="tag cc">${CC_NAME[c.cc]}</span>`);
-  if (c.cls!=='Mainstream') tags.push(`<span class="tag">${C.clsLabel[c.cls]||c.cls}</span>`);
-  if (c.year===2025) tags.push(`<span class="tag left">2025 leftover</span>`);
-  if (c.year===2027) tags.push(`<span class="tag new">2027 arrival</span>`);
-  if (c.isNew) tags.push(`<span class="tag new">New or updated</span>`);
-  if (c.est) tags.push(`<span class="tag est">Preliminary</span>`);
-  const inCmp = compare.includes(c.id);
+  const hcc = CC==='ALL' ? c.cc : CC;
+  let status;
+  if (c.est){ const st = rowStatus(c, hcc); status = `<span class="tag ${st === 'converted' ? 'cv' : 'est'}" title="${esc(STATUS[st].desc)}">${STATUS[st].short}</span>`; }
+  else status = `<span class="mkt m-${c.mkt}">${mktTxt(hcc, c)[0]}</span>`;
   const topTxt = TOP(c) > P(c) ? `up to ${moneyK(TOP(c))} · ` : '';
   const sub = CC==='ALL' ? `${topTxt}${MONEY[c.cc].k(c.price)} at home` : VT==='air' ? `${topTxt}${c.dest ? '+'+moneyK(c.dest)+' delivery' : 'before tax'}` : VT!=='car' ? `${topTxt}${c.dest ? '+'+money(c.dest)+' freight' : (CC==='UK'||CC==='AU'||CC==='IN') ? 'as published' : 'taxes included'}` : CC==='US' ? `${topTxt}+${money(c.dest)} dest.` : CC==='IN' ? `${topTxt}incl. ${c.gst}% GST` : CC==='UK' ? `${topTxt}all taxes in` : CC==='AU' ? `${topTxt}before on-roads` : CC==='CA' ? `${topTxt}before freight & tax` : `${topTxt}taxes included`;
   const fuelCostV = annualFuel(c);
+  const otd = M.range(o.lo, o.hi).replace(/ /g, '\u00a0');   // break only after the dash
+  const kind = [C.bodyLabel[c.body]||c.body, c.size, c.fuels.map(fuelLbl).join(' / ')].filter(Boolean).map(esc).join(' · ');
   return `<article class="card" data-id="${c.id}">
     ${photoHTML(c, 'card')}
-    <div class="card-top">
-      <div><div class="mk">${esc(c.make)}</div><h3>${esc(c.model)}<span class="yr">${c.year}</span></h3></div>
-      <button class="cmp" type="button" data-cmp="${c.id}" aria-pressed="${inCmp}">${inCmp?'✓ Comparing':'+ Compare'}</button>
+    <div class="card-body">
+      <div class="mk"><span>${esc(c.make)}</span>${CC==='ALL' ? `<span aria-hidden="true">·</span><span class="cc">${CC_NAME[c.cc]}</span>` : ''}</div>
+      <h3><button class="open" type="button" data-detail="${c.id}">${esc(c.model)}</button><span class="yr">${c.year}</span></h3>
+      <div class="kind">${kind}</div>
+      <div class="prices">
+        <div class="pbox"><div class="lbl">${C.cardPriceLabel}</div><div class="val">${VT!=='air' && (CC==='US'||CC==='UK'||(CC==='ALL'&&['USD','GBP','EUR','CAD','AUD'].includes(WCUR)))?money(P(c)):moneyK(P(c))}</div><div class="sub">${sub}</div></div>
+        <div class="pbox otd"><div class="lbl">${C.otdLabel} · ${esc(CC==='ALL'?WCUR:C.stateShort(S.state))}</div><div class="val${otdSize(otd)}">${otd.replace('–','–<wbr>')}</div><div class="sub">${C.otdSub}</div></div>
+      </div>
+      <div class="specs"><div class="sp">${specsHTML(c)}${fuelCostV!=null?`<span class="fuelyr">~${moneyK(fuelCostV)}/yr fuel</span>`:''}</div></div>
     </div>
-    <div class="tags">${tags.join('')}</div>
-    <div class="prices">
-      <div class="pbox"><div class="lbl">${C.cardPriceLabel}</div><div class="val">${VT!=='air' && (CC==='US'||CC==='UK'||(CC==='ALL'&&['USD','GBP','EUR','CAD','AUD'].includes(WCUR)))?money(P(c)):moneyK(P(c))}</div><div class="sub">${sub}</div></div>
-      <div class="pbox otd"><div class="lbl">${C.otdLabel} · ${esc(CC==='ALL'?WCUR:C.stateShort(S.state))}</div><div class="val${M.range(o.lo,o.hi).length>=12?' long':''}">${M.range(o.lo, o.hi).replace('–','–<wbr>')}</div><div class="sub">${C.otdSub}</div></div>
-    </div>
-    <div class="specs">${specsHTML(c)}${fuelCostV!=null?`<span class="muted">~${moneyK(fuelCostV)}/yr fuel</span>`:''}</div>
-    <div class="mkt m-${c.mkt}">${mktTxt(CC==='ALL' ? c.cc : CC, c)[0]}</div>
-    <p class="note">${esc(c.note)}</p>
-    <button class="btn more" type="button" data-detail="${c.id}">Details &amp; cost breakdown</button>
+    <div class="card-foot"><div class="status">${status}</div>${cmpBtnHTML(c)}</div>
   </article>`;
 }
 function updateMore(){
@@ -1051,7 +1212,7 @@ function render(){
   $('resTitle').textContent = parts.length ? parts.join(' · ') : (S.q ? `Results for “${S.q}”` : 'All ' + VERT[VT].noun);
   const n = activeCount(); $('fcount').hidden = !n; $('fcount').textContent = n;
   $('applyCount').textContent = lastList.length.toLocaleString('en-US');
-  updateCmpBar();
+  updateCmpBar(); syncHash();
 }
 function renderMore(){                       // append the next page instead of rebuilding the whole list
   const start = (page-1)*PAGE;
@@ -1071,19 +1232,20 @@ function updateCmpBar(){
 
 /* ===== detail ===== */
 let detailCar = null, detailT = 0;
-function openDetail(id){
+function openDetail(id, fromHistory){
   detailCar = CARS[id]; if (!detailCar) return; detailT = 0;
-  $('dMake').textContent = detailCar.make + (detailCar.est ? ' · preliminary pricing' : '');
+  $('dMake').textContent = detailCar.make + (detailCar.est ? ' · ' + (rowStatus(detailCar, CC==='ALL' ? detailCar.cc : CC) === 'converted' ? 'converted list price' : 'estimated pricing') : '');
   $('dTitle').textContent = `${detailCar.model} ${detailCar.year}`;
   renderDetail();
   $('dBody').scrollTop = 0;
   if (!$('dlgDetail').open) $('dlgDetail').showModal();
+  sheetOpened('dlgDetail', fromHistory === true);
 }
 const wbr = s => s.replace(/ – /g, ' –<wbr> ');   // let long price ranges wrap after the dash on narrow screens
 function stickerHTML(o, totalLabel, ML){
   const lo = CC==='ALL' ? o.lo/FX[WCUR]*FX[CUR[detailCar.cc]] : o.lo, hi = CC==='ALL' ? o.hi/FX[WCUR]*FX[CUR[detailCar.cc]] : o.hi;
   return `<div class="sticker"><div class="st-head"><span>Cost breakdown</span><span>${esc(o.head)}</span></div><div class="st-rows">
-    ${o.lines.map(l => `<div class="st-row ${l.cls||''}"><span class="k">${esc(l.k)}${l.sub?`<small>${esc(l.sub)}</small>`:''}</span><span class="v">${wbr(esc(l.v))}</span></div>`).join('')}
+    ${o.lines.map(l => `<div class="st-row ${l.cls||''}"><span class="k"><span>${esc(l.k)}</span></span><span class="v">${wbr(esc(l.v))}</span>${l.sub?`<small class="s">${esc(l.sub)}</small>`:''}</div>`).join('')}
     <div class="st-row total"><span class="k">${totalLabel}</span><span class="v">${ML.money(lo)} –<wbr> ${ML.money(hi)}</span></div>
   </div></div>`;
 }
@@ -1141,9 +1303,9 @@ function detailDynamic(){
   const mid = (o.lo + o.hi)/2;
   return {
     trimVal: `<b>${ML.money(price)}</b> <span class="sm muted">${HC.cardPriceLabel} for the ${HC.trimWord} you picked</span>`,
-    world: CC==='ALL' ? `<div class="panel"><h4>Converted to ${CUR_NAME[WCUR]}</h4><div class="big">${money(o.lo)} –<wbr> ${money(o.hi)}</div><p class="sm">Estimated on-road in ${CC_NAME[c.cc]} (${regionName(c.cc, regionDefault(c.cc))}) at ECB reference rates of 29 Sept 2026. List price ${money(toWorld(price, c.cc))}. Open the ${CC_NAME[c.cc]} tab for other regions.</p></div>` : '',
+    world: CC==='ALL' ? `<div class="panel"><h4>Converted to ${CUR_NAME[WCUR]}</h4><div class="big">${money(o.lo)} –<wbr> ${money(o.hi)}</div><p class="sm">Estimated on-road in ${CC_NAME[c.cc]} (${regionName(c.cc, regionDefault(c.cc))}) at ECB reference rates of ${fmtDate(FX_DATE)}. List price ${money(toWorld(price, c.cc))}. Open the ${CC_NAME[c.cc]} tab for other regions.</p></div>` : '',
     sticker: stickerHTML(o, HC.otdLabel, ML),
-    pay: `<h4>Est. monthly payment</h4><div class="big">${money(monthlyPay(mid, AA))}<span class="sm"> / mo</span></div><p class="sm">${AA.down}% down, ${AA.apr}% rate, ${AA.term} months, on the midpoint ${HC.otdLabel.replace('Est. ','')} price${CC==='ALL'?' with '+CC_NAME[c.cc]+' loan norms':''}. ${CC==='ALL'?'':'Change these under “Cost assumptions”.'}</p>`
+    pay: `<h4>Est. monthly payment</h4><div class="big">${money(monthlyPay(mid, AA))}<span class="sm"> / mo</span></div><p class="sm">${AA.down}% down${AA.trade ? ' plus your '+money(AA.trade)+' trade-in' : ''}, ${AA.apr}% rate, ${AA.term} months, on the midpoint ${HC.otdLabel.replace('Est. ','')} price${CC==='ALL'?' with '+CC_NAME[c.cc]+' loan norms':''}. ${CC==='ALL'?'':'Change these under “Cost assumptions”.'}</p>`
   };
 }
 function updateDetailPrice(){ const d = detailDynamic(); $('dTrimVal').innerHTML = d.trimVal; $('dWorld').innerHTML = d.world; $('dSticker').innerHTML = d.sticker; $('dPay').innerHTML = d.pay; }
@@ -1179,7 +1341,7 @@ function renderDetail(){
   $('dBody').innerHTML = `
     ${photoHTML(c, 'detail')}${creditHTML(c)}
     <div class="tags">${CC==='ALL'?`<span class="tag cc">${CC_NAME[c.cc]}</span>`:''}<span class="tag">${C.bodyLabel[c.body]||c.body} · ${c.size}</span><span class="tag f-${c.fuel}">${c.fuels.map(fuelLbl).join(' / ')}</span><span class="tag">${C.clsLabel[c.cls]||c.cls}</span><span class="tag">${c.seats} ${c.vt==='boat'?'people':'seats'}</span><span class="tag">${esc(c.drive)}</span>${c.year===2025?'<span class="tag left">2025 leftover</span>':''}${c.year===2027?'<span class="tag new">2027 arrival</span>':''}${c.isNew?'<span class="tag new">New or updated</span>':''}</div>
-    <p>${esc(c.note)}</p>
+    <p class="d-note">${esc(c.note)}</p>
     <div class="trim">
       <div class="trim-lbls"><span>Base ${HC.trimWord} ${ML.money(c.price)}</span><span>Top ${HC.trimWord} ${ML.money(c.top)}</span></div>
       <input type="range" id="trimRange" min="0" max="100" step="1" value="${Math.round(detailT*100)}" aria-label="Trim level" ${c.top===c.price?'disabled':''}>
@@ -1192,9 +1354,12 @@ function renderDetail(){
       <div class="panel"><h4>Est. yearly fuel or charging</h4>${fuelLine}</div>
     </div>
     <div class="panel"><h4>${c.vt==='boat'?'Size, power and fuel burn':c.vt==='air'?'Speed, range and fuel burn':c.vt==='moto'?'Engine and economy':HCC==='US'?'EPA efficiency':'Efficiency'}</h4>${effPanel(c)}${c.vt==='car' && evNote?`<p class="fine">${evNote}</p>`:''}</div>
-    <div class="panel"><h4>Why this price band</h4><p class="sm">${mktTxt(HCC, c)[1]}</p><p class="fine">${industry} Current offers are on ${esc(c.make)}’s website.</p></div>
-    <div class="dlg-actions"><button class="btn primary" type="button" id="dCmpBtn">Add to compare</button><button class="btn" type="button" data-close>Close</button></div>`;
+    <div class="panel"><h4>Why this price band</h4><p class="mkt m-${c.mkt}">${mktTxt(HCC, c)[0]}</p><p class="sm">${mktTxt(HCC, c)[1]}</p><p class="fine">${industry} Current offers are on ${esc(c.make)}’s website.</p></div>
+    ${provHTML(c)}
+    <div class="dlg-actions"><button class="btn primary" type="button" id="dCmpBtn">Add to compare</button><button class="btn" type="button" id="dShareBtn">Share</button><button class="btn" type="button" data-close>Close</button></div>`;
   updateDetailCmpBtn();
+  $('dShareBtn').addEventListener('click', () => shareLink(`${c.make} ${c.model} · CarFinder 2026`, {detail:c}));
+  $('dCopyBtn').addEventListener('click', () => copyReport(c));
   const tr = $('trimRange');
   if (tr) tr.addEventListener('input', e => { detailT = +e.target.value/100; updateDetailPrice(); });
   $('dCmpBtn').addEventListener('click', () => { toggleCompare(c.id); updateDetailCmpBtn(); });
@@ -1206,17 +1371,17 @@ function toggleCompare(id){
   if (i>=0) compare.splice(i,1);
   else { if (compare.length>=4){ toast('Compare holds four at a time. Remove one first.'); return; } compare.push(id); }
   store(cmpKey(), compare);
-  document.querySelectorAll(`[data-cmp="${id}"]`).forEach(b => { const on = compare.includes(id); b.setAttribute('aria-pressed', on); b.textContent = on ? '✓ Comparing' : '+ Compare'; });
-  updateCmpBar();
+  document.querySelectorAll(`[data-cmp="${id}"]`).forEach(b => b.setAttribute('aria-pressed', compare.includes(id)));
+  updateCmpBar(); syncHash();
 }
 function cmpKey(){ return VT==='car' ? 'cmp_'+CC : 'cmp_'+VT+'_'+CC; }
-function openCompare(){
+function openCompare(fromHistory){
   const cs = compare.map(id=>CARS[id]);
   const row = (label, f, cls) => `<tr><td>${label}</td>${cs.map(c=>`<td class="${cls||''}">${f(c)}</td>`).join('')}</tr>`;
   const one = VERT[VT].one;
   $('cTitle').textContent = `Compare ${cs.length}`;
   $('cBody').innerHTML = `${cs.length>2 || innerWidth<400 ? `<p class="cmp-hint">Swipe the table sideways to see every ${one}</p>` : ''}<div class="cmp-wrap"><table class="cmp-t">
-    <thead><tr><th></th>${cs.map(c=>`<th>${esc(c.model)}<small>${esc(c.make)} · ${c.year}</small></th>`).join('')}</tr></thead>
+    <thead><tr><th></th>${cs.map(c=>`<th><small>${esc(c.make)} · ${c.year}</small>${esc(c.model)}</th>`).join('')}</tr></thead>
     <tbody>
     ${CC==='ALL' ? row('Country', c=>CC_NAME[c.cc]) : ''}
     ${row('Type', c=>`${C.bodyLabel[c.body]||c.body} · ${c.size}`)}
@@ -1224,7 +1389,7 @@ function openCompare(){
     ${row(C.cardPriceLabel, c=>TOP(c)>P(c)?`${money(P(c))} – ${money(TOP(c))}`:money(P(c)), 'num')}
     ${CC==='ALL' ? row('Home-market price', c=>c.top>c.price?`${MONEY[c.cc].money(c.price)} – ${MONEY[c.cc].money(c.top)}`:MONEY[c.cc].money(c.price), 'num') : ''}
     ${VT!=='car' ? (cs.some(c=>c.dest) ? row(VT==='air' ? 'Delivery' : 'Freight & setup', c=>c.dest?money(c.dest):'included', 'num') : '') : CC==='US' ? row('Destination', c=>money(c.dest), 'num') : CC==='IN' ? row('GST rate', c=>c.gst+'%', 'num') : ''}
-    ${row(`${C.otdLabel} (${esc(CC==='ALL'?'home region, '+WCUR:regionName(CC, S.state))})`, c=>{const o=bd(c,c.price); return `${money(o.lo)} – ${money(o.hi)}`;}, 'num')}
+    ${row(`${C.otdLabel} (${esc(CC==='ALL'?'home region, '+WCUR:regionName(CC, S.state))})`, c=>{const o=bd(c,c.price); return `${money(o.lo)} – ${money(o.hi)}`;}, 'num otd')}
     ${row('Est. monthly', c=>{const o=bd(c,c.price); return money(monthlyPay((o.lo+o.hi)/2, CC==='ALL'?DEFA(c.cc, VT):A))+'/mo';}, 'num')}
     ${VT==='air' ? row('Base price per seat', c=>money(P(c)/(c.seats||1)), 'num') : row('Base price per hp (peak power)', c=>c.hp ? money(P(c)/c.hp) : 'n/a', 'num')}
     ${VT==='boat' ? row('Length', c=>lenTxt(c)) : ''}
@@ -1238,15 +1403,17 @@ function openCompare(){
     ${row('Market', c=>mktTxt(CC==='ALL'?c.cc:CC, c)[0])}
     ${row('Notes', c=>esc(c.note))}
     ${row('', c=>`<button class="rm" type="button" data-rm="${c.id}">Remove</button>`)}
-    </tbody></table></div>`;
+    </tbody></table></div><div class="dlg-actions"><button class="btn" type="button" id="cShareBtn">Share this comparison</button><button class="btn" type="button" data-close>Close</button></div>`;
+  $('cShareBtn').addEventListener('click', () => shareLink(`Compare ${cs.length} · CarFinder 2026`));
   $('cBody').querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click', ()=>{ toggleCompare(+b.dataset.rm); if (compare.length<2){ $('dlgCompare').close(); } else openCompare(); render(); }));
   $('cBody').scrollTop = 0;
-  if (!$('dlgCompare').open) $('dlgCompare').showModal();
+  if (!$('dlgCompare').open){ $('dlgCompare').showModal(); sheetOpened('dlgCompare', fromHistory === true); }
 }
 
 /* ===== toast ===== */
 let toastT;
-function toast(msg){ let t = document.querySelector('.toast'); if (!t){ t = document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); document.body.appendChild(t);} t.textContent = msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{t.hidden=true;},3200); }
+function toastEl(){ let t = document.querySelector('.toast'); if (!t){ t = document.createElement('div'); t.className = 'toast off'; t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite'); t.setAttribute('aria-atomic', 'true'); document.body.appendChild(t); } return t; }
+function toast(msg){ const t = toastEl(); t.textContent = ''; requestAnimationFrame(() => { t.textContent = msg; t.classList.remove('off'); }); clearTimeout(toastT); toastT = setTimeout(() => { t.classList.add('off'); setTimeout(() => { if (t.classList.contains('off')) t.textContent = ''; }, 250); }, 3200); }
 
 /* ===== country-specific chrome ===== */
 function effOut(v){ if (!v) return 'Any'; const u = C.eff.unit; if (u==='mpg' && CC!=='UK') return v+' mpg'; if (u==='mpg') return v+' mpg UK / '+Math.round(v*0.8327)+' US'; if (u==='kmpl' || u==='km/L') return v+' '+u+' / '+usMpg(100/v)+' mpg'; if (u==='L/100km') return v+' L/100km / '+usMpg(v)+' mpg'; if (u==='L/h') return v+' L/h / '+Math.round(v/3.785*10)/10+' gal/h'; return v+' '+u; }
@@ -1266,6 +1433,15 @@ function applySliders(){
   $('optHp').textContent = C.powerSort || 'Most horsepower'; $('optPerhp').textContent = C.perSort || 'Cheapest per horsepower';
 }
 function rngOut(v){ if (!v) return 'Any'; const u = C.rng.unit; if (u==='km') return v+' km / '+usMi(v)+' mi'; if (u==='ft') return v+' ft / '+(v*0.3048).toFixed(1)+' m'; if (u==='nm') return v.toLocaleString('en-US')+' nm / '+Math.round(v*1.852).toLocaleString('en-US')+' km'; return v+' '+u; }
+/* the masthead's data-as-of line: compile date, the rates and their drift on the World tab, the estimate count, the version */
+function statusCounts(){ const o = {checked:0, listed:0, converted:0, estimated:0, est:0}; for (const c of CARS){ o[rowStatus(c, CC==='ALL' ? c.cc : CC)]++; if (c.est) o.est++; } return o; }
+function updateAsof(){
+  const asof = provenance({vt:VT, make:'', est:0}, CC==='ALL' ? 'US' : CC);
+  const sc = statusCounts(); const n = CARS.length.toLocaleString('en-US');
+  const parts = []; if (sc.converted) parts.push(`${sc.converted.toLocaleString('en-US')} converted`); if (sc.estimated) parts.push(`${sc.estimated.toLocaleString('en-US')} estimated`);
+  const moved = CC==='ALL' ? fxMovedTxt(VT) : '';
+  $('asof').innerHTML = `Prices and tax rules as of <b>${fmtDate(asof.compiled)}</b>${CC==='ALL' && asof.fx ? ` · converted at ECB rates of ${fmtDate(asof.fx.date)}` : ''}${moved}${parts.length ? ` · <span class="estcount">of ${n} prices, <a href="methodology.html#dates" title="What listed, converted and estimated mean">${parts.join(' and ')}</a></span>` : ` · <span class="estcount">all ${n} prices from the makers\u2019 lists</span>`} · <a href="methodology.html#${CC==='ALL' ? 'world' : CC.toLowerCase()}">How we calculate</a> · <a href="${REPO}/releases/tag/v${APP_VERSION}" target="_blank" rel="noopener" title="Cite this version: the changelog lists what each release changed">v${APP_VERSION}</a><span class="asof-rep"> · <a href="${REPO}/issues/new?template=wrong-price.yml" target="_blank" rel="noopener">Report a wrong price</a></span>`;
+}
 function buildChrome(){
   const V = VERT[VT];
   document.documentElement.setAttribute('data-country', CC); document.documentElement.setAttribute('data-vt', VT);
@@ -1273,14 +1449,20 @@ function buildChrome(){
   document.querySelectorAll('.ctab').forEach(b => b.setAttribute('aria-selected', b.dataset.country===CC));
   const tabs = $('countryTabs'), tab = tabs.querySelector(`.ctab[data-country="${CC}"]`);
   if (tab) tabs.scrollLeft = Math.max(0, tab.offsetLeft - tabs.offsetLeft - (tabs.clientWidth - tab.offsetWidth)/2);   // keep the active country visible on phones
-  $('pageTitle').innerHTML = `CarFinder <span>${C.title}</span> 2026${VT==='car' ? '' : ` <em>${V.name}</em>`}`;
+  $('pageTitle').innerHTML = `${esc(C.title)} <span class="what"><span class="wl">${V.name}</span><span class="ws" aria-hidden="true">${V.short}</span></span>`;   // phones show the short name
   document.title = `CarFinder 2026 · ${V.name} · ${CC==='ALL' ? 'World' : C.name}`;
   $('lede').textContent = C.lede;
+  updateAsof();
+  const sc = statusCounts();
+  $('showEstLbl').textContent = sc.est ? `Include the ${sc.est.toLocaleString('en-US')} with ${sc.converted && sc.estimated ? 'converted or estimated' : sc.converted ? 'converted' : 'estimated'} prices` : 'Include models with estimated pricing';
+  $('estGroup').hidden = sc.est === 0;
   $('optSeats').textContent = VT==='boat' ? 'Biggest capacity' : 'Most seats'; $('optSeats').hidden = VT==='moto';
   const bodies = C.bodyOrder.filter(b => CARS.some(c => c.body===b));
-  $('bodyChips').innerHTML = `<button class="chip" type="button" data-body="" aria-pressed="true">All types</button>` + bodies.map(b=>`<button class="chip" type="button" data-body="${b}" aria-pressed="false">${C.bodyPlural[b]||b}</button>`).join('');
+  const nBody = b => CARS.reduce((n, c) => n + (c.body===b), 0), nFuel = f => CARS.reduce((n, c) => n + c.fuels.includes(f), 0), nAll = CARS.length.toLocaleString('en-US');   // counts sit in data-n (drawn by CSS) so the label text stays the label
+  $('bodyChips').innerHTML = `<button class="chip" type="button" data-body="" data-n="${nAll}" aria-pressed="true">All types</button>` + bodies.map(b=>`<button class="chip" type="button" data-body="${b}" data-n="${nBody(b)}" aria-pressed="false">${C.bodyPlural[b]||b}</button>`).join('');
   const fuels = C.fuelOrder.filter(f => CARS.some(c => c.fuels.includes(f)));
-  $('fuelChips').innerHTML = `<button class="chip fuel" type="button" data-fuel="" aria-pressed="true">${VT==='boat' ? 'Any power' : 'Any fuel'}</button>` + fuels.map(f=>`<button class="chip fuel" type="button" data-fuel="${f}" aria-pressed="false">${fuelLbl(f)}</button>`).join('');
+  $('fuelChips').innerHTML = `<button class="chip fuel" type="button" data-fuel="" data-n="${nAll}" aria-pressed="true">${VT==='boat' ? 'Any power' : 'Any fuel'}</button>` + fuels.map(f=>`<button class="chip fuel" type="button" data-fuel="${f}" data-n="${nFuel(f)}" aria-pressed="false">${fuelLbl(f)}</button>`).join('');
+  $('fuelLbl').textContent = VT==='boat' ? 'Power' : 'Fuel';
   refreshPriceUI();
   $('sizeLbl').textContent = C.sizeLabel;
   $('sizeOpts').innerHTML = C.sizes.map(s=>`<button class="opt" type="button" data-v="${s}" aria-pressed="false">${s}</button>`).join('');
@@ -1299,7 +1481,7 @@ function buildChrome(){
   // region select (currency select on the World tab)
   const def = regionDefault(CC);
   $('state').innerHTML = `<option value="${def}">${C.statePrompt}</option>` + regionsFor(CC).map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join('');
-  S.state = load('state_'+CC, def); if (![...$('state').options].some(o=>o.value===S.state)) S.state = def; $('state').value = S.state;
+  S.state = load('state_'+CC, def); if (![...$('state').options].some(o=>o.value===S.state)) S.state = def; $('state').value = S.state; syncLoc();
   if (CC==='ALL'){ WCUR = S.state; worldPrices(); worldPresets(); refreshPriceUI(); }
   $('assume').hidden = Object.keys(C.assume).length===0;
   // makes
@@ -1321,10 +1503,10 @@ function buildChrome(){
   const UL = C.wizardUseLabels;
   $('wTitle').textContent = VT==='car' ? 'What do you need?' : VT==='moto' ? 'What kind of riding?' : VT==='air' ? 'What kind of flying?' : 'What kind of boating?';
   $('wBody').innerHTML = `
-    <div class="q"><h3>1. Total budget, taxes and fees included</h3><div class="opts" id="wBudget">${C.wizardBudgets.map(([v,l])=>`<button class="opt" type="button" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>
-    <div class="q"><h3>2. What will it mostly do?</h3><div class="opts" id="wUse">${['commute','family','work','fun','trips','all'].map(k=>`<button class="opt" type="button" data-v="${k}" aria-pressed="false">${esc(UL[k])}</button>`).join('')}</div></div>
-    <div class="q"><h3>3. ${VT==='boat' ? 'Power' : 'Fuel'}</h3><div class="opts" id="wFuel">${C.wizardFuels.map(([v,l])=>`<button class="opt" type="button" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>
-    <div class="q"><h3>4. ${C.wizardAwd}</h3><div class="opts" id="wAwd"><button class="opt" type="button" data-v="awd" aria-pressed="false">${C.wizardYes || 'Yes, I want AWD or 4WD'}</button><button class="opt" type="button" data-v="any" aria-pressed="false">${C.wizardNo || 'No, doesn’t matter'}</button></div></div>
+    <div class="q"><h3><span class="n">01</span>Total budget, taxes and fees included</h3><div class="opts" id="wBudget">${C.wizardBudgets.map(([v,l])=>`<button class="opt" type="button" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>
+    <div class="q"><h3><span class="n">02</span>What will it mostly do?</h3><div class="opts" id="wUse">${['commute','family','work','fun','trips','all'].map(k=>`<button class="opt" type="button" data-v="${k}" aria-pressed="false">${esc(UL[k])}</button>`).join('')}</div></div>
+    <div class="q"><h3><span class="n">03</span>${VT==='boat' ? 'Power' : 'Fuel'}</h3><div class="opts" id="wFuel">${C.wizardFuels.map(([v,l])=>`<button class="opt" type="button" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>
+    <div class="q"><h3><span class="n">04</span>${C.wizardAwd}</h3><div class="opts" id="wAwd"><button class="opt" type="button" data-v="awd" aria-pressed="false">${C.wizardYes || 'Yes, I want AWD or 4WD'}</button><button class="opt" type="button" data-v="any" aria-pressed="false">${C.wizardNo || 'No, doesn’t matter'}</button></div></div>
     <div class="dlg-actions"><button class="btn primary" id="wGo" type="button">Show my matches</button></div>
     <p class="fine">This sets the filters for you. You can loosen or change any of them afterward.</p>`;
   const W = {budget:null, use:null, fuel:null, awd:null};
@@ -1359,8 +1541,110 @@ function syncChips(){
   if (CC==='ALL') setPressed($('countryOpts'), b => S.countries.has(b.dataset.v));
   $('y2025').checked = S.years[2025]; $('y2026').checked = S.years[2026]; $('y2027').checked = S.years[2027]; $('onlyNew').checked = S.onlyNew; $('showEst').checked = S.est;
 }
+/* ===== permalinks: the whole view (vertical, country, region, filters, sort, compare set, open sheet) lives in the URL hash ===== */
+const slugify = s => String(s).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+function slugOf(c){ return (CC==='ALL' ? c.cc.toLowerCase() + '-' : '') + slugify(c.make + ' ' + c.model) + (c.year && c.year !== 2026 ? '-' + c.year : ''); }
+function bySlug(s){ for (let i = 0; i < CARS.length; i++) if (slugOf(CARS[i]) === s) return CARS[i]; return null; }
+const SORTS = ['price-asc','price-desc','fuel','mpg','range','hp','perhp','seats','name'];
+/* US local tax: a city-or-county box under the state menu for states with a local table; an unknown entry falls back to the state average and says so */
+function syncLoc(fromHash){
+  const T = (CC==='US' && VT==='car') ? usLocalTable(S.state) : null; const row = $('locRow');
+  if (!T){ S.loc = ''; row.hidden = true; return; }
+  row.hidden = false;
+  $('locList').innerHTML = T.places.map(p => `<option value="${esc(p[0])}">${p[1]}%</option>`).join('');
+  $('locLbl').textContent = `${usState(S.state).name}: your city or county (local tax)`;
+  const want = fromHash != null ? fromHash : load('loc_'+S.state, '');
+  S.loc = usLocal(S.state, want) ? want : ''; $('loc').value = S.loc; locNote();
+}
+function locNote(){
+  const T = usLocalTable(S.state); if (!T) return; const l = usLocal(S.state, S.loc); const typed = $('loc').value.trim();
+  $('locNote').textContent = l ? `${l.rate}% combined, effective ${fmtDate(l.asof)}` : typed ? `Not in the ${T.src[1].split(',')[0]} list; using the ${usState(S.state).rate}% state average` : `Using the ${usState(S.state).rate}% state average until you pick one`;
+}
+function viewHash(opts){
+  const p = new URLSearchParams(); p.set('v', VT); p.set('cc', CC);
+  if (S.state !== regionDefault(CC)) p.set('r', S.state);
+  if (CC==='US' && S.loc) p.set('loc', S.loc);
+  if (CC==='ALL' && WUNIT !== 'l100') p.set('u', WUNIT);
+  if (S.q) p.set('q', S.q);
+  const list = (k, set) => { if (set.size) p.set(k, [...set].join(',')); };
+  list('b', S.body); list('f', S.fuel); list('s', S.size); list('t', S.cls); list('m', S.make); list('k', S.countries);
+  if (S.pmin) p.set('pmin', S.pmin); if (S.pmax) p.set('pmax', S.pmax);
+  if (S.seats) p.set('seats', S.seats); if (S.drive !== 'any') p.set('drive', S.drive);
+  if (S.eff) p.set('eff', S.eff); if (S.rng) p.set('rng', S.rng);
+  if (S.sort !== 'price-asc') p.set('sort', S.sort);
+  const ys = [2025, 2026, 2027].filter(y => S.years[y]); if (ys.length < 3) p.set('y', ys.join(','));
+  if (S.onlyNew) p.set('new', '1'); if (!S.est) p.set('est', '0');
+  if (compare.length) p.set('cmp', compare.map(i => slugOf(CARS[i])).join(','));
+  const d = opts && opts.detail !== undefined ? opts.detail : (detailCar && $('dlgDetail').open ? detailCar : null);
+  if (d) p.set('d', slugOf(d)); else if (!(opts && opts.detail) && $('dlgCompare').open) p.set('co', '1');
+  return p.toString();
+}
+/* history hygiene: filters and typing rewrite the current entry (replaceState); opening a sheet adds one (pushState) so Back closes it
+   and Forward reopens it. Closing a sheet with its button or Escape goes back over the entry it added, so no dead entries pile up. */
+let HASH_WRITTEN = '';
+const SHEET_KEYS = ['d', 'co', 'cmp']; const PUSHED = {dlgDetail:false, dlgCompare:false}; let CLOSING_QUIETLY = false, OWN_BACK = 0;   // SHEET_KEYS: what a sheet can change without the rest of the view changing
+function writeHash(push){ const h = viewHash(); if (h === HASH_WRITTEN) return; HASH_WRITTEN = h; const url = location.pathname + location.search + '#' + h; try { if (push) history.pushState(null, '', url); else history.replaceState(null, '', url); } catch (e) {} }
+function syncHash(){ writeHash(false); }
+function sheetOpened(id, fromHistory){ if (fromHistory){ HASH_WRITTEN = location.hash.slice(1); PUSHED[id] = true; return; } const before = HASH_WRITTEN; writeHash(true); PUSHED[id] = HASH_WRITTEN !== before; }
+function sheetClosed(id){ if (CLOSING_QUIETLY) return; if (PUSHED[id]){ PUSHED[id] = false; try { clearTimeout(OWN_BACK); OWN_BACK = setTimeout(() => { OWN_BACK = 0; }, 800); history.back(); return; } catch (e) { OWN_BACK = 0; } } syncHash(); }
+function closeQuietly(id){ if (!$(id).open) return; CLOSING_QUIETLY = true; try { $(id).close(); } finally { CLOSING_QUIETLY = false; } PUSHED[id] = false; }
+function sheetOnlyDiff(a, b){ const pa = new URLSearchParams(a), pb = new URLSearchParams(b); SHEET_KEYS.forEach(k => { pa.delete(k); pb.delete(k); }); pa.sort(); pb.sort(); return pa.toString() === pb.toString(); }
+function onHashChange(){
+  const h = location.hash.slice(1);
+  if (OWN_BACK){ clearTimeout(OWN_BACK); OWN_BACK = 0; HASH_WRITTEN = h; syncHash(); return; }   // our own back() after a sheet closed: the view is already right, and may have moved on since
+  if (h === HASH_WRITTEN) return;
+  if (sheetOnlyDiff(h, HASH_WRITTEN)){                                   // Back or Forward across a sheet: open or close it, nothing else changes
+    const p = new URLSearchParams(h); HASH_WRITTEN = h;
+    const d = p.get('d') ? bySlug(p.get('d')) : null;
+    if (d){ closeQuietly('dlgCompare'); if (!$('dlgDetail').open || detailCar !== d) openDetail(d.id, true); else PUSHED.dlgDetail = true; return; }
+    closeQuietly('dlgDetail');
+    if (p.get('co') === '1' && compare.length >= 2){ if (!$('dlgCompare').open) openCompare(true); else PUSHED.dlgCompare = true; return; }
+    closeQuietly('dlgCompare'); syncHash(); return;
+  }
+  const p = readHash(); if (p) applyHash(p);
+}
+function readHash(){ const h = location.hash.slice(1); return h && h.includes('=') ? new URLSearchParams(h) : null; }
+/* apply a hash after buildChrome(): filters into S, then the sheet or comparison it names */
+function applyHashFilters(p){
+  const sets = (k, set) => { const v = p.get(k); if (v) v.split(',').forEach(x => { if (x) set.add(x); }); };
+  const r = p.get('r'); if (r && [...$('state').options].some(o => o.value === r)) { S.state = r; $('state').value = r; if (CC==='US') syncLoc(p.get('loc')); if (CC==='ALL'){ WCUR = r; worldPrices(); worldPresets(); refreshPriceUI(); updateAsof(); } }
+  const u = p.get('u'); if (CC==='ALL' && u && WORLD_UNITS[u]) { WUNIT = u; $('wunit').value = u; applyWorldUnits(); applySliders(); }
+  S.q = (p.get('q') || '').trim().toLowerCase(); $('q').value = S.q;
+  sets('b', S.body); sets('f', S.fuel); sets('s', S.size); sets('t', S.cls); sets('m', S.make); sets('k', S.countries);
+  const num = k => Math.max(0, parseFloat(p.get(k)) || 0);
+  S.pmin = num('pmin'); S.pmax = num('pmax'); S.seats = num('seats'); S.eff = num('eff'); S.rng = num('rng');
+  const dr = p.get('drive'); if (dr && C.driveOpts.some(([v]) => v === dr)) S.drive = dr;
+  const so = p.get('sort'); if (SORTS.includes(so)) S.sort = so;
+  const y = p.get('y'); if (y) { const on = new Set(y.split(',').map(Number)); [2025, 2026, 2027].forEach(yy => S.years[yy] = on.has(yy)); if (![2025, 2026, 2027].some(yy => S.years[yy])) S.years[2026] = true; }
+  if (p.get('new') === '1') S.onlyNew = true; if (p.get('est') === '0') S.est = false;
+  const cmp = p.get('cmp'); if (cmp) { compare = cmp.split(',').map(sl => bySlug(sl)).filter(Boolean).map(c => c.id).slice(0, 4); store(cmpKey(), compare); }
+  return p.get('d') ? bySlug(p.get('d')) : null;
+}
+function applyHash(p){                                 // a pasted or changed hash: rebuild the whole view from it
+  const v = p.get('v'), cc = (p.get('cc') || '').toUpperCase();
+  if (VERT[v] || COUNTRIES[cc]) setLive(COUNTRIES[cc] ? cc : CC, VERT[v] ? v : VT);
+  $('countryTabs').innerHTML = countryTabsHTML();
+  resetS(); page = 1; detailCar = null; closeQuietly('dlgDetail'); closeQuietly('dlgCompare');
+  buildChrome(); const d = applyHashFilters(p); syncChips(); render();
+  if (d) openDetail(d.id); else if (p.get('co') === '1' && compare.length >= 2) openCompare();
+}
+function shareLink(title, opts){
+  const url = permalink(opts);
+  const done = () => toast('Link copied. It opens this exact view.');
+  if (navigator.share && matchMedia('(pointer:coarse)').matches) { navigator.share({title, url}).catch(() => {}); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, () => toast('Copy the link from the address bar.'));
+  else toast('Copy the link from the address bar.');
+}
 function setLive(cc, vt){ VT = vt; CC = cc; C = countryConfig(cc, vt); CARS = DATA[vt][cc]; M = MONEY[cc]; }
 function countryTabsHTML(){ return ORDER.map(cc => `<button class="ctab" type="button" role="tab" data-country="${cc}" aria-selected="false">${COUNTRIES[cc].name} <small>${DATA[VT][cc].length.toLocaleString('en-US')}</small></button>`).join(''); }
+/* theme: the system setting until the toggle is used, then the saved choice (data-theme on <html>) */
+const THEME_BG = {light:'#f3f0e8', dark:'#0e0f11'};
+function effTheme(){ const t = document.documentElement.getAttribute('data-theme'); return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+function applyTheme(t){
+  if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
+  const now = effTheme(); const b = $('themeBtn'); if (b) b.setAttribute('aria-label', now === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', t ? THEME_BG[t] : (/dark/.test(m.media||'') ? THEME_BG.dark : THEME_BG.light)));
+}
 function switchCountry(cc){
   setLive(cc, VT); store('country', cc);
   resetS(); $('q').value=''; page = 1; detailCar = null;
@@ -1378,15 +1662,25 @@ function switchVertical(vt){
 function init(){
   const savedVT = load('vt','car'); const savedCC = load('country','US');
   setLive(COUNTRIES[savedCC] ? savedCC : 'US', VERT[savedVT] ? savedVT : 'car');
-  $('vertTabs').innerHTML = VERTS.map(vt => `<button class="vtab" type="button" role="tab" data-vt="${vt}" aria-selected="false"><svg aria-hidden="true"><use href="#ico-${vt}"></use></svg>${VT_LABEL[vt]}</button>`).join('');
+  applyTheme(load('theme', null) === 'dark' ? 'dark' : load('theme', null) === 'light' ? 'light' : null);
+  $('themeBtn').addEventListener('click', () => { const t = effTheme() === 'dark' ? 'light' : 'dark'; store('theme', t); applyTheme(t); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(document.documentElement.getAttribute('data-theme')));
+  $('vertTabs').innerHTML = VERTS.map(vt => `<button class="vtab" type="button" role="tab" data-vt="${vt}" aria-selected="false" title="${VT_LABEL[vt]}"><svg class="i" aria-hidden="true"><use href="#ico-${vt}"></use></svg><span class="vl">${VERT[vt].short}</span></button>`).join('');
   $('vertTabs').addEventListener('click', e => { const b = e.target.closest('.vtab'); if (b && b.dataset.vt!==VT){ switchVertical(b.dataset.vt); window.scrollTo({top:0}); } });
   $('countryTabs').innerHTML = countryTabsHTML();
   $('countryTabs').addEventListener('click', e => { const b = e.target.closest('.ctab'); if (b && b.dataset.country!==CC){ switchCountry(b.dataset.country); window.scrollTo({top:0}); } });
-  $('state').addEventListener('change', e => { S.state = e.target.value; store('state_'+CC, S.state); if (CC==='ALL'){ WCUR = S.state; worldPrices(); worldPresets(); refreshPriceUI(); S.pmin = 0; S.pmax = 0; syncChips(); } render(); if (detailCar && $('dlgDetail').open) renderDetail(); });
+  $('state').addEventListener('change', e => { S.state = e.target.value; store('state_'+CC, S.state); syncLoc(); if (CC==='ALL'){ WCUR = S.state; worldPrices(); worldPresets(); refreshPriceUI(); S.pmin = 0; S.pmax = 0; syncChips(); updateAsof(); } render(); if (detailCar && $('dlgDetail').open) renderDetail(); });
+  const onLoc = () => { const v = $('loc').value.trim(); const hit = usLocal(S.state, v) ? v : ''; if (hit === S.loc){ locNote(); return; } S.loc = hit; store('loc_'+S.state, S.loc); locNote(); render(); syncHash(); if (detailCar && $('dlgDetail').open) renderDetail(); };
+  $('loc').addEventListener('input', onLoc); $('loc').addEventListener('change', onLoc);
   // phones: the state picker gets its own row under the sticky search bar; wider screens keep it in the toolbar
   const mqPhone = matchMedia('(max-width:639px)'), mqWide = matchMedia('(min-width:960px)');
   const placeState = () => { (mqPhone.matches ? $('stateRow') : $('toolbar')).appendChild($('stateWrap')); };
   placeState(); mqPhone.addEventListener('change', placeState);
+  // wide screens: body and fuel types sit in the filter column and the actions in the toolbar; narrower, a chip row and a quiet row under the masthead
+  const mqDesk = matchMedia('(min-width:1024px)');
+  const placeTypes = () => { if (mqWide.matches){ $('fBody').appendChild($('bodyChips')); $('fFuel').appendChild($('fuelChips')); } else { $('chipRow').append($('bodyChips'), $('fuelChips')); } };
+  const placeActions = () => { (mqDesk.matches ? $('toolbar') : document.querySelector('.masthead')).appendChild($('mastActions')); };
+  placeTypes(); mqWide.addEventListener('change', placeTypes); placeActions(); mqDesk.addEventListener('change', placeActions);
   $('countryOpts').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return; const v=b.dataset.v; if (S.countries.has(v)) S.countries.delete(v); else S.countries.add(v); syncChips(); page=1; render(); });
   $('wunit').addEventListener('change', e => { WUNIT = e.target.value; store('wunit', WUNIT); applyWorldUnits(); applySliders(); S.eff = 0; S.rng = 0; syncChips(); page=1; render(); });
   $('makes').addEventListener('change', e => { const v=e.target.value; if (e.target.checked) S.make.add(v); else S.make.delete(v); page=1; render(); });
@@ -1426,16 +1720,27 @@ function init(){
   // back to top after a long scroll
   let ttRaf = 0; addEventListener('scroll', () => { if (ttRaf) return; ttRaf = requestAnimationFrame(() => { ttRaf = 0; $('toTop').classList.toggle('show', scrollY > 1200); }); }, {passive:true});
   $('toTop').addEventListener('click', () => scrollTo({top:0, behavior:'smooth'}));
-  $('btnCompare').addEventListener('click', openCompare);
+  $('btnCompare').addEventListener('click', () => openCompare());
   $('btnClearCmp').addEventListener('click', () => { compare = []; store(cmpKey(), compare); render(); });
   document.querySelectorAll('dialog').forEach(d => { d.addEventListener('click', e => { if (e.target.closest('[data-close]')) d.close(); else if (e.target === d) d.close(); }); });
   $('btnGloss').addEventListener('click', () => $('dlgGloss').showModal());
   $('btnWizard').addEventListener('click', () => $('dlgWizard').showModal());
-  // ?v=moto&cc=IN deep links (the site's demo buttons use them)
+  $('btnShare').addEventListener('click', () => shareLink(document.title));
+  $('asof').addEventListener('click', e => { const b = e.target.closest('.fxmove'); if (b) b.setAttribute('aria-expanded', b.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'); });
+  document.addEventListener('click', e => { if (!e.target.closest('.fxmove')) document.querySelectorAll('.fxmove[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false')); });
+  toastEl();                                                             // the live region exists before anything is announced into it
+  $('dlgDetail').addEventListener('close', () => sheetClosed('dlgDetail'));
+  $('dlgCompare').addEventListener('close', () => sheetClosed('dlgCompare'));
+  addEventListener('hashchange', onHashChange);
+  // ?v=moto&cc=IN deep links (the site's demo buttons use them); a #v=…&cc=…&… permalink carries the whole view and wins
   const qs = new URLSearchParams(location.search); const qv = qs.get('v'), qc = (qs.get('cc')||'').toUpperCase();
   if (VERT[qv] || COUNTRIES[qc]) setLive(COUNTRIES[qc] ? qc : CC, VERT[qv] ? qv : VT);
+  const hp = readHash();
+  if (hp) { applyHash(hp); return; }
   $('countryTabs').innerHTML = countryTabsHTML();
   buildChrome(); syncChips(); render();
 }
 init();
+// installable and offline on the website (the page is self-contained, so the worker only has to keep it and the fonts); not from file://
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 </script>
