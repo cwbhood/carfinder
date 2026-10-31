@@ -223,6 +223,17 @@ select{min-height:var(--tap);max-width:100%;width:100%;padding:9px 36px 9px 12px
 .pbox .val{font:500 17px/1.2 var(--mono);margin-top:6px;letter-spacing:-.01em;overflow-wrap:anywhere}
 .pbox.otd .val{color:var(--accent);font-size:26px;line-height:1.05;letter-spacing:-.02em;margin-top:4px}
 .pbox.otd .val.l1{font-size:23px} .pbox.otd .val.l2{font-size:20px} .pbox.otd .val.l3{font-size:17px} .pbox.otd .val.l4{font-size:15px;letter-spacing:-.03em}
+/* the drive-off figure stays on one line: each size step is also capped by the card's own width (the drive-off column
+   is about 58% of the card less padding; a mono character is about 0.6 em), so a narrow grid column shrinks it instead
+   of breaking the range at its dash */
+@supports (width:1cqi){
+  .card{container-type:inline-size}
+  .pbox.otd .val{white-space:nowrap;font-size:min(26px,calc((58cqi - 32px) / 5.4))}
+  .pbox.otd .val.l1{font-size:min(23px,calc((58cqi - 32px) / 6))}
+  .pbox.otd .val.l2{font-size:min(20px,calc((58cqi - 32px) / 7.2))}
+  .pbox.otd .val.l3{font-size:min(17px,calc((58cqi - 32px) / 8.4))}
+  .pbox.otd .val.l4{font-size:min(15px,calc((58cqi - 32px) / 9.6))}
+}
 .pbox .sub{font-size:12.5px;line-height:1.35;color:var(--muted);margin-top:4px}
 .specs{margin-top:12px;padding-block:9px 12px;border-top:1px solid var(--line);font:400 12.5px/1.6 var(--mono);color:var(--ink);overflow:hidden}
 .specs .sp{display:flex;flex-wrap:wrap;margin-left:-17px}      /* each item carries its separator; the one that starts a line is clipped */
