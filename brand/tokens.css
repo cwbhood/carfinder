@@ -1,0 +1,27 @@
+/* CarFinder design tokens (docs/DESIGN.md). The website and generated pages link this file; the app inlines the same
+   values because it ships as one self-contained page. Light is paper, dark is ink; data-theme on <html> overrides. */
+:root{
+  --bg:#f3f0e8; --surface:#fffdf7; --surface-2:#ece8de; --ink:#17140f; --muted:#5f594f; --faint:#8a8377;
+  --line:#dcd5c6; --line-strong:#c4bba8; --accent:#b03a0b; --accent-ink:#ffffff; --accent-soft:#f7e3d6;
+  --good:#2f6f4a; --warn:#7e560f; --bad:#a8261b;
+  --display:"Big Shoulders Display","Arial Narrow",sans-serif;
+  --text:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r-ctl:3px; --r-card:6px; --tap:44px;
+  --ease:cubic-bezier(.2,.7,.2,1); --t-fast:140ms; --t-sheet:220ms;
+  --shadow-float:0 1px 0 var(--line),0 24px 48px -24px rgba(0,0,0,.35);
+  --gut:16px; --max:1240px;
+  color-scheme:light;
+}
+@media (min-width:640px){:root{--gut:24px}}
+@media (min-width:1024px){:root{--gut:32px}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e0f11; --surface:#16181b; --surface-2:#1d2024; --ink:#ece8e0; --muted:#9b968d; --faint:#6d6961;
+  --line:#2a2d31; --line-strong:#3a3e44; --accent:#ff7a3d; --accent-ink:#160b05; --accent-soft:#2e1a10;
+  --good:#5cc48a; --warn:#e0a83a; --bad:#ff6b5b; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e0f11; --surface:#16181b; --surface-2:#1d2024; --ink:#ece8e0; --muted:#9b968d; --faint:#6d6961;
+  --line:#2a2d31; --line-strong:#3a3e44; --accent:#ff7a3d; --accent-ink:#160b05; --accent-soft:#2e1a10;
+  --good:#5cc48a; --warn:#e0a83a; --bad:#ff6b5b; color-scheme:dark;
+}
