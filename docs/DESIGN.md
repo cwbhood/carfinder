@@ -94,3 +94,13 @@ optical alignment of the display type, hanging punctuation in quotes); and restr
 Phone-first: 44 px controls, 16 px inputs, no horizontal overflow at 360 px. Light and dark both first-class
 (`prefers-color-scheme` plus the manual toggle). AA contrast for text. Escape data with `esc()`. The pricing core
 stays DOM-free. Photos stay Wikimedia links with the credit line.
+
+## App notes (carfinder.html)
+- Selected states: the vehicle switch inverts to ink (it is the mode); filter toggles take `--accent-soft` with an ink
+  border; the country strip marks the open tab with a 2 px ink underline. Orange stays for the drive-off figure, the
+  primary button, focus rings and the slider thumb.
+- Counts on toggles are drawn from a `data-n` attribute by CSS, so a button's text stays its label.
+- Field labels (11 px mono caps) sit above figures; in the card the two price columns share rows (CSS subgrid) so
+  the sticker and drive-off figures sit on one line whatever the label length.
+- Receipt rows: label, dotted leader (`::after`), mono amount; sub-notes on their own line in `--muted`; a 1 px
+  `--line-strong` rule above subtotals and a 2 px ink rule above the total.

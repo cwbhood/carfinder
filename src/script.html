@@ -1163,34 +1163,35 @@ function copyReport(c){
   else toast('Could not copy; select the text in the sheet instead.');
 }
 function creditHTML(c){ const r = imgRec(c); if (!r) return ''; return `<p class="fine credit-line">Photo: ${esc(r.artist||'unknown author')}${r.license ? ', '+esc(r.license) : ''}, via <a href="https://commons.wikimedia.org/wiki/File:${encodeURIComponent(r.file)}" target="_blank" rel="noopener">Wikimedia Commons</a>${r.approx ? ' · may show an earlier generation or another market’s version' : ''}</p>`; }
+/* the card is a window sticker: make, model and year, then the two prices, one line of specs and at most one status
+   (the price status when it is not a maker's list price, otherwise the market band); everything else is in the sheet */
+const CMP_BOX = '<span class="box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>';
+function cmpBtnHTML(c){ const on = compare.includes(c.id); return `<button class="cmp" type="button" data-cmp="${c.id}" aria-pressed="${on}" aria-label="Compare ${esc(c.make+' '+c.model)}">${CMP_BOX}Compare</button>`; }
+function otdSize(s){ const n = s.length; return n <= 9 ? '' : n <= 10 ? ' l1' : n <= 12 ? ' l2' : n <= 14 ? ' l3' : ' l4'; }   // the drive-off figure steps down a size as the range gets longer, so it stays on one line
 function cardHTML(c){
   const o = CC==='ALL' ? {lo:c.wlo, hi:c.whi} : bd(c, c.price);
-  const tags = [`<span class="tag">${C.bodyLabel[c.body]||c.body} · ${c.size}</span>`, `<span class="tag f-${c.fuel}">${c.fuels.map(fuelLbl).join(' / ')}</span>`];
-  if (CC==='ALL') tags.unshift(`<span class="tag cc">${CC_NAME[c.cc]}</span>`);
-  if (c.cls!=='Mainstream') tags.push(`<span class="tag">${C.clsLabel[c.cls]||c.cls}</span>`);
-  if (c.year===2025) tags.push(`<span class="tag left">2025 leftover</span>`);
-  if (c.year===2027) tags.push(`<span class="tag new">2027 arrival</span>`);
-  if (c.isNew) tags.push(`<span class="tag new">New or updated</span>`);
-  if (c.est){ const st = rowStatus(c, CC==='ALL' ? c.cc : CC); tags.push(`<span class="tag ${st === 'converted' ? 'cv' : 'est'}" title="${esc(STATUS[st].desc)}">${STATUS[st].short}</span>`); }
-  const inCmp = compare.includes(c.id);
+  const hcc = CC==='ALL' ? c.cc : CC;
+  let status;
+  if (c.est){ const st = rowStatus(c, hcc); status = `<span class="tag ${st === 'converted' ? 'cv' : 'est'}" title="${esc(STATUS[st].desc)}">${STATUS[st].short}</span>`; }
+  else status = `<span class="mkt m-${c.mkt}">${mktTxt(hcc, c)[0]}</span>`;
   const topTxt = TOP(c) > P(c) ? `up to ${moneyK(TOP(c))} · ` : '';
   const sub = CC==='ALL' ? `${topTxt}${MONEY[c.cc].k(c.price)} at home` : VT==='air' ? `${topTxt}${c.dest ? '+'+moneyK(c.dest)+' delivery' : 'before tax'}` : VT!=='car' ? `${topTxt}${c.dest ? '+'+money(c.dest)+' freight' : (CC==='UK'||CC==='AU'||CC==='IN') ? 'as published' : 'taxes included'}` : CC==='US' ? `${topTxt}+${money(c.dest)} dest.` : CC==='IN' ? `${topTxt}incl. ${c.gst}% GST` : CC==='UK' ? `${topTxt}all taxes in` : CC==='AU' ? `${topTxt}before on-roads` : CC==='CA' ? `${topTxt}before freight & tax` : `${topTxt}taxes included`;
   const fuelCostV = annualFuel(c);
+  const otd = M.range(o.lo, o.hi).replace(/ /g, '\u00a0');   // break only after the dash
+  const kind = [C.bodyLabel[c.body]||c.body, c.size, c.fuels.map(fuelLbl).join(' / ')].filter(Boolean).map(esc).join(' · ');
   return `<article class="card" data-id="${c.id}">
     ${photoHTML(c, 'card')}
-    <div class="card-top">
-      <div><div class="mk">${esc(c.make)}</div><h3>${esc(c.model)}<span class="yr">${c.year}</span></h3></div>
-      <button class="cmp" type="button" data-cmp="${c.id}" aria-pressed="${inCmp}">${inCmp?'✓ Comparing':'+ Compare'}</button>
+    <div class="card-body">
+      <div class="mk"><span>${esc(c.make)}</span>${CC==='ALL' ? `<span aria-hidden="true">·</span><span class="cc">${CC_NAME[c.cc]}</span>` : ''}</div>
+      <h3><button class="open" type="button" data-detail="${c.id}">${esc(c.model)}</button><span class="yr">${c.year}</span></h3>
+      <div class="kind">${kind}</div>
+      <div class="prices">
+        <div class="pbox"><div class="lbl">${C.cardPriceLabel}</div><div class="val">${VT!=='air' && (CC==='US'||CC==='UK'||(CC==='ALL'&&['USD','GBP','EUR','CAD','AUD'].includes(WCUR)))?money(P(c)):moneyK(P(c))}</div><div class="sub">${sub}</div></div>
+        <div class="pbox otd"><div class="lbl">${C.otdLabel} · ${esc(CC==='ALL'?WCUR:C.stateShort(S.state))}</div><div class="val${otdSize(otd)}">${otd.replace('–','–<wbr>')}</div><div class="sub">${C.otdSub}</div></div>
+      </div>
+      <div class="specs"><div class="sp">${specsHTML(c)}${fuelCostV!=null?`<span class="fuelyr">~${moneyK(fuelCostV)}/yr fuel</span>`:''}</div></div>
     </div>
-    <div class="tags">${tags.join('')}</div>
-    <div class="prices">
-      <div class="pbox"><div class="lbl">${C.cardPriceLabel}</div><div class="val">${VT!=='air' && (CC==='US'||CC==='UK'||(CC==='ALL'&&['USD','GBP','EUR','CAD','AUD'].includes(WCUR)))?money(P(c)):moneyK(P(c))}</div><div class="sub">${sub}</div></div>
-      <div class="pbox otd"><div class="lbl">${C.otdLabel} · ${esc(CC==='ALL'?WCUR:C.stateShort(S.state))}</div><div class="val${M.range(o.lo,o.hi).length>=12?' long':''}">${M.range(o.lo, o.hi).replace('–','–<wbr>')}</div><div class="sub">${C.otdSub}</div></div>
-    </div>
-    <div class="specs">${specsHTML(c)}${fuelCostV!=null?`<span class="muted">~${moneyK(fuelCostV)}/yr fuel</span>`:''}</div>
-    <div class="mkt m-${c.mkt}">${mktTxt(CC==='ALL' ? c.cc : CC, c)[0]}</div>
-    <p class="note">${esc(c.note)}</p>
-    <button class="btn more" type="button" data-detail="${c.id}">Details &amp; cost breakdown</button>
+    <div class="card-foot"><div class="status">${status}</div>${cmpBtnHTML(c)}</div>
   </article>`;
 }
 function updateMore(){
@@ -1244,7 +1245,7 @@ const wbr = s => s.replace(/ – /g, ' –<wbr> ');   // let long price ranges w
 function stickerHTML(o, totalLabel, ML){
   const lo = CC==='ALL' ? o.lo/FX[WCUR]*FX[CUR[detailCar.cc]] : o.lo, hi = CC==='ALL' ? o.hi/FX[WCUR]*FX[CUR[detailCar.cc]] : o.hi;
   return `<div class="sticker"><div class="st-head"><span>Cost breakdown</span><span>${esc(o.head)}</span></div><div class="st-rows">
-    ${o.lines.map(l => `<div class="st-row ${l.cls||''}"><span class="k">${esc(l.k)}${l.sub?`<small>${esc(l.sub)}</small>`:''}</span><span class="v">${wbr(esc(l.v))}</span></div>`).join('')}
+    ${o.lines.map(l => `<div class="st-row ${l.cls||''}"><span class="k"><span>${esc(l.k)}</span></span><span class="v">${wbr(esc(l.v))}</span>${l.sub?`<small class="s">${esc(l.sub)}</small>`:''}</div>`).join('')}
     <div class="st-row total"><span class="k">${totalLabel}</span><span class="v">${ML.money(lo)} –<wbr> ${ML.money(hi)}</span></div>
   </div></div>`;
 }
@@ -1340,7 +1341,7 @@ function renderDetail(){
   $('dBody').innerHTML = `
     ${photoHTML(c, 'detail')}${creditHTML(c)}
     <div class="tags">${CC==='ALL'?`<span class="tag cc">${CC_NAME[c.cc]}</span>`:''}<span class="tag">${C.bodyLabel[c.body]||c.body} · ${c.size}</span><span class="tag f-${c.fuel}">${c.fuels.map(fuelLbl).join(' / ')}</span><span class="tag">${C.clsLabel[c.cls]||c.cls}</span><span class="tag">${c.seats} ${c.vt==='boat'?'people':'seats'}</span><span class="tag">${esc(c.drive)}</span>${c.year===2025?'<span class="tag left">2025 leftover</span>':''}${c.year===2027?'<span class="tag new">2027 arrival</span>':''}${c.isNew?'<span class="tag new">New or updated</span>':''}</div>
-    <p>${esc(c.note)}</p>
+    <p class="d-note">${esc(c.note)}</p>
     <div class="trim">
       <div class="trim-lbls"><span>Base ${HC.trimWord} ${ML.money(c.price)}</span><span>Top ${HC.trimWord} ${ML.money(c.top)}</span></div>
       <input type="range" id="trimRange" min="0" max="100" step="1" value="${Math.round(detailT*100)}" aria-label="Trim level" ${c.top===c.price?'disabled':''}>
@@ -1353,7 +1354,7 @@ function renderDetail(){
       <div class="panel"><h4>Est. yearly fuel or charging</h4>${fuelLine}</div>
     </div>
     <div class="panel"><h4>${c.vt==='boat'?'Size, power and fuel burn':c.vt==='air'?'Speed, range and fuel burn':c.vt==='moto'?'Engine and economy':HCC==='US'?'EPA efficiency':'Efficiency'}</h4>${effPanel(c)}${c.vt==='car' && evNote?`<p class="fine">${evNote}</p>`:''}</div>
-    <div class="panel"><h4>Why this price band</h4><p class="sm">${mktTxt(HCC, c)[1]}</p><p class="fine">${industry} Current offers are on ${esc(c.make)}’s website.</p></div>
+    <div class="panel"><h4>Why this price band</h4><p class="mkt m-${c.mkt}">${mktTxt(HCC, c)[0]}</p><p class="sm">${mktTxt(HCC, c)[1]}</p><p class="fine">${industry} Current offers are on ${esc(c.make)}’s website.</p></div>
     ${provHTML(c)}
     <div class="dlg-actions"><button class="btn primary" type="button" id="dCmpBtn">Add to compare</button><button class="btn" type="button" id="dShareBtn">Share</button><button class="btn" type="button" data-close>Close</button></div>`;
   updateDetailCmpBtn();
@@ -1370,7 +1371,7 @@ function toggleCompare(id){
   if (i>=0) compare.splice(i,1);
   else { if (compare.length>=4){ toast('Compare holds four at a time. Remove one first.'); return; } compare.push(id); }
   store(cmpKey(), compare);
-  document.querySelectorAll(`[data-cmp="${id}"]`).forEach(b => { const on = compare.includes(id); b.setAttribute('aria-pressed', on); b.textContent = on ? '✓ Comparing' : '+ Compare'; });
+  document.querySelectorAll(`[data-cmp="${id}"]`).forEach(b => b.setAttribute('aria-pressed', compare.includes(id)));
   updateCmpBar(); syncHash();
 }
 function cmpKey(){ return VT==='car' ? 'cmp_'+CC : 'cmp_'+VT+'_'+CC; }
@@ -1380,7 +1381,7 @@ function openCompare(fromHistory){
   const one = VERT[VT].one;
   $('cTitle').textContent = `Compare ${cs.length}`;
   $('cBody').innerHTML = `${cs.length>2 || innerWidth<400 ? `<p class="cmp-hint">Swipe the table sideways to see every ${one}</p>` : ''}<div class="cmp-wrap"><table class="cmp-t">
-    <thead><tr><th></th>${cs.map(c=>`<th>${esc(c.model)}<small>${esc(c.make)} · ${c.year}</small></th>`).join('')}</tr></thead>
+    <thead><tr><th></th>${cs.map(c=>`<th><small>${esc(c.make)} · ${c.year}</small>${esc(c.model)}</th>`).join('')}</tr></thead>
     <tbody>
     ${CC==='ALL' ? row('Country', c=>CC_NAME[c.cc]) : ''}
     ${row('Type', c=>`${C.bodyLabel[c.body]||c.body} · ${c.size}`)}
@@ -1388,7 +1389,7 @@ function openCompare(fromHistory){
     ${row(C.cardPriceLabel, c=>TOP(c)>P(c)?`${money(P(c))} – ${money(TOP(c))}`:money(P(c)), 'num')}
     ${CC==='ALL' ? row('Home-market price', c=>c.top>c.price?`${MONEY[c.cc].money(c.price)} – ${MONEY[c.cc].money(c.top)}`:MONEY[c.cc].money(c.price), 'num') : ''}
     ${VT!=='car' ? (cs.some(c=>c.dest) ? row(VT==='air' ? 'Delivery' : 'Freight & setup', c=>c.dest?money(c.dest):'included', 'num') : '') : CC==='US' ? row('Destination', c=>money(c.dest), 'num') : CC==='IN' ? row('GST rate', c=>c.gst+'%', 'num') : ''}
-    ${row(`${C.otdLabel} (${esc(CC==='ALL'?'home region, '+WCUR:regionName(CC, S.state))})`, c=>{const o=bd(c,c.price); return `${money(o.lo)} – ${money(o.hi)}`;}, 'num')}
+    ${row(`${C.otdLabel} (${esc(CC==='ALL'?'home region, '+WCUR:regionName(CC, S.state))})`, c=>{const o=bd(c,c.price); return `${money(o.lo)} – ${money(o.hi)}`;}, 'num otd')}
     ${row('Est. monthly', c=>{const o=bd(c,c.price); return money(monthlyPay((o.lo+o.hi)/2, CC==='ALL'?DEFA(c.cc, VT):A))+'/mo';}, 'num')}
     ${VT==='air' ? row('Base price per seat', c=>money(P(c)/(c.seats||1)), 'num') : row('Base price per hp (peak power)', c=>c.hp ? money(P(c)/c.hp) : 'n/a', 'num')}
     ${VT==='boat' ? row('Length', c=>lenTxt(c)) : ''}
@@ -1439,7 +1440,7 @@ function updateAsof(){
   const sc = statusCounts(); const n = CARS.length.toLocaleString('en-US');
   const parts = []; if (sc.converted) parts.push(`${sc.converted.toLocaleString('en-US')} converted`); if (sc.estimated) parts.push(`${sc.estimated.toLocaleString('en-US')} estimated`);
   const moved = CC==='ALL' ? fxMovedTxt(VT) : '';
-  $('asof').innerHTML = `Prices and tax rules as of <b>${fmtDate(asof.compiled)}</b>${CC==='ALL' && asof.fx ? ` · converted at ECB rates of ${fmtDate(asof.fx.date)}` : ''}${moved}${parts.length ? ` · <span class="estcount">of ${n} prices, <a href="methodology.html#dates" title="What listed, converted and estimated mean">${parts.join(' and ')}</a></span>` : ` · <span class="estcount">all ${n} prices from the makers\u2019 lists</span>`} · <a href="methodology.html#${CC==='ALL' ? 'world' : CC.toLowerCase()}">How we calculate</a> · <a href="${REPO}/releases/tag/v${APP_VERSION}" target="_blank" rel="noopener" title="Cite this version: the changelog lists what each release changed">v${APP_VERSION}</a> · <a href="${REPO}/issues/new?template=wrong-price.yml" target="_blank" rel="noopener">Report a wrong price</a>`;
+  $('asof').innerHTML = `Prices and tax rules as of <b>${fmtDate(asof.compiled)}</b>${CC==='ALL' && asof.fx ? ` · converted at ECB rates of ${fmtDate(asof.fx.date)}` : ''}${moved}${parts.length ? ` · <span class="estcount">of ${n} prices, <a href="methodology.html#dates" title="What listed, converted and estimated mean">${parts.join(' and ')}</a></span>` : ` · <span class="estcount">all ${n} prices from the makers\u2019 lists</span>`} · <a href="methodology.html#${CC==='ALL' ? 'world' : CC.toLowerCase()}">How we calculate</a> · <a href="${REPO}/releases/tag/v${APP_VERSION}" target="_blank" rel="noopener" title="Cite this version: the changelog lists what each release changed">v${APP_VERSION}</a><span class="asof-rep"> · <a href="${REPO}/issues/new?template=wrong-price.yml" target="_blank" rel="noopener">Report a wrong price</a></span>`;
 }
 function buildChrome(){
   const V = VERT[VT];
@@ -1448,7 +1449,7 @@ function buildChrome(){
   document.querySelectorAll('.ctab').forEach(b => b.setAttribute('aria-selected', b.dataset.country===CC));
   const tabs = $('countryTabs'), tab = tabs.querySelector(`.ctab[data-country="${CC}"]`);
   if (tab) tabs.scrollLeft = Math.max(0, tab.offsetLeft - tabs.offsetLeft - (tabs.clientWidth - tab.offsetWidth)/2);   // keep the active country visible on phones
-  $('pageTitle').innerHTML = `CarFinder <span>${C.title}</span> 2026${VT==='car' ? '' : ` <em>${V.name}</em>`}`;
+  $('pageTitle').innerHTML = `${esc(C.title)} <span class="what"><span class="wl">${V.name}</span><span class="ws" aria-hidden="true">${V.short}</span></span>`;   // phones show the short name
   document.title = `CarFinder 2026 · ${V.name} · ${CC==='ALL' ? 'World' : C.name}`;
   $('lede').textContent = C.lede;
   updateAsof();
@@ -1457,9 +1458,11 @@ function buildChrome(){
   $('estGroup').hidden = sc.est === 0;
   $('optSeats').textContent = VT==='boat' ? 'Biggest capacity' : 'Most seats'; $('optSeats').hidden = VT==='moto';
   const bodies = C.bodyOrder.filter(b => CARS.some(c => c.body===b));
-  $('bodyChips').innerHTML = `<button class="chip" type="button" data-body="" aria-pressed="true">All types</button>` + bodies.map(b=>`<button class="chip" type="button" data-body="${b}" aria-pressed="false">${C.bodyPlural[b]||b}</button>`).join('');
+  const nBody = b => CARS.reduce((n, c) => n + (c.body===b), 0), nFuel = f => CARS.reduce((n, c) => n + c.fuels.includes(f), 0), nAll = CARS.length.toLocaleString('en-US');   // counts sit in data-n (drawn by CSS) so the label text stays the label
+  $('bodyChips').innerHTML = `<button class="chip" type="button" data-body="" data-n="${nAll}" aria-pressed="true">All types</button>` + bodies.map(b=>`<button class="chip" type="button" data-body="${b}" data-n="${nBody(b)}" aria-pressed="false">${C.bodyPlural[b]||b}</button>`).join('');
   const fuels = C.fuelOrder.filter(f => CARS.some(c => c.fuels.includes(f)));
-  $('fuelChips').innerHTML = `<button class="chip fuel" type="button" data-fuel="" aria-pressed="true">${VT==='boat' ? 'Any power' : 'Any fuel'}</button>` + fuels.map(f=>`<button class="chip fuel" type="button" data-fuel="${f}" aria-pressed="false">${fuelLbl(f)}</button>`).join('');
+  $('fuelChips').innerHTML = `<button class="chip fuel" type="button" data-fuel="" data-n="${nAll}" aria-pressed="true">${VT==='boat' ? 'Any power' : 'Any fuel'}</button>` + fuels.map(f=>`<button class="chip fuel" type="button" data-fuel="${f}" data-n="${nFuel(f)}" aria-pressed="false">${fuelLbl(f)}</button>`).join('');
+  $('fuelLbl').textContent = VT==='boat' ? 'Power' : 'Fuel';
   refreshPriceUI();
   $('sizeLbl').textContent = C.sizeLabel;
   $('sizeOpts').innerHTML = C.sizes.map(s=>`<button class="opt" type="button" data-v="${s}" aria-pressed="false">${s}</button>`).join('');
@@ -1500,10 +1503,10 @@ function buildChrome(){
   const UL = C.wizardUseLabels;
   $('wTitle').textContent = VT==='car' ? 'What do you need?' : VT==='moto' ? 'What kind of riding?' : VT==='air' ? 'What kind of flying?' : 'What kind of boating?';
   $('wBody').innerHTML = `
-    <div class="q"><h3>1. Total budget, taxes and fees included</h3><div class="opts" id="wBudget">${C.wizardBudgets.map(([v,l])=>`<button class="opt" type="button" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>
-    <div class="q"><h3>2. What will it mostly do?</h3><div class="opts" id="wUse">${['commute','family','work','fun','trips','all'].map(k=>`<button class="opt" type="button" data-v="${k}" aria-pressed="false">${esc(UL[k])}</button>`).join('')}</div></div>
-    <div class="q"><h3>3. ${VT==='boat' ? 'Power' : 'Fuel'}</h3><div class="opts" id="wFuel">${C.wizardFuels.map(([v,l])=>`<button class="opt" type="button" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>
-    <div class="q"><h3>4. ${C.wizardAwd}</h3><div class="opts" id="wAwd"><button class="opt" type="button" data-v="awd" aria-pressed="false">${C.wizardYes || 'Yes, I want AWD or 4WD'}</button><button class="opt" type="button" data-v="any" aria-pressed="false">${C.wizardNo || 'No, doesn’t matter'}</button></div></div>
+    <div class="q"><h3><span class="n">01</span>Total budget, taxes and fees included</h3><div class="opts" id="wBudget">${C.wizardBudgets.map(([v,l])=>`<button class="opt" type="button" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>
+    <div class="q"><h3><span class="n">02</span>What will it mostly do?</h3><div class="opts" id="wUse">${['commute','family','work','fun','trips','all'].map(k=>`<button class="opt" type="button" data-v="${k}" aria-pressed="false">${esc(UL[k])}</button>`).join('')}</div></div>
+    <div class="q"><h3><span class="n">03</span>${VT==='boat' ? 'Power' : 'Fuel'}</h3><div class="opts" id="wFuel">${C.wizardFuels.map(([v,l])=>`<button class="opt" type="button" data-v="${v}" aria-pressed="false">${l}</button>`).join('')}</div></div>
+    <div class="q"><h3><span class="n">04</span>${C.wizardAwd}</h3><div class="opts" id="wAwd"><button class="opt" type="button" data-v="awd" aria-pressed="false">${C.wizardYes || 'Yes, I want AWD or 4WD'}</button><button class="opt" type="button" data-v="any" aria-pressed="false">${C.wizardNo || 'No, doesn’t matter'}</button></div></div>
     <div class="dlg-actions"><button class="btn primary" id="wGo" type="button">Show my matches</button></div>
     <p class="fine">This sets the filters for you. You can loosen or change any of them afterward.</p>`;
   const W = {budget:null, use:null, fuel:null, awd:null};
@@ -1634,6 +1637,14 @@ function shareLink(title, opts){
 }
 function setLive(cc, vt){ VT = vt; CC = cc; C = countryConfig(cc, vt); CARS = DATA[vt][cc]; M = MONEY[cc]; }
 function countryTabsHTML(){ return ORDER.map(cc => `<button class="ctab" type="button" role="tab" data-country="${cc}" aria-selected="false">${COUNTRIES[cc].name} <small>${DATA[VT][cc].length.toLocaleString('en-US')}</small></button>`).join(''); }
+/* theme: the system setting until the toggle is used, then the saved choice (data-theme on <html>) */
+const THEME_BG = {light:'#f3f0e8', dark:'#0e0f11'};
+function effTheme(){ const t = document.documentElement.getAttribute('data-theme'); return t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
+function applyTheme(t){
+  if (t) document.documentElement.setAttribute('data-theme', t); else document.documentElement.removeAttribute('data-theme');
+  const now = effTheme(); const b = $('themeBtn'); if (b) b.setAttribute('aria-label', now === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', t ? THEME_BG[t] : (/dark/.test(m.media||'') ? THEME_BG.dark : THEME_BG.light)));
+}
 function switchCountry(cc){
   setLive(cc, VT); store('country', cc);
   resetS(); $('q').value=''; page = 1; detailCar = null;
@@ -1651,7 +1662,10 @@ function switchVertical(vt){
 function init(){
   const savedVT = load('vt','car'); const savedCC = load('country','US');
   setLive(COUNTRIES[savedCC] ? savedCC : 'US', VERT[savedVT] ? savedVT : 'car');
-  $('vertTabs').innerHTML = VERTS.map(vt => `<button class="vtab" type="button" role="tab" data-vt="${vt}" aria-selected="false"><svg aria-hidden="true"><use href="#ico-${vt}"></use></svg>${VT_LABEL[vt]}</button>`).join('');
+  applyTheme(load('theme', null) === 'dark' ? 'dark' : load('theme', null) === 'light' ? 'light' : null);
+  $('themeBtn').addEventListener('click', () => { const t = effTheme() === 'dark' ? 'light' : 'dark'; store('theme', t); applyTheme(t); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(document.documentElement.getAttribute('data-theme')));
+  $('vertTabs').innerHTML = VERTS.map(vt => `<button class="vtab" type="button" role="tab" data-vt="${vt}" aria-selected="false" title="${VT_LABEL[vt]}"><svg class="i" aria-hidden="true"><use href="#ico-${vt}"></use></svg><span class="vl">${VERT[vt].short}</span></button>`).join('');
   $('vertTabs').addEventListener('click', e => { const b = e.target.closest('.vtab'); if (b && b.dataset.vt!==VT){ switchVertical(b.dataset.vt); window.scrollTo({top:0}); } });
   $('countryTabs').innerHTML = countryTabsHTML();
   $('countryTabs').addEventListener('click', e => { const b = e.target.closest('.ctab'); if (b && b.dataset.country!==CC){ switchCountry(b.dataset.country); window.scrollTo({top:0}); } });
@@ -1662,6 +1676,11 @@ function init(){
   const mqPhone = matchMedia('(max-width:639px)'), mqWide = matchMedia('(min-width:960px)');
   const placeState = () => { (mqPhone.matches ? $('stateRow') : $('toolbar')).appendChild($('stateWrap')); };
   placeState(); mqPhone.addEventListener('change', placeState);
+  // wide screens: body and fuel types sit in the filter column and the actions in the toolbar; narrower, a chip row and a quiet row under the masthead
+  const mqDesk = matchMedia('(min-width:1024px)');
+  const placeTypes = () => { if (mqWide.matches){ $('fBody').appendChild($('bodyChips')); $('fFuel').appendChild($('fuelChips')); } else { $('chipRow').append($('bodyChips'), $('fuelChips')); } };
+  const placeActions = () => { (mqDesk.matches ? $('toolbar') : document.querySelector('.masthead')).appendChild($('mastActions')); };
+  placeTypes(); mqWide.addEventListener('change', placeTypes); placeActions(); mqDesk.addEventListener('change', placeActions);
   $('countryOpts').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return; const v=b.dataset.v; if (S.countries.has(v)) S.countries.delete(v); else S.countries.add(v); syncChips(); page=1; render(); });
   $('wunit').addEventListener('change', e => { WUNIT = e.target.value; store('wunit', WUNIT); applyWorldUnits(); applySliders(); S.eff = 0; S.rng = 0; syncChips(); page=1; render(); });
   $('makes').addEventListener('change', e => { const v=e.target.value; if (e.target.checked) S.make.add(v); else S.make.delete(v); page=1; render(); });
